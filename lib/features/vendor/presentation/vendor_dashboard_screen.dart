@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../auth/presentation/login_screen.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
+import 'manage_assigned_shop_screen.dart';
+import 'manage_vendor_categories_screen.dart';
+import 'manage_vendor_products_screen.dart';
+import 'manage_vendor_orders_screen.dart';
+import 'manage_vendor_shop_banner_screen.dart';
+import 'view_vendor_reviews_screen.dart';
 
 class VendorDashboardScreen extends StatelessWidget {
   const VendorDashboardScreen({super.key});
@@ -14,16 +21,24 @@ class VendorDashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vendor Shop Portal'),
+        title: const Text('Vendor Portal'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () => authProvider.logout(),
+            onPressed: () async {
+              await authProvider.logout();
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              }
+            },
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,8 +52,8 @@ class VendorDashboardScreen extends StatelessWidget {
                   children: [
                     const CircleAvatar(
                       radius: 30,
-                      backgroundColor: Colors.green,
-                      child: Icon(Icons.storefront, size: 35, color: Colors.white),
+                      backgroundColor: Colors.orangeAccent,
+                      child: Icon(Icons.store, size: 35, color: Colors.white),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
@@ -51,7 +66,7 @@ class VendorDashboardScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Shop Role: ${user?.role ?? AppConstants.roleVendor}',
+                            'Role: ${user?.role ?? AppConstants.roleVendor}',
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
@@ -63,40 +78,88 @@ class VendorDashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Shop Management',
+              'Storefront Management',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            // Grid of Vendor Options
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: const [
-                  _VendorDashboardCard(
-                    title: 'My Products',
-                    icon: Icons.inventory_2_outlined,
-                    subtitle: 'Add & manage catalog items',
-                  ),
-                  _VendorDashboardCard(
-                    title: 'Shop Orders',
-                    icon: Icons.shopping_bag_outlined,
-                    subtitle: 'Track incoming customer orders',
-                  ),
-                  _VendorDashboardCard(
-                    title: 'Store Settings',
-                    icon: Icons.store_outlined,
-                    subtitle: 'Update hours & info',
-                  ),
-                  _VendorDashboardCard(
-                    title: 'Earnings & Payouts',
-                    icon: Icons.account_balance_wallet_outlined,
-                    subtitle: 'View financial summary',
-                  ),
-                ],
-              ),
+            // Grid of Vendor Modules
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.1,
+              children: [
+                _VendorDashboardCard(
+                  title: 'Manage Shop',
+                  icon: Icons.storefront,
+                  subtitle: 'Update shop info',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ManageAssignedShopScreen()),
+                    );
+                  },
+                ),
+                _VendorDashboardCard(
+                  title: 'Products',
+                  icon: Icons.shopping_bag,
+                  subtitle: 'Add, edit & stock',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ManageVendorProductsScreen()),
+                    );
+                  },
+                ),
+                _VendorDashboardCard(
+                  title: 'Orders',
+                  icon: Icons.receipt_long,
+                  subtitle: 'Receive & update orders',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ManageVendorOrdersScreen()),
+                    );
+                  },
+                ),
+                _VendorDashboardCard(
+                  title: 'Categories',
+                  icon: Icons.category,
+                  subtitle: 'Manage categories',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ManageVendorCategoriesScreen()),
+                    );
+                  },
+                ),
+                _VendorDashboardCard(
+                  title: 'Shop Banner',
+                  icon: Icons.image,
+                  subtitle: 'Manage banner & promo',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ManageVendorShopBannerScreen()),
+                    );
+                  },
+                ),
+                _VendorDashboardCard(
+                  title: 'Customer Reviews',
+                  icon: Icons.star,
+                  subtitle: 'View ratings & feedback',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ViewVendorReviewsScreen()),
+                    );
+                  },
+                ),
+              ],
             ),
+            const SizedBox(height: 24),
             const Center(child: ZenvyroBrandingWidget(compact: true)),
           ],
         ),
@@ -109,11 +172,13 @@ class _VendorDashboardCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final String subtitle;
+  final VoidCallback onTap;
 
   const _VendorDashboardCard({
     required this.title,
     required this.icon,
     required this.subtitle,
+    required this.onTap,
   });
 
   @override
@@ -122,29 +187,27 @@ class _VendorDashboardCard extends StatelessWidget {
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Opening $title module...')),
-          );
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: Colors.green),
-              const SizedBox(height: 12),
+              Icon(icon, size: 32, color: Colors.orange),
+              const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
             ],
           ),
