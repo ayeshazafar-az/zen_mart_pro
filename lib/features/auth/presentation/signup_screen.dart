@@ -1,41 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'auth_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  String _selectedRole = AppConstants.roleCustomer;
+
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() async {
+  void _handleSignup() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      bool success = await authProvider.login(
+      bool success = await authProvider.signUp(
         _emailController.text,
         _passwordController.text,
+        _nameController.text,
+        _selectedRole,
       );
 
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Login failed'),
+            content: Text(authProvider.errorMessage ?? 'Registration failed'),
             backgroundColor: Colors.red,
           ),
         );
@@ -48,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      appBar: AppBar(title: const Text('Create Account')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -59,20 +65,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.storefront_rounded, size: 80, color: Colors.blue),
+                  const Text(
+                    'Join Zen Mart Pro',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                    validator: (value) => value!.isEmpty ? 'Please enter your name' : null,
+                  ),
                   const SizedBox(height: 16),
-                  const Text(
-                    AppConstants.appName,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Multi-Vendor Ecosystem Portal',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 32),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
@@ -91,22 +99,38 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Please enter your password' : null,
+                    validator: (value) => value!.length < 6 ? 'Password must be at least 6 characters' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Account Role',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.badge_outlined),
+                    ),
+                    items: [
+                      DropdownMenuItem(value: AppConstants.roleCustomer, child: Text('Customer')),
+                      DropdownMenuItem(value: AppConstants.roleVendor, child: Text('Vendor')),
+                      DropdownMenuItem(value: AppConstants.roleRider, child: Text('Delivery Rider')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedRole = value;
+                        });
+                      }
+                    },
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: authProvider.isLoading ? null : _handleLogin,
+                      onPressed: authProvider.isLoading ? null : _handleSignup,
                       child: authProvider.isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Login', style: TextStyle(fontSize: 16)),
+                          : const Text('Register Account', style: TextStyle(fontSize: 16)),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () => context.push('/signup'),
-                    child: const Text('Don\'t have an account? Register here'),
                   ),
                   const SizedBox(height: 24),
                   const Center(child: ZenvyroBrandingWidget(compact: true)),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
-import '../constants/zenvyro_branding_widget.dart';
+import '../../features/auth/presentation/signup_screen.dart';
+import '../../features/super_admin/presentation/admin_dashboard_screen.dart';
+import '../../features/vendor/presentation/vendor_dashboard_screen.dart';
+import '../../features/rider/presentation/rider_dashboard_screen.dart';
+import '../../features/customer/presentation/customer_home_screen.dart';
+import '../constants/app_constants.dart';
 
 class AppRouter {
   static GoRouter router(AuthProvider authProvider) {
@@ -13,23 +17,24 @@ class AppRouter {
       redirect: (context, state) {
         final user = authProvider.currentUser;
         final isLoggedIn = user != null;
-        final isLoggingIn = state.uri.toString() == '/login';
+        final path = state.uri.toString();
+        final isAuthRoute = path == '/login' || path == '/signup';
 
-        // Redirect to login if not authenticated
+        // Redirect to login if not authenticated and trying to access protected routes
         if (!isLoggedIn) {
-          return '/login';
+          return isAuthRoute ? null : '/login';
         }
 
-        // Redirect to appropriate dashboard if already logged in and on the login page
-        if (isLoggingIn) {
+        // Redirect to appropriate dashboard if already logged in and on an auth page
+        if (isLoggedIn && isAuthRoute) {
           switch (user.role) {
-            case 'super_admin':
+            case AppConstants.roleSuperAdmin:
               return '/admin-dashboard';
-            case 'vendor':
+            case AppConstants.roleVendor:
               return '/vendor-dashboard';
-            case 'rider':
+            case AppConstants.roleRider:
               return '/rider-dashboard';
-            case 'customer':
+            case AppConstants.roleCustomer:
             default:
               return '/customer-home';
           }
@@ -42,61 +47,26 @@ class AppRouter {
           builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
+          path: '/signup',
+          builder: (context, state) => const SignupScreen(),
+        ),
+        GoRoute(
           path: '/admin-dashboard',
-          builder: (context, state) => const RoleDashboardScaffold(roleTitle: 'Super Admin Dashboard'),
+          builder: (context, state) => const AdminDashboardScreen(),
         ),
         GoRoute(
           path: '/vendor-dashboard',
-          builder: (context, state) => const RoleDashboardScaffold(roleTitle: 'Vendor Shop Dashboard'),
+          builder: (context, state) => const VendorDashboardScreen(),
         ),
         GoRoute(
           path: '/rider-dashboard',
-          builder: (context, state) => const RoleDashboardScaffold(roleTitle: 'Rider Delivery Dashboard'),
+          builder: (context, state) => const RiderDashboardScreen(),
         ),
         GoRoute(
           path: '/customer-home',
-          builder: (context, state) => const RoleDashboardScaffold(roleTitle: 'Customer Marketplace Home'),
+          builder: (context, state) => const CustomerHomeScreen(),
         ),
       ],
-    );
-  }
-}
-
-class RoleDashboardScaffold extends StatelessWidget {
-  final String roleTitle;
-  const RoleDashboardScaffold({super.key, required this.roleTitle});
-
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(roleTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              authProvider.logout();
-            },
-          )
-        ],
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          Center(
-            child: Text(
-              'Welcome, ${authProvider.currentUser?.name ?? "User"}!\nRole: ${authProvider.currentUser?.role ?? "Unknown"}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const Spacer(),
-          const ZenvyroBrandingWidget(),
-          const SizedBox(height: 20),
-        ],
-      ),
     );
   }
 }

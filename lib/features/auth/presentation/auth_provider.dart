@@ -79,6 +79,41 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> signUp(String email, String password, String name, String role) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      auth.UserCredential credential = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+
+      final newUser = UserModel(
+        uid: credential.user!.uid,
+        email: email.trim(),
+        name: name.trim(),
+        role: role,
+      );
+
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(credential.user!.uid)
+          .set(newUser.toMap());
+
+      _currentUser = newUser;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _auth.signOut();
     _currentUser = null;
