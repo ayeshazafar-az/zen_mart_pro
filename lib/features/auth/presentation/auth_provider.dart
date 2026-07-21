@@ -1,62 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/user_model.dart';
 import '../../../core/constants/app_constants.dart';
+import '../data/user_model.dart';
 
 class AuthProvider with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  AppUser? _currentUser;
-  AppUser? get currentUser => _currentUser;
+  UserModel? _currentUser;
+  UserModel? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchUserData(User firebaseUser) async {
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
+  AuthProvider() {
+    _initAuthListener();
+  }
+
+  void _initAuthListener() {
+    _auth.authStateChanges().listen((auth.User? firebaseUser) async {
+      if (firebaseUser == null) {
+        _currentUser = null;
+        notifyListeners();
+      } else {
+        await _fetchUserData(firebaseUser.uid);
+      }
+    });
+  }
+
+  Future<void> _fetchUserData(String uid) async {
     try {
       DocumentSnapshot doc = await _firestore
           .collection(AppConstants.usersCollection)
-          .doc(firebaseUser.uid)
+          .doc(uid)
           .get();
 
-      if (doc.exists) {
-        _currentUser = AppUser.fromMap(doc.data() as Map<String, dynamic>, firebaseUser.uid);
+      if (doc.exists && doc.data() != null) {
+        _currentUser = UserModel.fromMap(doc.data() as Map<String, dynamic>, uid);
       } else {
-        _currentUser = AppUser(
-          uid: firebaseUser.uid,
-          email: firebaseUser.email ?? '',
-          name: 'User',
-          role: 'customer',
+        _currentUser = UserModel(
+          uid: uid,
+          email: _auth.currentUser?.email ?? '',
+          name: 'Zen User',
+          role: AppConstants.roleCustomer,
         );
       }
       notifyListeners();
     } catch (e) {
-      debugPrint("Error fetching user data: $e");
+      _errorMessage = e.toString();
+      notifyListeners();
     }
   }
 
   Future<bool> login(String email, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      notifyListeners();
-
-      UserCredential credential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      auth.UserCredential credential = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
       );
-
-      if (credential.user != null) {
-        await fetchUserData(credential.user!);
-      }
-
+      await _fetchUserData(credential.user!.uid);
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
       notifyListeners();
-      debugPrint("Login Error: $e");
       return false;
     }
   }

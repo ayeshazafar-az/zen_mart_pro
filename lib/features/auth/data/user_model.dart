@@ -1,25 +1,25 @@
-class AppUser {
+class UserModel {
   final String uid;
   final String email;
   final String name;
-  final String role; // 'super_admin', 'vendor', 'customer', 'rider'
-  final String? assignedShopId; // Specifically used for vendors
+  final String role; // 'super_admin', 'vendor', 'rider', 'customer'
+  final String? phone;
 
-  AppUser({
+  UserModel({
     required this.uid,
     required this.email,
     required this.name,
     required this.role,
-    this.assignedShopId,
+    this.phone,
   });
 
-  factory AppUser.fromMap(Map<String, dynamic> map, String uid) {
-    return AppUser(
+  factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
+    return UserModel(
       uid: uid,
       email: map['email'] ?? '',
-      name: map['name'] ?? '',
+      name: map['name'] ?? 'User',
       role: map['role'] ?? 'customer',
-      assignedShopId: map['assignedShopId'],
+      phone: map['phone'],
     );
   }
 
@@ -28,7 +28,7 @@ class AppUser {
       'email': email,
       'name': name,
       'role': role,
-      'assignedShopId': assignedShopId,
+      'phone': phone,
     };
   }
 }

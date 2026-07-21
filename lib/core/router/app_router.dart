@@ -15,10 +15,12 @@ class AppRouter {
         final isLoggedIn = user != null;
         final isLoggingIn = state.uri.toString() == '/login';
 
+        // Redirect to login if not authenticated
         if (!isLoggedIn) {
           return '/login';
         }
 
+        // Redirect to appropriate dashboard if already logged in and on the login page
         if (isLoggingIn) {
           switch (user.role) {
             case 'super_admin':
@@ -82,9 +84,10 @@ class RoleDashboardScaffold extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const Spacer(),
           Center(
             child: Text(
-              'Welcome, ${authProvider.currentUser?.name ?? "User"}!\nRole: ${authProvider.currentUser?.role}',
+              'Welcome, ${authProvider.currentUser?.name ?? "User"}!\nRole: ${authProvider.currentUser?.role ?? "Unknown"}',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),

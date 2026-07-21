@@ -26,7 +26,10 @@ class ZenMartApp extends StatelessWidget {
             title: 'Zen Mart Pro',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
-              primarySwatch: Colors.blue,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.light,
+              ),
               useMaterial3: true,
             ),
             routerConfig: router,
