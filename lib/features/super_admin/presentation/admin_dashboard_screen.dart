@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../auth/presentation/login_screen.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
+import 'create_shop_screen.dart';
+import 'create_vendor_screen.dart';
+import 'manage_vendors_screen.dart';
+import 'manage_customers_screen.dart';
+import 'manage_riders_screen.dart';
+import 'manage_categories_screen.dart';
+import 'manage_shop_banners_screen.dart';
+import 'view_all_shops_screen.dart';
+import 'view_all_products_screen.dart';
+import 'view_all_orders_screen.dart';
+import 'handle_complaints_screen.dart';
+import 'view_reports_analytics_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -19,7 +32,15 @@ class AdminDashboardScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () => authProvider.logout(),
+            onPressed: () async {
+              await authProvider.logout();
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              }
+            },
           ),
         ],
       ),
@@ -63,7 +84,7 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Ecosystem Management',
+              'Ecosystem & Storefront Management',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -74,26 +95,79 @@ class AdminDashboardScreen extends StatelessWidget {
               crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
+              childAspectRatio: 1.1,
               children: const [
                 _AdminDashboardCard(
-                  title: 'Manage Users',
+                  title: 'Create Shop',
+                  icon: Icons.storefront,
+                  subtitle: 'Create & assign shops',
+                  destination: CreateShopScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'Create Vendor',
+                  icon: Icons.person_add,
+                  subtitle: 'Add vendor accounts',
+                  destination: CreateVendorScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'Manage Vendors',
+                  icon: Icons.supervisor_account,
+                  subtitle: 'View & manage vendors',
+                  destination: ManageVendorsScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'Manage Customers',
                   icon: Icons.people_alt_outlined,
-                  subtitle: 'View vendors, riders & customers',
+                  subtitle: 'View platform customers',
+                  destination: ManageCustomersScreen(),
                 ),
                 _AdminDashboardCard(
-                  title: 'Shops & Approvals',
-                  icon: Icons.storefront_outlined,
-                  subtitle: 'Review vendor storefronts',
+                  title: 'Manage Riders',
+                  icon: Icons.delivery_dining,
+                  subtitle: 'View delivery staff',
+                  destination: ManageRidersScreen(),
                 ),
                 _AdminDashboardCard(
-                  title: 'Platform Categories',
+                  title: 'Categories',
                   icon: Icons.category_outlined,
                   subtitle: 'Manage marketplace catalog',
+                  destination: ManageCategoriesScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'Shop Banners',
+                  icon: Icons.image,
+                  subtitle: 'Manage promotional banners',
+                  destination: ManageShopBannersScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'All Shops',
+                  icon: Icons.store,
+                  subtitle: 'View all active shops',
+                  destination: ViewAllShopsScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'All Products',
+                  icon: Icons.shopping_bag,
+                  subtitle: 'View platform products',
+                  destination: ViewAllProductsScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'All Orders',
+                  icon: Icons.receipt_long,
+                  subtitle: 'Monitor all transactions',
+                  destination: ViewAllOrdersScreen(),
                 ),
                 _AdminDashboardCard(
                   title: 'Complaints',
                   icon: Icons.report_problem_outlined,
                   subtitle: 'Resolve dispute tickets',
+                  destination: HandleComplaintsScreen(),
+                ),
+                _AdminDashboardCard(
+                  title: 'Analytics & Reports',
+                  icon: Icons.analytics,
+                  subtitle: 'Platform metrics & stats',
+                  destination: ViewReportsAnalyticsScreen(),
                 ),
               ],
             ),
@@ -110,11 +184,13 @@ class _AdminDashboardCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final String subtitle;
+  final Widget destination;
 
   const _AdminDashboardCard({
     required this.title,
     required this.icon,
     required this.subtitle,
+    required this.destination,
   });
 
   @override
@@ -124,28 +200,31 @@ class _AdminDashboardCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Opening $title module...')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => destination),
           );
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: Colors.blue),
-              const SizedBox(height: 12),
+              Icon(icon, size: 32, color: Colors.blue),
+              const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
             ],
           ),
