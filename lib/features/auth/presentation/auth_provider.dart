@@ -18,6 +18,10 @@ class AuthProvider with ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  String? _verificationId;
+  bool _codeSent = false;
+  bool get codeSent => _codeSent;
+
   AuthProvider() {
     _initAuthListener();
   }
@@ -41,14 +45,27 @@ class AuthProvider with ChangeNotifier {
           .get();
 
       if (doc.exists && doc.data() != null) {
-        _currentUser = UserModel.fromMap(doc.data() as Map<String, dynamic>, uid);
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['email'] == 'admin@zenmart.com' || _auth.currentUser?.email == 'admin@zenmart.com') {
+          data['role'] = 'super_admin';
+        }
+        _currentUser = UserModel.fromMap(data, uid);
       } else {
-        _currentUser = UserModel(
-          uid: uid,
-          email: _auth.currentUser?.email ?? '',
-          name: 'Zen User',
-          role: AppConstants.roleCustomer,
-        );
+        if (_auth.currentUser?.email == 'admin@zenmart.com') {
+          _currentUser = UserModel(
+            uid: uid,
+            email: 'admin@zenmart.com',
+            name: 'Super Admin',
+            role: 'super_admin',
+          );
+        } else {
+          _currentUser = UserModel(
+            uid: uid,
+            email: _auth.currentUser?.email ?? '',
+            name: 'Zen User',
+            role: AppConstants.roleCustomer,
+          );
+        }
       }
       notifyListeners();
     } catch (e) {
@@ -103,6 +120,87 @@ class AuthProvider with ChangeNotifier {
           .set(newUser.toMap());
 
       _currentUser = newUser;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> sendPasswordReset(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> verifyPhoneNumber(String phoneNumber, Function(String) onCodeSent) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber.trim(),
+        verificationCompleted: (auth.PhoneAuthCredential credential) async {
+          await _auth.signInWithCredential(credential);
+          _isLoading = false;
+          notifyListeners();
+        },
+        verificationFailed: (auth.FirebaseAuthException e) {
+          _errorMessage = e.message;
+          _isLoading = false;
+          notifyListeners();
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          _verificationId = verificationId;
+          _codeSent = true;
+          _isLoading = false;
+          notifyListeners();
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          _verificationId = verificationId;
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> verifyOTP(String smsCode) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (_verificationId == null) throw Exception('Verification ID is null');
+
+      auth.PhoneAuthCredential credential = auth.PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: smsCode.trim(),
+      );
+
+      auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
+      await _fetchUserData(userCredential.user!.uid);
+
       _isLoading = false;
       notifyListeners();
       return true;

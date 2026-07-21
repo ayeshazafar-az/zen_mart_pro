@@ -23,7 +23,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,36 +67,37 @@ class AdminDashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            // Grid of Management Options
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: const [
-                  _AdminDashboardCard(
-                    title: 'Manage Users',
-                    icon: Icons.people_alt_outlined,
-                    subtitle: 'View vendors, riders & customers',
-                  ),
-                  _AdminDashboardCard(
-                    title: 'Shops & Approvals',
-                    icon: Icons.storefront_outlined,
-                    subtitle: 'Review vendor storefronts',
-                  ),
-                  _AdminDashboardCard(
-                    title: 'Platform Categories',
-                    icon: Icons.category_outlined,
-                    subtitle: 'Manage marketplace catalog',
-                  ),
-                  _AdminDashboardCard(
-                    title: 'Complaints',
-                    icon: Icons.report_problem_outlined,
-                    subtitle: 'Resolve dispute tickets',
-                  ),
-                ],
-              ),
+            // Grid of Management Options with shrinkWrap for scrolling safety
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: const [
+                _AdminDashboardCard(
+                  title: 'Manage Users',
+                  icon: Icons.people_alt_outlined,
+                  subtitle: 'View vendors, riders & customers',
+                ),
+                _AdminDashboardCard(
+                  title: 'Shops & Approvals',
+                  icon: Icons.storefront_outlined,
+                  subtitle: 'Review vendor storefronts',
+                ),
+                _AdminDashboardCard(
+                  title: 'Platform Categories',
+                  icon: Icons.category_outlined,
+                  subtitle: 'Manage marketplace catalog',
+                ),
+                _AdminDashboardCard(
+                  title: 'Complaints',
+                  icon: Icons.report_problem_outlined,
+                  subtitle: 'Resolve dispute tickets',
+                ),
+              ],
             ),
+            const SizedBox(height: 24),
             const Center(child: ZenvyroBrandingWidget(compact: true)),
           ],
         ),
