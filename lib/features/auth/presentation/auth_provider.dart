@@ -26,15 +26,29 @@ class AuthProvider with ChangeNotifier {
     _initAuthListener();
   }
 
+  // Listens to Firebase Auth state changes globally
   void _initAuthListener() {
     _auth.authStateChanges().listen((auth.User? firebaseUser) async {
       if (firebaseUser == null) {
         _currentUser = null;
+        _resetAuthState(); // Clear sensitive states on logout
         notifyListeners();
       } else {
         await _fetchUserData(firebaseUser.uid);
       }
     });
+  }
+
+  // Helper to clear errors manually from UI if needed
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // Internal helper to reset OTP states
+  void _resetAuthState() {
+    _codeSent = false;
+    _verificationId = null;
   }
 
   Future<void> _fetchUserData(String uid) async {
@@ -46,11 +60,14 @@ class AuthProvider with ChangeNotifier {
 
       if (doc.exists && doc.data() != null) {
         final data = doc.data() as Map<String, dynamic>;
+
+        // Super Admin Bootstrap Logic
         if (data['email'] == 'admin@zenmart.com' || _auth.currentUser?.email == 'admin@zenmart.com') {
           data['role'] = 'super_admin';
         }
         _currentUser = UserModel.fromMap(data, uid);
       } else {
+        // Fallback if document is somehow missing
         if (_auth.currentUser?.email == 'admin@zenmart.com') {
           _currentUser = UserModel(
             uid: uid,
@@ -88,6 +105,11 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "An error occurred during login.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -114,6 +136,7 @@ class AuthProvider with ChangeNotifier {
         role: role,
       );
 
+      // Create user document in Firestore
       await _firestore
           .collection(AppConstants.usersCollection)
           .doc(credential.user!.uid)
@@ -123,6 +146,11 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "An error occurred during sign up.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -141,6 +169,11 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "Failed to send reset email.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -157,13 +190,17 @@ class AuthProvider with ChangeNotifier {
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber.trim(),
+        // Triggered automatically on some Android devices that can read the incoming SMS
         verificationCompleted: (auth.PhoneAuthCredential credential) async {
-          await _auth.signInWithCredential(credential);
+          auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
+          await _checkAndCreatePhoneUser(userCredential.user!);
+
+          _resetAuthState(); // Reset so it doesn't hang on OTP screen
           _isLoading = false;
           notifyListeners();
         },
         verificationFailed: (auth.FirebaseAuthException e) {
-          _errorMessage = e.message;
+          _errorMessage = e.message ?? "Phone verification failed.";
           _isLoading = false;
           notifyListeners();
         },
@@ -199,11 +236,17 @@ class AuthProvider with ChangeNotifier {
       );
 
       auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
-      await _fetchUserData(userCredential.user!.uid);
+      await _checkAndCreatePhoneUser(userCredential.user!);
 
+      _resetAuthState(); // Crucial: clear OTP states upon successful login
       _isLoading = false;
       notifyListeners();
       return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "Invalid OTP code provided.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -212,9 +255,34 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Helper method to ensure Phone Auth users get a Firestore document
+  Future<void> _checkAndCreatePhoneUser(auth.User firebaseUser) async {
+    DocumentSnapshot doc = await _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(firebaseUser.uid)
+        .get();
+
+    if (!doc.exists) {
+      final newUser = UserModel(
+        uid: firebaseUser.uid,
+        email: '',
+        name: 'Zen User', // Default name for phone auth users
+        role: AppConstants.roleCustomer, // Default to customer
+      );
+
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(firebaseUser.uid)
+          .set(newUser.toMap());
+    }
+
+    await _fetchUserData(firebaseUser.uid);
+  }
+
   Future<void> logout() async {
     await _auth.signOut();
     _currentUser = null;
+    _resetAuthState(); // Clean up states immediately
     notifyListeners();
   }
 }

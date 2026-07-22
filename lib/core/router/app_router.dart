@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
+import '../../features/auth/presentation/otp_verification_screen.dart';
 import '../../features/super_admin/presentation/admin_dashboard_screen.dart';
 import '../../features/vendor/presentation/vendor_dashboard_screen.dart';
 import '../../features/rider/presentation/rider_dashboard_screen.dart';
@@ -18,7 +19,9 @@ class AppRouter {
         final user = authProvider.currentUser;
         final isLoggedIn = user != null;
         final path = state.uri.toString();
-        final isAuthRoute = path == '/login' || path == '/signup';
+
+        // Added '/otp' to the list of authentication routes
+        final isAuthRoute = path == '/login' || path == '/signup' || path == '/otp';
 
         // Redirect to login if not authenticated and trying to access protected routes
         if (!isLoggedIn) {
@@ -49,6 +52,10 @@ class AppRouter {
         GoRoute(
           path: '/signup',
           builder: (context, state) => const SignupScreen(),
+        ),
+        GoRoute(
+          path: '/otp',
+          builder: (context, state) => const OtpVerificationScreen(),
         ),
         GoRoute(
           path: '/admin-dashboard',

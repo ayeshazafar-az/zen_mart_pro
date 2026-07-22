@@ -12,8 +12,9 @@ dependencies:
 
   # Firebase Core & Services
   firebase_core: ^3.10.1
-  firebase_auth: ^5.4.1
-  cloud_firestore: ^5.6.1
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.0.0       # Added for Vendor Product & Banner Uploads
   firebase_messaging: ^15.0.0
 
   # Navigation & Routing
@@ -24,6 +25,8 @@ dependencies:
 
   # UI & Utilities
   cupertino_icons: ^1.0.6
+  cached_network_image: ^3.3.1    # Added for optimized image loading
+  shared_preferences: ^2.2.3      # Added for secure session caching
 
 dev_dependencies:
   flutter_test:

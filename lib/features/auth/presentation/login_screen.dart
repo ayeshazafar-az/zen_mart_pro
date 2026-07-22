@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'auth_provider.dart';
-import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,7 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                // Red error indicator message for incorrect credentials
+
+                // Dynamic error indicator message
                 if (authProvider.errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -53,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: Border.all(color: Colors.red.shade200),
                     ),
                     child: Text(
-                      'Your email or password is incorrect.',
+                      authProvider.errorMessage!,
                       style: TextStyle(
                         color: Colors.red.shade700,
                         fontWeight: FontWeight.w500,
@@ -63,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
+
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -75,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   value == null || value.isEmpty ? 'Enter email' : null,
                 ),
                 const SizedBox(height: 16),
+
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -99,6 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   value == null || value.isEmpty ? 'Enter password' : null,
                 ),
                 const SizedBox(height: 24),
+
                 ElevatedButton(
                   onPressed: authProvider.isLoading
                       ? null
@@ -110,30 +114,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                   child: authProvider.isLoading
                       ? const SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
                     ),
                   )
-                      : const Text('Login'),
+                      : const Text('Login', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 16),
+
+                // --- New Phone Authentication Trigger ---
+                OutlinedButton.icon(
+                  onPressed: () {
+                    // Route to the OTP screen using GoRouter
+                    context.push('/otp');
+                  },
+                  icon: const Icon(Icons.phone),
+                  label: const Text('Login with Phone (OTP)'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text("Don't have an account? "),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignupScreen(),
-                          ),
-                        );
+                        // Replaced Navigator with GoRouter
+                        context.push('/signup');
                       },
                       child: const Text(
                         'Sign Up',
