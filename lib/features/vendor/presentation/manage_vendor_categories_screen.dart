@@ -92,7 +92,7 @@ class _ManageVendorCategoriesScreenState extends State<ManageVendorCategoriesScr
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Categories')),

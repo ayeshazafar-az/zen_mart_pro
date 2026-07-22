@@ -9,7 +9,7 @@ class EarningsDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final riderId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final riderId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(

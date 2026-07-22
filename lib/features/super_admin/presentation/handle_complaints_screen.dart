@@ -54,9 +54,9 @@ class HandleComplaintsScreen extends StatelessWidget {
                     },
                     child: const Text('Resolve'),
                   )
-                      : const Chip(
-                    label: Text('Resolved', style: TextStyle(color: Colors.green)),
-                    backgroundColor: Colors.green50,
+                      : Chip(
+                    backgroundColor: Colors.green[50],
+                    label: const Text('Resolved'), // Keep const on inner widgets if they are constant
                   ),
                 ),
               );

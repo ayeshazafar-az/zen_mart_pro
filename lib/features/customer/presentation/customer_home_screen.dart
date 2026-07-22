@@ -145,7 +145,7 @@ class CustomerHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Explore Shops',

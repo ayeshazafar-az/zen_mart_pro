@@ -90,7 +90,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final riderId = authProvider.currentUser?.uid ?? '';
     final userEmail = authProvider.currentUser?.email ?? 'Customer';
 
     return Scaffold(
@@ -138,7 +138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total Amount:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       Text('\$ ${widget.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),

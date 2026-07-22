@@ -9,7 +9,7 @@ class ViewVendorReviewsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Customer Reviews & Ratings')),
@@ -63,7 +63,7 @@ class ViewVendorReviewsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.between,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 customerEmail,

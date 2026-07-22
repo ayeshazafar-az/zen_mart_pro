@@ -9,7 +9,7 @@ class ActiveDeliveryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final riderId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final riderId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
@@ -58,7 +58,7 @@ class ActiveDeliveryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.between,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Order #${orderId.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                           const Chip(label: Text('OUT FOR DELIVERY'), backgroundColor: Colors.blueAccent),
