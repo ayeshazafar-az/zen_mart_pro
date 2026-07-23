@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
-import '../../auth/presentation/login_screen.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
 import 'create_shop_screen.dart';
 import 'create_vendor_screen.dart';
+import 'create_vendor_shop_screen.dart'; // Combo workflow screen
 import 'manage_vendors_screen.dart';
 import 'manage_customers_screen.dart';
 import 'manage_riders_screen.dart';
@@ -16,6 +16,7 @@ import 'view_all_products_screen.dart';
 import 'view_all_orders_screen.dart';
 import 'handle_complaints_screen.dart';
 import 'view_reports_analytics_screen.dart';
+import 'manage_approvals_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -32,14 +33,9 @@ class AdminDashboardScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () async {
-              await authProvider.logout();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
+            onPressed: () {
+              // GoRouter will automatically intercept the state change and route to '/login'
+              authProvider.logout();
             },
           ),
         ],
@@ -97,16 +93,32 @@ class AdminDashboardScreen extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.1,
               children: const [
+                // Pending Approvals Card prioritized at the top
+                _AdminDashboardCard(
+                  title: 'Pending Approvals',
+                  icon: Icons.domain_verification,
+                  subtitle: 'Approve riders & vendors',
+                  destination: ManageApprovalsScreen(),
+                ),
+                // Combo Workflow: Create both Vendor and Shop simultaneously
+                _AdminDashboardCard(
+                  title: 'Quick Vendor & Shop',
+                  icon: Icons.bolt,
+                  subtitle: 'All-in-one onboarding',
+                  destination: CreateVendorShopScreen(),
+                ),
+                // Separate Workflow: Create independent Shop
                 _AdminDashboardCard(
                   title: 'Create Shop',
                   icon: Icons.storefront,
-                  subtitle: 'Create & assign shops',
+                  subtitle: 'Assign shop to vendor',
                   destination: CreateShopScreen(),
                 ),
+                // Separate Workflow: Create independent Vendor account
                 _AdminDashboardCard(
                   title: 'Create Vendor',
                   icon: Icons.person_add,
-                  subtitle: 'Add vendor accounts',
+                  subtitle: 'Add vendor credentials',
                   destination: CreateVendorScreen(),
                 ),
                 _AdminDashboardCard(
