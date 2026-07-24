@@ -47,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
     final userEmail = authProvider.currentUser?.email ?? 'User';
 
     return Scaffold(
@@ -68,7 +68,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No messages yet. Say hello!'));
+                  return const Center(
+                      child: Text('No messages yet. Say hello!'));
                 }
 
                 final messages = snapshot.data!.docs;
@@ -84,17 +85,20 @@ class _ChatScreenState extends State<ChatScreen> {
                     final isMe = senderId == userId;
 
                     return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment:
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                           color: isMe ? Colors.orange : Colors.grey[200],
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           messageText,
-                          style: TextStyle(color: isMe ? Colors.white : Colors.black),
+                          style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black),
                         ),
                       ),
                     );
@@ -114,7 +118,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Type a message...',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),

@@ -10,8 +10,7 @@ class ShoppingCartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId =
-        authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Shopping Cart')),
@@ -106,7 +105,7 @@ class ShoppingCartScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.between,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Subtotal:',
                             style: TextStyle(fontSize: 16, color: Colors.grey)),
