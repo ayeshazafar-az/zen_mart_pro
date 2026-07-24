@@ -35,18 +35,18 @@ class HelpSupportScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Card(
+            const Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    const ListTile(
+                    ListTile(
                       leading: Icon(Icons.email, color: Colors.orange),
                       title: Text('Email Support'),
                       subtitle: Text('support@zenvyro.com'),
                     ),
-                    const Divider(),
-                    const ListTile(
+                    Divider(),
+                    ListTile(
                       leading: Icon(Icons.phone, color: Colors.orange),
                       title: Text('Helpline'),
                       subtitle: Text('+92 300 1234567'),
@@ -65,7 +65,8 @@ class HelpSupportScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
-        title: Text(question, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title:
+            Text(question, style: const TextStyle(fontWeight: FontWeight.w600)),
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),

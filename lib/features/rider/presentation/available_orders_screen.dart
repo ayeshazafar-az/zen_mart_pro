@@ -15,8 +15,7 @@ class AvailableOrdersScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('orders')
-            .where('status', whereIn: ['Accepted', 'Preparing'])
-            .snapshots(),
+            .where('status', whereIn: ['Accepted', 'Preparing']).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -29,7 +28,8 @@ class AvailableOrdersScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.inbox, size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No available delivery requests right now.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('No available delivery requests right now.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ],
               ),
             );
@@ -37,12 +37,14 @@ class AvailableOrdersScreen extends StatelessWidget {
 
           final orders = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return data['riderId'] == null || data['riderId'].toString().isEmpty;
+            return data['riderId'] == null ||
+                data['riderId'].toString().isEmpty;
           }).toList();
 
           if (orders.isEmpty) {
             return const Center(
-              child: Text('No unassigned delivery requests found.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+              child: Text('No unassigned delivery requests found.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey)),
             );
           }
 
@@ -67,14 +69,22 @@ class AvailableOrdersScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order #${orderId.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          Chip(label: Text(data['status'] ?? 'Accepted'), backgroundColor: Colors.orange.withOpacity(0.1)),
+                          Text('Order #${orderId.substring(0, 8)}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          Chip(
+                              label: Text(data['status'] ?? 'Accepted'),
+                              backgroundColor:
+                                  Colors.orange.withValues(alpha: 0.1)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text('Customer: $customerEmail'),
                       Text('Delivery Address: $address'),
-                      Text('Payout: \$ $totalAmount', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                      Text('Payout: \$ $totalAmount',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green)),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
@@ -86,7 +96,9 @@ class AvailableOrdersScreen extends StatelessWidget {
                             });
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Delivery accepted successfully!')),
+                                const SnackBar(
+                                    content: Text(
+                                        'Delivery accepted successfully!')),
                               );
                             }
                           },

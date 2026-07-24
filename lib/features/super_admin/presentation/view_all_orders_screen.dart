@@ -18,7 +18,8 @@ class ViewAllOrdersScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No orders found on the platform.'));
+            return const Center(
+                child: Text('No orders found on the platform.'));
           }
 
           final orders = snapshot.data!.docs;
@@ -53,18 +54,23 @@ class ViewAllOrdersScreen extends StatelessWidget {
                   ),
                   title: Text('Order ID: ${orderId.substring(0, 8)}...',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Customer: $customerEmail\nTotal: \$ $totalAmount'),
+                  subtitle:
+                      Text('Customer: $customerEmail\nTotal: \$ $totalAmount'),
                   isThreeLine: true,
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(color: statusColor),
                     ),
                     child: Text(
                       status.toUpperCase(),
-                      style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

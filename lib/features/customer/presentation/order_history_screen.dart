@@ -10,7 +10,7 @@ class OrderHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Order History')),
@@ -32,7 +32,8 @@ class OrderHistoryScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.history, size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No past orders found.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('No past orders found.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ],
               ),
             );
@@ -54,15 +55,18 @@ class OrderHistoryScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  title: Text('Order #${orderId.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Total: \$ $totalAmount\nPayment: $paymentMethod\nStatus: $status'),
+                  title: Text('Order #${orderId.substring(0, 8)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(
+                      'Total: \$ $totalAmount\nPayment: $paymentMethod\nStatus: $status'),
                   isThreeLine: true,
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => OrderTrackingScreen(orderId: orderId),
+                        builder: (context) =>
+                            OrderTrackingScreen(orderId: orderId),
                       ),
                     );
                   },

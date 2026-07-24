@@ -72,7 +72,8 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign up failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Sign up failed: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -111,7 +112,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
+                validator: (val) => val == null || val.isEmpty
+                    ? 'Please enter your name'
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -124,7 +127,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   prefixIcon: Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (val) => val == null || !val.contains('@') ? 'Please enter a valid email' : null,
+                validator: (val) => val == null || !val.contains('@')
+                    ? 'Please enter a valid email'
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -138,13 +143,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
-                validator: (val) => val == null || val.length < 10 ? 'Enter a valid phone number' : null,
+                validator: (val) => val == null || val.length < 10
+                    ? 'Enter a valid phone number'
+                    : null,
               ),
               const SizedBox(height: 16),
 
               // Role Selection Dropdown (Only Customer and Rider)
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Register As',
                   border: OutlineInputBorder(),
@@ -152,7 +159,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'customer', child: Text('Customer')),
-                  DropdownMenuItem(value: 'rider', child: Text('Delivery Rider (Requires Approval)')),
+                  DropdownMenuItem(
+                      value: 'rider',
+                      child: Text('Delivery Rider (Requires Approval)')),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _selectedRole = val);
@@ -168,17 +177,25 @@ class _SignupScreenState extends State<SignupScreen> {
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
                 obscureText: _obscurePassword,
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Please enter a password';
-                  if (val.length < 8) return 'Must be at least 8 characters long';
-                  if (!RegExp(r'(?=.*[A-Z])').hasMatch(val)) return 'Must contain at least one uppercase letter';
-                  if (!RegExp(r'(?=.*[0-9])').hasMatch(val)) return 'Must contain at least one number';
-                  if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val)) return 'Must contain at least one special character (!@#\$&*~)';
+                  if (val == null || val.isEmpty)
+                    return 'Please enter a password';
+                  if (val.length < 8)
+                    return 'Must be at least 8 characters long';
+                  if (!RegExp(r'(?=.*[A-Z])').hasMatch(val))
+                    return 'Must contain at least one uppercase letter';
+                  if (!RegExp(r'(?=.*[0-9])').hasMatch(val))
+                    return 'Must contain at least one number';
+                  if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val))
+                    return 'Must contain at least one special character (!@#\$&*~)';
                   return null;
                 },
               ),
@@ -192,14 +209,19 @@ class _SignupScreenState extends State<SignupScreen> {
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    icon: Icon(_obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: () => setState(() =>
+                        _obscureConfirmPassword = !_obscureConfirmPassword),
                   ),
                 ),
                 obscureText: _obscureConfirmPassword,
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Please confirm your password';
-                  if (val != _passwordController.text) return 'Passwords do not match';
+                  if (val == null || val.isEmpty)
+                    return 'Please confirm your password';
+                  if (val != _passwordController.text)
+                    return 'Passwords do not match';
                   return null;
                 },
               ),
@@ -216,11 +238,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: _isLoading ? null : _handleSignup,
                   child: _isLoading
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                      : const Text('Complete Registration', style: TextStyle(fontSize: 16)),
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Complete Registration',
+                          style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],

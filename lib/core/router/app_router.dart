@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
@@ -21,7 +20,8 @@ class AppRouter {
         final isLoggedIn = user != null;
         final path = state.uri.toString();
 
-        final isAuthRoute = path == '/login' || path == '/signup' || path == '/otp';
+        final isAuthRoute =
+            path == '/login' || path == '/signup' || path == '/otp';
         final isPendingRoute = path == '/pending-approval';
 
         // 1. Redirect to login if not authenticated and trying to access protected routes
@@ -30,7 +30,8 @@ class AppRouter {
         }
 
         // 2. Intercept Unapproved Riders and Vendors
-        final requiresApproval = user.role == AppConstants.roleRider || user.role == AppConstants.roleVendor;
+        final requiresApproval = user.role == AppConstants.roleRider ||
+            user.role == AppConstants.roleVendor;
 
         if (requiresApproval && !user.isApproved) {
           // If they need approval but are not approved, lock them to the pending screen

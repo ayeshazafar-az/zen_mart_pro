@@ -24,7 +24,8 @@ class ManageVendorOrdersScreen extends StatelessWidget {
           }
 
           if (!shopSnapshot.hasData || shopSnapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No shop assigned to your account.'));
+            return const Center(
+                child: Text('No shop assigned to your account.'));
           }
 
           final shopId = shopSnapshot.data!.docs.first.id;
@@ -69,11 +70,14 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'Order #${orderId.substring(0, 8)}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                               Chip(
-                                label: Text(status.toUpperCase(), style: const TextStyle(fontSize: 12)),
-                                backgroundColor: _getStatusColor(status).withOpacity(0.1),
+                                label: Text(status.toUpperCase(),
+                                    style: const TextStyle(fontSize: 12)),
+                                backgroundColor: _getStatusColor(status)
+                                    .withValues(alpha: 0.1),
                               ),
                             ],
                           ),
@@ -86,24 +90,43 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             children: [
                               if (status == 'Pending') ...[
                                 OutlinedButton(
-                                  onPressed: () => _updateOrderStatus(orderId, 'Rejected'),
-                                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                                  onPressed: () =>
+                                      _updateOrderStatus(orderId, 'Rejected'),
+                                  style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.red),
                                   child: const Text('Reject'),
                                 ),
                                 const SizedBox(width: 8),
                                 ElevatedButton(
-                                  onPressed: () => _updateOrderStatus(orderId, 'Accepted'),
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                  onPressed: () =>
+                                      _updateOrderStatus(orderId, 'Accepted'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green),
                                   child: const Text('Accept'),
                                 ),
                               ] else ...[
                                 DropdownButton<String>(
-                                  value: ['Accepted', 'Preparing', 'Out for Delivery', 'Delivered'].contains(status) ? status : 'Accepted',
+                                  value: [
+                                    'Accepted',
+                                    'Preparing',
+                                    'Out for Delivery',
+                                    'Delivered'
+                                  ].contains(status)
+                                      ? status
+                                      : 'Accepted',
                                   items: const [
-                                    DropdownMenuItem(value: 'Accepted', child: Text('Accepted')),
-                                    DropdownMenuItem(value: 'Preparing', child: Text('Preparing')),
-                                    DropdownMenuItem(value: 'Out for Delivery', child: Text('Out for Delivery')),
-                                    DropdownMenuItem(value: 'Delivered', child: Text('Delivered')),
+                                    DropdownMenuItem(
+                                        value: 'Accepted',
+                                        child: Text('Accepted')),
+                                    DropdownMenuItem(
+                                        value: 'Preparing',
+                                        child: Text('Preparing')),
+                                    DropdownMenuItem(
+                                        value: 'Out for Delivery',
+                                        child: Text('Out for Delivery')),
+                                    DropdownMenuItem(
+                                        value: 'Delivered',
+                                        child: Text('Delivered')),
                                   ],
                                   onChanged: (newStatus) {
                                     if (newStatus != null) {

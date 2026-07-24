@@ -59,7 +59,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Shop created and assigned successfully!')),
+          const SnackBar(
+              content: Text('Shop created and assigned successfully!')),
         );
         Navigator.pop(context);
       }
@@ -110,7 +111,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   final vendors = snapshot.data!.docs;
 
                   return DropdownButtonFormField<String>(
-                    value: _selectedVendorUid,
+                    initialValue: _selectedVendorUid,
                     decoration: const InputDecoration(
                       labelText: 'Assign to Vendor',
                       border: OutlineInputBorder(),
@@ -131,7 +132,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       });
                     },
                     validator: (value) =>
-                    value == null ? 'Please select a vendor' : null,
+                        value == null ? 'Please select a vendor' : null,
                   );
                 },
               ),
@@ -144,7 +145,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   prefixIcon: Icon(Icons.storefront),
                 ),
                 validator: (value) =>
-                value == null || value.isEmpty ? 'Enter shop name' : null,
+                    value == null || value.isEmpty ? 'Enter shop name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -156,7 +157,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 ),
                 maxLines: 2,
                 validator: (value) =>
-                value == null || value.isEmpty ? 'Enter description' : null,
+                    value == null || value.isEmpty ? 'Enter description' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -167,7 +168,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   prefixIcon: Icon(Icons.location_on),
                 ),
                 validator: (value) =>
-                value == null || value.isEmpty ? 'Enter address' : null,
+                    value == null || value.isEmpty ? 'Enter address' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -178,8 +179,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Enter phone number' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter phone number'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -196,13 +198,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 onPressed: _isLoading ? null : _createShop,
                 child: _isLoading
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text('Create Shop'),
               ),
             ],

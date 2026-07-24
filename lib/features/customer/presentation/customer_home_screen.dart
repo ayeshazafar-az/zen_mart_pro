@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_screen.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
+import 'shop_products_screen.dart';
+import 'search_products_screen.dart';
+import 'customer_dashboard_screen.dart';
 
 class CustomerHomeScreen extends StatelessWidget {
   const CustomerHomeScreen({super.key});
@@ -20,10 +23,10 @@ class CustomerHomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              // TODO: Navigate to Shopping Cart
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Opening Shopping Cart...')),
-              );
+              // Switch to Cart tab (index 2) in the parent dashboard
+              final dashboardState = context
+                  .findAncestorStateOfType<CustomerDashboardScreenState>();
+              dashboardState?.switchTab(2);
             },
           ),
           IconButton(
@@ -50,9 +53,10 @@ class CustomerHomeScreen extends StatelessWidget {
             TextField(
               readOnly: true,
               onTap: () {
-                // TODO: Navigate to Search Products screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Opening Search module...')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const SearchProductsScreen()),
                 );
               },
               decoration: InputDecoration(
@@ -76,7 +80,8 @@ class CustomerHomeScreen extends StatelessWidget {
             SizedBox(
               height: 140,
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('shops').snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection('shops').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Container(
@@ -85,13 +90,18 @@ class CustomerHomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text('Welcome to Zenvyro Mart Pro', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Welcome to Zenvyro Mart Pro',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                     );
                   }
 
                   final shops = snapshot.data!.docs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
-                    return data['bannerImageUrl'] != null && data['bannerImageUrl'].toString().isNotEmpty;
+                    return data['bannerImageUrl'] != null &&
+                        data['bannerImageUrl'].toString().isNotEmpty;
                   }).toList();
 
                   if (shops.isEmpty) {
@@ -101,7 +111,11 @@ class CustomerHomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text('Discover Local Stores & Products', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Discover Local Stores & Products',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                     );
                   }
 
@@ -110,7 +124,9 @@ class CustomerHomeScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final data = shops[index].data() as Map<String, dynamic>;
                       final bannerUrl = data['bannerImageUrl'];
-                      final bannerTitle = data['bannerTitle'] ?? data['name'] ?? 'Special Offer';
+                      final bannerTitle = data['bannerTitle'] ??
+                          data['name'] ??
+                          'Special Offer';
 
                       return Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -125,7 +141,10 @@ class CustomerHomeScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             gradient: LinearGradient(
-                              colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                              colors: [
+                                Colors.black.withValues(alpha: 0.6),
+                                Colors.transparent
+                              ],
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                             ),
@@ -134,7 +153,10 @@ class CustomerHomeScreen extends StatelessWidget {
                           alignment: Alignment.bottomLeft,
                           child: Text(
                             bannerTitle,
-                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       );
@@ -153,7 +175,10 @@ class CustomerHomeScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    // TODO: Browse all shops screen
+                    // Switch to Shops tab (index 1) in the parent dashboard
+                    final dashboardState = context.findAncestorStateOfType<
+                        CustomerDashboardScreenState>();
+                    dashboardState?.switchTab(1);
                   },
                   child: const Text('See All'),
                 ),
@@ -162,14 +187,16 @@ class CustomerHomeScreen extends StatelessWidget {
             const SizedBox(height: 8),
             // Active Shops List
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('shops').snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('shops').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No shops available right now.'));
+                  return const Center(
+                      child: Text('No shops available right now.'));
                 }
 
                 final shops = snapshot.data!.docs;
@@ -186,22 +213,34 @@ class CustomerHomeScreen extends StatelessWidget {
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: imageUrl.isNotEmpty
                             ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(Icons.store)),
-                        )
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(imageUrl,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        const Icon(Icons.store)),
+                              )
                             : const CircleAvatar(child: Icon(Icons.store)),
-                        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(address),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
-                          // TODO: Navigate to Shop Details / Products
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Opening $name...')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ShopProductsScreen(
+                                shopId: shops[index].id,
+                                shopName: name,
+                              ),
+                            ),
                           );
                         },
                       ),

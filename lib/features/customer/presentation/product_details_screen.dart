@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../../auth/presentation/auth_provider.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final DocumentSnapshot productDoc;
@@ -18,7 +20,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final data = widget.productDoc.data() as Map<String, dynamic>;
     final name = data['name'] ?? 'Product Name';
     final price = data['price']?.toString() ?? '0.00';
-    final description = data['description'] ?? 'No description available for this product.';
+    final description =
+        data['description'] ?? 'No description available for this product.';
     final imageUrl = data['imageUrl'] ?? '';
     final stock = data['stock'] ?? 0;
 
@@ -44,7 +47,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Container(
                 height: 280,
                 color: Colors.grey[200],
-                child: const Center(child: Icon(Icons.shopping_bag, size: 80, color: Colors.grey)),
+                child: const Center(
+                    child:
+                        Icon(Icons.shopping_bag, size: 80, color: Colors.grey)),
               ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -53,12 +58,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '\$ $price',
-                    style: const TextStyle(fontSize: 20, color: Colors.green, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -82,15 +91,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   if (stock > 0) ...[
                     Row(
                       children: [
-                        const Text('Quantity: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text('Quantity: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                          onPressed: _quantity > 1
+                              ? () => setState(() => _quantity--)
+                              : null,
                         ),
-                        Text('$_quantity', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text('$_quantity',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
-                          onPressed: _quantity < stock ? () => setState(() => _quantity++) : null,
+                          onPressed: _quantity < stock
+                              ? () => setState(() => _quantity++)
+                              : null,
                         ),
                       ],
                     ),
@@ -103,21 +119,56 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       bottomNavigationBar: stock > 0
           ? Container(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: () {
-              // TODO: Implement Cart provider / Add to Cart logic
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Added $_quantity x $name to cart!')),
-              );
-            },
-            child: const Text('Add to Cart', style: TextStyle(fontSize: 16)),
-          ),
-        ),
-      )
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    final userId = authProvider.currentUser?.uid ?? '';
+                    if (userId.isEmpty) return;
+
+                    try {
+                      // Get shopId from the product's parent collection path
+                      final productRef = widget.productDoc.reference;
+                      final shopId = productRef.parent.parent?.id ?? '';
+
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .collection('cart')
+                          .add({
+                        'productId': widget.productDoc.id,
+                        'shopId': shopId,
+                        'name': name,
+                        'price': data['price'] ?? 0.0,
+                        'quantity': _quantity,
+                        'imageUrl': imageUrl,
+                        'addedAt': FieldValue.serverTimestamp(),
+                      });
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Added $_quantity x $name to cart!')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error adding to cart: $e')),
+                        );
+                      }
+                    }
+                  },
+                  child:
+                      const Text('Add to Cart', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            )
           : null,
     );
   }

@@ -10,7 +10,8 @@ class ShoppingCartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId =
+        authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Shopping Cart')),
@@ -30,9 +31,11 @@ class ShoppingCartScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+                  Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('Your cart is empty.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('Your cart is empty.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ],
               ),
             );
@@ -66,10 +69,16 @@ class ShoppingCartScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: imageUrl.isNotEmpty
-                            ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.image))
+                            ? Image.network(imageUrl,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.image))
                             : const Icon(Icons.shopping_bag),
-                        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text('Price: \$ $price | Qty: $quantity'),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -99,8 +108,11 @@ class ShoppingCartScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.between,
                       children: [
-                        const Text('Subtotal:', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                        Text('\$ ${subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text('Subtotal:',
+                            style: TextStyle(fontSize: 16, color: Colors.grey)),
+                        Text('\$ ${subtotal.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -119,7 +131,8 @@ class ShoppingCartScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text('Proceed to Checkout', style: TextStyle(fontSize: 16)),
+                        child: const Text('Proceed to Checkout',
+                            style: TextStyle(fontSize: 16)),
                       ),
                     ),
                   ],
