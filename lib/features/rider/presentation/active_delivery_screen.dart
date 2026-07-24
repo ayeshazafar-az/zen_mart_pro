@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../../shared_features/chat/chat_screen.dart';
 
 class ActiveDeliveryScreen extends StatelessWidget {
   const ActiveDeliveryScreen({super.key});
@@ -30,7 +31,8 @@ class ActiveDeliveryScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.directions_bike, size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No active deliveries in progress.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('No active deliveries in progress.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ],
               ),
             );
@@ -60,31 +62,63 @@ class ActiveDeliveryScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order #${orderId.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          const Chip(label: Text('OUT FOR DELIVERY'), backgroundColor: Colors.blueAccent),
+                          Text('Order #${orderId.substring(0, 8)}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          const Chip(
+                              label: Text('OUT FOR DELIVERY'),
+                              backgroundColor: Colors.blueAccent),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text('Customer: $customerEmail'),
                       Text('Phone: $phone'),
                       Text('Address: $address'),
-                      Text('Payout: \$ $totalAmount', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                      Text('Payout: \$ $totalAmount',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green)),
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green),
                           onPressed: () async {
                             await orderDoc.reference.update({
                               'status': 'Delivered',
                             });
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Order marked as Delivered!')),
+                                const SnackBar(
+                                    content:
+                                        Text('Order marked as Delivered!')),
                               );
                             }
                           },
-                          child: const Text('Mark as Delivered', style: TextStyle(color: Colors.white)),
+                          child: const Text('Mark as Delivered',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.chat),
+                          label: const Text('Chat & Call Customer'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  orderId: orderId,
+                                  recipientName: customerEmail.split('@')[0],
+                                  chatChannel: 'rider_messages',
+                                  recipientPhone: phone,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

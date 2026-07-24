@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../../shared_features/chat/chat_screen.dart';
 
 class ManageVendorOrdersScreen extends StatelessWidget {
   const ManageVendorOrdersScreen({super.key});
@@ -137,6 +138,31 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                               ],
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          if (['Accepted', 'Preparing', 'Out for Delivery']
+                              .contains(status))
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.chat),
+                                label: const Text('Chat & Call Customer'),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                        orderId: orderId,
+                                        recipientName:
+                                            customerEmail.split('@')[0],
+                                        chatChannel: 'vendor_messages',
+                                        recipientPhone:
+                                            data['phone'], // Customer's phone
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                         ],
                       ),
                     ),

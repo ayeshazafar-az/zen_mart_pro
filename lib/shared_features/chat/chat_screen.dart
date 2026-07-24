@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final String orderId;
   final String recipientName;
+  final String chatChannel; // e.g., 'vendor_messages' or 'rider_messages'
+  final String? recipientPhone; // For Calling
 
   const ChatScreen({
     super.key,
     required this.orderId,
     required this.recipientName,
+    required this.chatChannel,
+    this.recipientPhone,
   });
 
   @override
@@ -26,6 +31,22 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch phone dialer')),
+        );
+      }
+    }
+  }
+
   Future<void> _sendMessage(String senderId, String senderEmail) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
@@ -35,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
     await FirebaseFirestore.instance
         .collection('orders')
         .doc(widget.orderId)
-        .collection('messages')
+        .collection(widget.chatChannel)
         .add({
       'senderId': senderId,
       'senderEmail': senderEmail,
@@ -51,7 +72,18 @@ class _ChatScreenState extends State<ChatScreen> {
     final userEmail = authProvider.currentUser?.email ?? 'User';
 
     return Scaffold(
-      appBar: AppBar(title: Text('Chat with ${widget.recipientName}')),
+      appBar: AppBar(
+        title: Text('Chat with ${widget.recipientName}'),
+        actions: [
+          if (widget.recipientPhone != null &&
+              widget.recipientPhone!.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.call),
+              tooltip: 'Voice Call',
+              onPressed: () => _makePhoneCall(widget.recipientPhone!),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -59,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: FirebaseFirestore.instance
                   .collection('orders')
                   .doc(widget.orderId)
-                  .collection('messages')
+                  .collection(widget.chatChannel)
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {

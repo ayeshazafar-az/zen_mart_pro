@@ -283,6 +283,7 @@ class OrderTrackingScreen extends StatelessWidget {
                             builder: (context) => ChatScreen(
                               orderId: orderId,
                               recipientName: 'Rider',
+                              chatChannel: 'rider_messages',
                             ),
                           ),
                         );
@@ -290,6 +291,33 @@ class OrderTrackingScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+
+                // Chat with Vendor button
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.storefront),
+                    label: const Text('Chat with Vendor',
+                        style: TextStyle(fontSize: 16)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            orderId: orderId,
+                            recipientName: 'Vendor',
+                            chatChannel: 'vendor_messages',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
 
                 // Leave a Review button
                 if (isDelivered) ...[

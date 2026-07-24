@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'core/router/app_router.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("Handling a background message: ${message.messageId}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Set up Firebase Messaging background handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Request permission for iOS/Web and initialize token
+  final messaging = FirebaseMessaging.instance;
+  await messaging.requestPermission();
+  messaging.getToken().then((token) {
+    debugPrint('FCM Token: $token');
+  });
+
   runApp(const ZenMartApp());
 }
 
