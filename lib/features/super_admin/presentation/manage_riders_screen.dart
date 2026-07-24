@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import 'rider_verification_details_screen.dart';
 
 class ManageRidersScreen extends StatelessWidget {
   const ManageRidersScreen({super.key});
@@ -33,42 +34,66 @@ class ManageRidersScreen extends StatelessWidget {
               final email = data['email'] ?? '';
               final phone = data['phone'] ?? 'N/A';
 
+              final isApproved = data['isApproved'] ?? false;
+
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
+                color: isApproved ? Colors.white : Colors.orange.shade50,
                 child: ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RiderVerificationDetailsScreen(
+                            riderDoc: riders[index]),
+                      ),
+                    );
+                  },
                   leading: const CircleAvatar(
                     child: Icon(Icons.delivery_dining),
                   ),
-                  title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Email: $email\nPhone: $phone'),
+                  title: Text(name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(
+                      'Email: $email\nPhone: $phone\nStatus: ${isApproved ? "Approved" : "Pending Verification"}'),
                   isThreeLine: true,
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () async {
-                      bool? confirm = await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Delete Rider'),
-                          content: Text('Are you sure you want to delete $name?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isApproved)
+                        const Icon(Icons.info_outline, color: Colors.orange),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          bool? confirm = await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Rider'),
+                              content: Text(
+                                  'Are you sure you want to delete $name?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Delete',
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (confirm == true) {
-                        await FirebaseFirestore.instance
-                            .collection(AppConstants.usersCollection)
-                            .doc(riders[index].id)
-                            .delete();
-                      }
-                    },
+                          );
+                          if (confirm == true) {
+                            await FirebaseFirestore.instance
+                                .collection(AppConstants.usersCollection)
+                                .doc(riders[index].id)
+                                .delete();
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
               );

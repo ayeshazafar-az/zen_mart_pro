@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_provider.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -74,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) =>
-                  value == null || value.isEmpty ? 'Enter email' : null,
+                      value == null || value.isEmpty ? 'Enter email' : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -99,32 +100,49 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   validator: (value) =>
-                  value == null || value.isEmpty ? 'Enter password' : null,
+                      value == null || value.isEmpty ? 'Enter password' : null,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Forgot Password?',
+                        style: TextStyle(
+                            color: Colors.orange, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 8),
 
                 ElevatedButton(
                   onPressed: authProvider.isLoading
                       ? null
                       : () async {
-                    if (_formKey.currentState!.validate()) {
-                      await authProvider.login(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
-                    }
-                  },
+                          if (_formKey.currentState!.validate()) {
+                            await authProvider.login(
+                              _emailController.text,
+                              _passwordController.text,
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: authProvider.isLoading
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text('Login', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 16),

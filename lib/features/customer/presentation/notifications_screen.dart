@@ -9,7 +9,7 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userId = authProvider.currentUser?.id ?? authProvider.currentUser?.uid ?? '';
+    final userId = authProvider.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notifications')),
@@ -30,9 +30,11 @@ class NotificationsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey),
+                  Icon(Icons.notifications_off_outlined,
+                      size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No notifications yet.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  Text('No notifications yet.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ],
               ),
             );
@@ -55,7 +57,8 @@ class NotificationsScreen extends StatelessWidget {
                     backgroundColor: Colors.orangeAccent,
                     child: Icon(Icons.notifications, color: Colors.white),
                   ),
-                  title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(title,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(message),
                 ),
               );

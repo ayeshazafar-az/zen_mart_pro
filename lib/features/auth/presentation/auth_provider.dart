@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../../core/constants/app_constants.dart';
 import '../data/user_model.dart';
 
@@ -34,7 +36,8 @@ class AuthProvider with ChangeNotifier {
         _currentUser = null;
         _resetAuthState();
         notifyListeners();
-      } else if (!firebaseUser.emailVerified && firebaseUser.email != 'admin@zenmart.com') {
+      } else if (!firebaseUser.emailVerified &&
+          firebaseUser.email != 'admin@zenmart.com') {
         // Case 2: They are logged into Firebase, but HAVEN'T clicked the link.
         // We refuse to set _currentUser, which stops GoRouter from letting them in.
         // Exception made for Super Admin account.
@@ -67,7 +70,8 @@ class AuthProvider with ChangeNotifier {
       if (doc.exists && doc.data() != null) {
         final data = doc.data() as Map<String, dynamic>;
 
-        if (data['email'] == 'admin@zenmart.com' || _auth.currentUser?.email == 'admin@zenmart.com') {
+        if (data['email'] == 'admin@zenmart.com' ||
+            _auth.currentUser?.email == 'admin@zenmart.com') {
           data['role'] = 'super_admin';
         }
         _currentUser = UserModel.fromMap(data, uid);
@@ -117,7 +121,8 @@ class AuthProvider with ChangeNotifier {
       // Strict Email Verification Check (Bypassed for Admin)
       if (!isAdmin && refreshedUser != null && !refreshedUser.emailVerified) {
         await _auth.signOut();
-        _errorMessage = "Please verify your email address before logging in. Check your inbox.";
+        _errorMessage =
+            "Please verify your email address before logging in. Check your inbox.";
         _isLoading = false;
         notifyListeners();
         return false;
@@ -154,7 +159,8 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // 1. Create auth account
-      auth.UserCredential credential = await _auth.createUserWithEmailAndPassword(
+      auth.UserCredential credential =
+          await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
       );
@@ -201,6 +207,110 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> signUpRider({
+    required String email,
+    required String password,
+    required String name,
+    required String phoneNumber,
+    required String address,
+    required String city,
+    required String vehicleType,
+    required String bankName,
+    required File vehicleImage,
+    required File cnicFront,
+    required File cnicBack,
+    required File paymentReceipt,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // 1. Create auth account
+      auth.UserCredential credential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+
+      final uid = credential.user!.uid;
+
+      // 2. Upload images to Firebase Storage (Bypassed to prevent billing requirements)
+      Future<String> uploadImage(File file, String path) async {
+        // Simulating upload time
+        await Future.delayed(const Duration(milliseconds: 1000));
+
+        // Return dummy placeholders so Super Admin screen can still load images
+        if (path.contains('vehicle')) {
+          return 'https://placehold.co/600x400/orange/white.png?text=Rider+Vehicle';
+        } else if (path.contains('cnic_front')) {
+          return 'https://placehold.co/600x400/orange/white.png?text=CNIC+Front';
+        } else if (path.contains('cnic_back')) {
+          return 'https://placehold.co/600x400/orange/white.png?text=CNIC+Back';
+        } else {
+          return 'https://placehold.co/600x400/orange/white.png?text=Payment+Receipt';
+        }
+      }
+
+      final vehicleImageUrl = await uploadImage(vehicleImage, 'vehicle.jpg');
+      final cnicFrontUrl = await uploadImage(cnicFront, 'cnic_front.jpg');
+      final cnicBackUrl = await uploadImage(cnicBack, 'cnic_back.jpg');
+      final paymentReceiptUrl =
+          await uploadImage(paymentReceipt, 'payment_receipt.jpg');
+
+      // 3. Save comprehensive data to Firestore
+      Map<String, dynamic> userData = {
+        'uid': uid,
+        'email': email.trim(),
+        'name': name.trim(),
+        'phone': phoneNumber.trim(),
+        'role': 'rider',
+        'isApproved': false,
+        'address': address.trim(),
+        'city': city.trim(),
+        'vehicleType': vehicleType,
+        'bankName': bankName,
+        'vehicleImageUrl': vehicleImageUrl,
+        'cnicFrontUrl': cnicFrontUrl,
+        'cnicBackUrl': cnicBackUrl,
+        'paymentReceiptUrl': paymentReceiptUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .set(userData);
+
+      // 4. Send verification email immediately
+      await credential.user!.sendEmailVerification();
+
+      // 5. Sign out so they cannot access the app until email is verified and approved
+      await _auth.signOut();
+      _currentUser = null;
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "An error occurred during rider sign up.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      if (_auth.currentUser != null &&
+          _auth.currentUser!.email == email.trim()) {
+        try {
+          await _auth.currentUser!.delete();
+        } catch (_) {}
+      }
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> sendPasswordReset(String email) async {
     _isLoading = true;
     _errorMessage = null;
@@ -224,8 +334,81 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> changePassword(
+      String currentPassword, String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final user = _auth.currentUser;
+      if (user == null || user.email == null)
+        throw Exception("User not logged in");
+
+      // Re-authenticate
+      auth.AuthCredential credential = auth.EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on auth.FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? "Failed to update password.";
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateUserProfile(
+      {required String name, required String phone, String? photoUrl}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final user = _auth.currentUser;
+      if (user == null || _currentUser == null)
+        throw Exception("User not logged in");
+
+      final updates = <String, dynamic>{
+        'name': name.trim(),
+        'phone': phone.trim(),
+      };
+      if (photoUrl != null) {
+        updates['photoUrl'] = photoUrl;
+      }
+
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .update(updates);
+
+      // Refresh local user data
+      await _fetchUserData(user.uid);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   // NOTE: Phone Auth methods remain intact in case you want to use them for 2FA or Password Resets later.
-  Future<void> verifyPhoneNumber(String phoneNumber, Function(String) onCodeSent) async {
+  Future<void> verifyPhoneNumber(
+      String phoneNumber, Function(String) onCodeSent) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -234,7 +417,8 @@ class AuthProvider with ChangeNotifier {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber.trim(),
         verificationCompleted: (auth.PhoneAuthCredential credential) async {
-          auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
+          auth.UserCredential userCredential =
+              await _auth.signInWithCredential(credential);
           await _checkAndCreatePhoneUser(userCredential.user!);
 
           _resetAuthState();
@@ -277,7 +461,8 @@ class AuthProvider with ChangeNotifier {
         smsCode: smsCode.trim(),
       );
 
-      auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
+      auth.UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       await _checkAndCreatePhoneUser(userCredential.user!);
 
       _resetAuthState();

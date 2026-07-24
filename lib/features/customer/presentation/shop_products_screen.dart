@@ -57,68 +57,78 @@ class ShopProductsScreen extends StatelessWidget {
 
               return Card(
                 elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailsScreen(productDoc: productDoc),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetailsScreen(productDoc: productDoc),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12)),
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: Colors.grey[200],
+                                    child: const Icon(Icons.image,
+                                        size: 40, color: Colors.grey),
+                                  ),
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.shopping_bag,
+                                      size: 40, color: Colors.grey),
+                                ),
                         ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                    Expanded(
-                    child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: imageUrl.isNotEmpty
-                    ? Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.image, size: 40, color: Colors.grey),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$ $price',
+                              style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              stock > 0 ? 'In Stock ($stock)' : 'Out of Stock',
+                              style: TextStyle(
+                                color: stock > 0 ? Colors.grey : Colors.red,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                )
-                    : Container(
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.shopping_bag, size: 40, color: Colors.grey),
                 ),
-              ),
-              Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              const SizedBox(height: 4),
-              Text(
-              '\$ $price',
-              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              const SizedBox(height: 2),
-              Text(
-              stock > 0 ? 'In Stock ($stock)' : 'Out of Stock',
-              style: TextStyle(
-              color: stock > 0 ? Colors.grey : Colors.red,
-              fontSize: 11,
-              ),
-              ),
-              ],
-              ),
-              ),
-              ],
-              ),
-              ),
               );
             },
           );

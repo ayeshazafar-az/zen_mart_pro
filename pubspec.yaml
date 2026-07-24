@@ -27,6 +27,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   cached_network_image: ^3.3.1    # Added for optimized image loading
   shared_preferences: ^2.2.3      # Added for secure session caching
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

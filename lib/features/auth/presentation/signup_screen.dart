@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'auth_provider.dart';
+import '../../rider/presentation/advanced_rider_signup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -149,9 +150,9 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Role Selection Dropdown (Only Customer and Rider)
+              // Role Selection (Only Customer)
               DropdownButtonFormField<String>(
-                initialValue: _selectedRole,
+                value: 'customer',
                 decoration: const InputDecoration(
                   labelText: 'Register As',
                   border: OutlineInputBorder(),
@@ -159,13 +160,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'customer', child: Text('Customer')),
-                  DropdownMenuItem(
-                      value: 'rider',
-                      child: Text('Delivery Rider (Requires Approval)')),
                 ],
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedRole = val);
-                },
+                onChanged: (val) {},
               ),
               const SizedBox(height: 16),
 
@@ -246,6 +242,37 @@ class _SignupScreenState extends State<SignupScreen> {
                       : const Text('Complete Registration',
                           style: TextStyle(fontSize: 16)),
                 ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Want to earn with us? '),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const AdvancedRiderSignupScreen()),
+                      );
+                    },
+                    child: const Text('Apply as a Rider',
+                        style: TextStyle(
+                            color: Colors.orange, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Already have an account?'),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Login'),
+                  ),
+                ],
               ),
             ],
           ),
