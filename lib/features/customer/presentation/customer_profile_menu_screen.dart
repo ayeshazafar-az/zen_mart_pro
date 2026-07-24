@@ -5,6 +5,7 @@ import '../../auth/presentation/login_screen.dart';
 import 'saved_addresses_screen.dart';
 import 'notifications_screen.dart';
 import 'help_support_screen.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class CustomerProfileMenuScreen extends StatelessWidget {
   const CustomerProfileMenuScreen({super.key});
@@ -37,7 +38,8 @@ class CustomerProfileMenuScreen extends StatelessWidget {
                       children: [
                         Text(
                           user?.name ?? 'Customer',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -85,10 +87,24 @@ class CustomerProfileMenuScreen extends StatelessWidget {
               );
             },
           ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return SwitchListTile(
+                secondary: const Icon(Icons.dark_mode, color: Colors.blueGrey),
+                title: const Text('Dark Mode'),
+                value: themeProvider.isDarkMode,
+                onChanged: (bool value) {
+                  themeProvider.toggleTheme(value);
+                },
+              );
+            },
+          ),
           const Divider(height: 32),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text('Logout',
+                style:
+                    TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             onTap: () async {
               await authProvider.logout();
               if (context.mounted) {

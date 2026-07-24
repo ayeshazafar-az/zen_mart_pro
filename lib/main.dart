@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'features/auth/presentation/auth_provider.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/router/app_router.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -38,12 +39,14 @@ class ZenMartApp extends StatefulWidget {
 class _ZenMartAppState extends State<ZenMartApp> {
   // Initialize these late so they are only created once when the app starts.
   late final AuthProvider _authProvider;
+  late final ThemeProvider _themeProvider;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _authProvider = AuthProvider();
+    _themeProvider = ThemeProvider();
     // The router is instantiated once and injected with the authProvider
     _router = AppRouter.router(_authProvider);
   }
@@ -54,18 +57,33 @@ class _ZenMartAppState extends State<ZenMartApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
+        ChangeNotifierProvider.value(value: _themeProvider),
       ],
-      child: MaterialApp.router(
-        title: 'Zen Mart Pro',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF0D47A1), // Professional, clean aesthetic
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        routerConfig: _router,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp.router(
+            title: 'Zen Mart Pro',
+            debugShowCheckedModeBanner: false,
+            themeMode: themeProvider.themeMode,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor:
+                    const Color(0xFF0D47A1), // Professional, clean aesthetic
+                brightness: Brightness.light,
+              ),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor:
+                    const Color(0xFF0D47A1), // Professional, clean aesthetic
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            routerConfig: _router,
+          );
+        },
       ),
     );
   }

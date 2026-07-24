@@ -17,6 +17,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.currentUser?.uid ?? '';
+
     final data = widget.productDoc.data() as Map<String, dynamic>;
     final name = data['name'] ?? 'Product Name';
     final price = data['price']?.toString() ?? '0.00';
@@ -26,7 +29,51 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final stock = data['stock'] ?? 0;
 
     return Scaffold(
-      appBar: AppBar(title: Text(name)),
+      appBar: AppBar(
+        title: Text(name),
+        actions: [
+          if (userId.isNotEmpty)
+            StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId)
+                  .collection('wishlist')
+                  .doc(widget.productDoc.id)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                final inWishlist = snapshot.hasData && snapshot.data!.exists;
+                return IconButton(
+                  icon: Icon(
+                    inWishlist ? Icons.favorite : Icons.favorite_border,
+                    color: inWishlist ? Colors.red : null,
+                  ),
+                  onPressed: () async {
+                    final docRef = FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userId)
+                        .collection('wishlist')
+                        .doc(widget.productDoc.id);
+
+                    if (inWishlist) {
+                      await docRef.delete();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Removed from wishlist')));
+                      }
+                    } else {
+                      await docRef.set(data);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Added to wishlist')));
+                      }
+                    }
+                  },
+                );
+              },
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

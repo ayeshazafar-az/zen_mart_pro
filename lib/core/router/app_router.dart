@@ -2,7 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
-import '../../features/auth/presentation/otp_verification_screen.dart';
+import '../../features/auth/presentation/phone_login_screen.dart';
 import '../../features/auth/presentation/pending_approval_screen.dart';
 import '../../features/super_admin/presentation/admin_dashboard_screen.dart';
 import '../../features/vendor/presentation/vendor_dashboard_screen.dart';
@@ -70,7 +70,7 @@ class AppRouter {
         ),
         GoRoute(
           path: '/otp',
-          builder: (context, state) => const OtpVerificationScreen(),
+          builder: (context, state) => const PhoneLoginScreen(),
         ),
         GoRoute(
           path: '/pending-approval',
