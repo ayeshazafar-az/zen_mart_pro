@@ -55,7 +55,8 @@ class AdminDashboardScreen extends StatelessWidget {
                     const CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.blueAccent,
-                      child: Icon(Icons.admin_panel_settings, size: 35, color: Colors.white),
+                      child: Icon(Icons.admin_panel_settings,
+                          size: 35, color: Colors.white),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
@@ -64,7 +65,8 @@ class AdminDashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Welcome back, ${user?.name ?? "Admin"}!',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -134,7 +136,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   destination: ManageCustomersScreen(),
                 ),
                 _AdminDashboardCard(
-                  title: 'Manage Riders',
+                  title: 'Approved Riders',
                   icon: Icons.delivery_dining,
                   subtitle: 'View delivery staff',
                   destination: ManageRidersScreen(),
@@ -228,7 +230,8 @@ class _AdminDashboardCard extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
               Text(

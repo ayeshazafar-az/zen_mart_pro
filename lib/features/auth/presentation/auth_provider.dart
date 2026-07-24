@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../../../core/constants/app_constants.dart';
 import '../data/user_model.dart';
 
@@ -216,6 +216,8 @@ class AuthProvider with ChangeNotifier {
     required String city,
     required String vehicleType,
     required String bankName,
+    required File profileImage,
+    required File drivingLicense,
     required File vehicleImage,
     required File cnicFront,
     required File cnicBack,
@@ -235,23 +237,21 @@ class AuthProvider with ChangeNotifier {
 
       final uid = credential.user!.uid;
 
-      // 2. Upload images to Firebase Storage (Bypassed to prevent billing requirements)
+      // 2. Base64 Encode heavily compressed images for Firestore Storage
       Future<String> uploadImage(File file, String path) async {
-        // Simulating upload time
-        await Future.delayed(const Duration(milliseconds: 1000));
-
-        // Return dummy placeholders so Super Admin screen can still load images
-        if (path.contains('vehicle')) {
-          return 'https://placehold.co/600x400/orange/white.png?text=Rider+Vehicle';
-        } else if (path.contains('cnic_front')) {
-          return 'https://placehold.co/600x400/orange/white.png?text=CNIC+Front';
-        } else if (path.contains('cnic_back')) {
-          return 'https://placehold.co/600x400/orange/white.png?text=CNIC+Back';
-        } else {
-          return 'https://placehold.co/600x400/orange/white.png?text=Payment+Receipt';
+        try {
+          final bytes = await file.readAsBytes();
+          final base64String = base64Encode(bytes);
+          return base64String;
+        } catch (e) {
+          throw Exception('Failed to process image $path: $e');
         }
       }
 
+      final profileImageUrl =
+          await uploadImage(profileImage, 'profile_image.jpg');
+      final drivingLicenseUrl =
+          await uploadImage(drivingLicense, 'driving_license.jpg');
       final vehicleImageUrl = await uploadImage(vehicleImage, 'vehicle.jpg');
       final cnicFrontUrl = await uploadImage(cnicFront, 'cnic_front.jpg');
       final cnicBackUrl = await uploadImage(cnicBack, 'cnic_back.jpg');
@@ -270,6 +270,8 @@ class AuthProvider with ChangeNotifier {
         'city': city.trim(),
         'vehicleType': vehicleType,
         'bankName': bankName,
+        'profileImageUrl': profileImageUrl,
+        'drivingLicenseUrl': drivingLicenseUrl,
         'vehicleImageUrl': vehicleImageUrl,
         'cnicFrontUrl': cnicFrontUrl,
         'cnicBackUrl': cnicBackUrl,

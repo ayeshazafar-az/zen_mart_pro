@@ -31,6 +31,8 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
   String? _selectedBank;
 
   // Images
+  File? _profileImage;
+  File? _drivingLicense;
   File? _vehicleImage;
   File? _cnicFront;
   File? _cnicBack;
@@ -43,7 +45,10 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
   Future<void> _pickImage(void Function(File) onPicked) async {
     try {
       final pickedFile = await _picker.pickImage(
-          source: ImageSource.gallery, imageQuality: 70);
+          source: ImageSource.gallery,
+          imageQuality: 30,
+          maxWidth: 800,
+          maxHeight: 800);
       if (pickedFile != null) {
         setState(() {
           onPicked(File(pickedFile.path));
@@ -66,12 +71,15 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
       return;
     }
 
-    if (_vehicleImage == null ||
+    if (_profileImage == null ||
+        _drivingLicense == null ||
+        _vehicleImage == null ||
         _cnicFront == null ||
         _cnicBack == null ||
         _paymentReceipt == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload all required images!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Please upload all required images, including your Driving License & profile picture!')));
       return;
     }
 
@@ -88,6 +96,8 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
       city: _cityController.text,
       vehicleType: _selectedVehicleType!,
       bankName: _selectedBank!,
+      profileImage: _profileImage!,
+      drivingLicense: _drivingLicense!,
       vehicleImage: _vehicleImage!,
       cnicFront: _cnicFront!,
       cnicBack: _cnicBack!,
@@ -176,6 +186,27 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
                             fontWeight: FontWeight.bold,
                             color: Colors.orange)),
                     const SizedBox(height: 16),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () => _pickImage((f) => _profileImage = f),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.orange.shade100,
+                          backgroundImage: _profileImage != null
+                              ? FileImage(_profileImage!)
+                              : null,
+                          child: _profileImage == null
+                              ? const Icon(Icons.add_a_photo,
+                                  size: 40, color: Colors.orange)
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Center(
+                        child: Text('Profile Photo',
+                            style: TextStyle(color: Colors.grey))),
+                    const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -298,6 +329,9 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
                     const SizedBox(height: 16),
                     _buildImagePickerTile('Vehicle Photo (Show Number)',
                         _vehicleImage, (f) => _vehicleImage = f),
+                    const SizedBox(height: 8),
+                    _buildImagePickerTile('Driving License', _drivingLicense,
+                        (f) => _drivingLicense = f),
                     const SizedBox(height: 8),
                     _buildImagePickerTile(
                         'CNIC Front', _cnicFront, (f) => _cnicFront = f),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
@@ -24,7 +25,9 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   insetPadding: const EdgeInsets.all(10),
                   child: InteractiveViewer(
-                    child: Image.network(url, fit: BoxFit.contain),
+                    child: url.startsWith('http')
+                        ? Image.network(url, fit: BoxFit.contain)
+                        : Image.memory(base64Decode(url), fit: BoxFit.contain),
                   ),
                 ),
               );
@@ -35,7 +38,10 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 color: Colors.grey.shade200,
                 image: DecorationImage(
-                    image: NetworkImage(url), fit: BoxFit.cover),
+                    image: url.startsWith('http')
+                        ? NetworkImage(url) as ImageProvider
+                        : MemoryImage(base64Decode(url)),
+                    fit: BoxFit.cover),
               ),
               child: const Align(
                 alignment: Alignment.bottomRight,
@@ -129,6 +135,23 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            Center(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.orange.shade100,
+                backgroundImage: data['profileImageUrl'] != null &&
+                        data['profileImageUrl'].isNotEmpty
+                    ? (data['profileImageUrl'].toString().startsWith('http')
+                        ? NetworkImage(data['profileImageUrl']) as ImageProvider
+                        : MemoryImage(base64Decode(data['profileImageUrl'])))
+                    : null,
+                child: data['profileImageUrl'] == null ||
+                        data['profileImageUrl'].isEmpty
+                    ? const Icon(Icons.person, size: 60, color: Colors.orange)
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 24),
             const Text('Personal Information',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
@@ -144,6 +167,8 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
             _buildPhotoBlock(context, 'Vehicle Image', data['vehicleImageUrl']),
+            _buildPhotoBlock(
+                context, 'Driving License', data['drivingLicenseUrl']),
             _buildPhotoBlock(context, 'CNIC Front', data['cnicFrontUrl']),
             _buildPhotoBlock(context, 'CNIC Back', data['cnicBackUrl']),
             _buildPhotoBlock(

@@ -9,11 +9,12 @@ class ManageRidersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Riders')),
+      appBar: AppBar(title: const Text('Approved Riders')),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection(AppConstants.usersCollection)
             .where('role', isEqualTo: 'rider')
+            .where('isApproved', isEqualTo: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
