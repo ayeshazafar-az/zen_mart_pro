@@ -7,7 +7,7 @@ import '../../features/auth/presentation/pending_approval_screen.dart';
 import '../../features/super_admin/presentation/admin_dashboard_screen.dart';
 import '../../features/vendor/presentation/vendor_dashboard_screen.dart';
 import '../../features/rider/presentation/rider_dashboard_screen.dart';
-import '../../features/customer/presentation/customer_home_screen.dart';
+import '../../features/customer/presentation/customer_dashboard_screen.dart';
 import '../constants/app_constants.dart';
 
 class AppRouter {
@@ -53,7 +53,7 @@ class AppRouter {
               return '/rider-dashboard';
             case AppConstants.roleCustomer:
             default:
-              return '/customer-home';
+              return '/customer-dashboard';
           }
         }
 
@@ -89,8 +89,8 @@ class AppRouter {
           builder: (context, state) => const RiderDashboardScreen(),
         ),
         GoRoute(
-          path: '/customer-home',
-          builder: (context, state) => const CustomerHomeScreen(),
+          path: '/customer-dashboard',
+          builder: (context, state) => const CustomerDashboardScreen(),
         ),
       ],
     );

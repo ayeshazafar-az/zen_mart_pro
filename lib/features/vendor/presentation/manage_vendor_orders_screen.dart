@@ -139,8 +139,12 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          if (['Accepted', 'Preparing', 'Out for Delivery']
-                              .contains(status))
+                          if ([
+                            'Pending',
+                            'Accepted',
+                            'Preparing',
+                            'Out for Delivery'
+                          ].contains(status))
                             SizedBox(
                               width: double.infinity,
                               child: OutlinedButton.icon(

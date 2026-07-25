@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../auth/presentation/auth_provider.dart';
 
 class ManageAssignedShopScreen extends StatefulWidget {
   const ManageAssignedShopScreen({super.key});
 
   @override
-  State<ManageAssignedShopScreen> createState() => _ManageAssignedShopScreenState();
+  State<ManageAssignedShopScreen> createState() =>
+      _ManageAssignedShopScreenState();
 }
 
 class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
@@ -15,17 +19,30 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _imageUrlController = TextEditingController();
+
   bool _isLoading = false;
   String? _shopDocId;
   bool _isInitialized = false;
+
+  String? _base64Image;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (pickedFile != null) {
+      final bytes = await File(pickedFile.path).readAsBytes();
+      setState(() {
+        _base64Image = base64Encode(bytes);
+      });
+    }
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -38,7 +55,7 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
         'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'phone': _phoneController.text.trim(),
-        'imageUrl': _imageUrlController.text.trim(),
+        if (_base64Image != null) 'imageUrl': _base64Image,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -97,7 +114,10 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
             _nameController.text = data['name'] ?? '';
             _addressController.text = data['address'] ?? '';
             _phoneController.text = data['phone'] ?? '';
-            _imageUrlController.text = data['imageUrl'] ?? '';
+            if (data['imageUrl'] != null &&
+                data['imageUrl'].toString().isNotEmpty) {
+              _base64Image = data['imageUrl'];
+            }
             _isInitialized = true;
           }
 
@@ -107,27 +127,49 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  if (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty)
-                    Container(
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
                       height: 150,
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: NetworkImage(data['imageUrl']),
-                          fit: BoxFit.cover,
-                        ),
+                        border: Border.all(
+                            color: Colors.grey.shade400,
+                            style: BorderStyle.solid),
                       ),
+                      child: _base64Image != null && _base64Image!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: _base64Image!.startsWith('http')
+                                  ? Image.network(_base64Image!,
+                                      fit: BoxFit.cover)
+                                  : Image.memory(base64Decode(_base64Image!),
+                                      fit: BoxFit.cover),
+                            )
+                          : const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo,
+                                    size: 40, color: Colors.grey),
+                                SizedBox(height: 8),
+                                Text('Upload Shop Cover',
+                                    style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
                     ),
+                  ),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
                       labelText: 'Shop Name',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter shop name' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Enter shop name'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -136,8 +178,9 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
                       labelText: 'Shop Address',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter shop address' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Enter shop address'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -146,28 +189,21 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
                       labelText: 'Phone Number',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter phone number' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _imageUrlController,
-                    decoration: const InputDecoration(
-                      labelText: 'Shop Image URL',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter image URL' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Enter phone number'
+                        : null,
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : () => _updateShop(_shopDocId!),
+                      onPressed:
+                          _isLoading ? null : () => _updateShop(_shopDocId!),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Save Changes', style: TextStyle(fontSize: 16)),
+                          : const Text('Save Changes',
+                              style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ],

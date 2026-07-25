@@ -111,16 +111,23 @@ class AuthProvider with ChangeNotifier {
         password: password.trim(),
       );
 
-      // Force Firebase to fetch the absolute latest account status (catches recent email verifications)
       await credential.user!.reload();
-
-      // Grab the freshly reloaded user object
       final auth.User? refreshedUser = _auth.currentUser;
-      bool isAdmin = email.trim().toLowerCase() == 'admin@zenmart.com';
 
-      // Strict Email Verification Check (Bypassed for Admin)
-      if (!isAdmin && refreshedUser != null && !refreshedUser.emailVerified) {
+      // Fetch user data first to check role
+      await _fetchUserData(credential.user!.uid);
+
+      bool isAdmin = _currentUser?.role == 'super_admin' ||
+          email.trim().toLowerCase() == 'admin@zenmart.com';
+      bool isVendor = _currentUser?.role == AppConstants.roleVendor;
+
+      // Strict Email Verification Check (Bypassed for Admin and Vendor)
+      if (!isAdmin &&
+          !isVendor &&
+          refreshedUser != null &&
+          !refreshedUser.emailVerified) {
         await _auth.signOut();
+        _currentUser = null;
         _errorMessage =
             "Please verify your email address before logging in. Check your inbox.";
         _isLoading = false;
@@ -128,7 +135,6 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      await _fetchUserData(credential.user!.uid);
       _isLoading = false;
       notifyListeners();
       return true;

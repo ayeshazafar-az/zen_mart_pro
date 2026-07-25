@@ -53,8 +53,9 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
       );
 
       // 2. Create the Vendor Auth Account
-      UserCredential userCredential = await FirebaseAuth.instanceFor(app: tempApp)
-          .createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instanceFor(app: tempApp)
+              .createUserWithEmailAndPassword(
         email: _vendorEmailController.text.trim(),
         password: _vendorPasswordController.text.trim(),
       );
@@ -62,7 +63,10 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
       final String vendorUid = userCredential.user!.uid;
 
       // 3. Create Vendor User Document in Firestore
-      await _firestore.collection(AppConstants.usersCollection).doc(vendorUid).set({
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(vendorUid)
+          .set({
         'uid': vendorUid,
         'email': _vendorEmailController.text.trim(),
         'name': _vendorNameController.text.trim(),
@@ -74,7 +78,7 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
 
       // 4. Create Shop Document and assign Vendor UID
       await _firestore.collection(AppConstants.shopsCollection).add({
-        'vendorUid': vendorUid,
+        'vendorId': vendorUid,
         'name': _shopNameController.text.trim(),
         'description': _shopDescController.text.trim(),
         'isActive': true,
@@ -85,7 +89,8 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Vendor & Shop created successfully! Credentials ready to share.'),
+            content: Text(
+                'Vendor & Shop created successfully! Credentials ready to share.'),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 4),
           ),
@@ -95,7 +100,9 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Auth Error'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text(e.message ?? 'Auth Error'),
+              backgroundColor: Colors.red),
         );
       }
     } catch (e) {
@@ -118,85 +125,108 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Vendor Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _vendorNameController,
-                decoration: const InputDecoration(labelText: 'Vendor Name', border: OutlineInputBorder()),
-                validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _vendorEmailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Vendor Email', border: OutlineInputBorder()),
-                validator: (val) => val == null || !val.contains('@') ? 'Invalid Email' : null,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _vendorPhoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder()),
-                validator: (val) => val == null || val.length < 10 ? 'Invalid Phone' : null,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _vendorPasswordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Temporary Password (Share with Vendor)',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Vendor Information',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue)),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _vendorNameController,
+                      decoration: const InputDecoration(
+                          labelText: 'Vendor Name',
+                          border: OutlineInputBorder()),
+                      validator: (val) =>
+                          val == null || val.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _vendorEmailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                          labelText: 'Vendor Email',
+                          border: OutlineInputBorder()),
+                      validator: (val) => val == null || !val.contains('@')
+                          ? 'Invalid Email'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _vendorPhoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                          labelText: 'Phone Number',
+                          border: OutlineInputBorder()),
+                      validator: (val) => val == null || val.length < 10
+                          ? 'Invalid Phone'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _vendorPasswordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Temporary Password (Share with Vendor)',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                        ),
+                      ),
+                      validator: (val) => val == null || val.length < 6
+                          ? 'Min 6 characters'
+                          : null,
+                    ),
+                    const Divider(height: 48, thickness: 2),
+                    const Text('Shop Details',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange)),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _shopNameController,
+                      decoration: const InputDecoration(
+                          labelText: 'Shop Name', border: OutlineInputBorder()),
+                      validator: (val) =>
+                          val == null || val.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _shopDescController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                          labelText: 'Shop Description',
+                          border: OutlineInputBorder()),
+                      validator: (val) =>
+                          val == null || val.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white),
+                        onPressed: _createVendorAndShop,
+                        child: const Text('Create Vendor Account & Shop',
+                            style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (val) => val == null || val.length < 6 ? 'Min 6 characters' : null,
               ),
-
-              const Divider(height: 48, thickness: 2),
-
-              const Text('Shop Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _shopNameController,
-                decoration: const InputDecoration(labelText: 'Shop Name', border: OutlineInputBorder()),
-                validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _shopDescController,
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Shop Description', border: OutlineInputBorder()),
-                validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-              ),
-
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
-                  onPressed: _createVendorAndShop,
-                  child: const Text('Create Vendor Account & Shop', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

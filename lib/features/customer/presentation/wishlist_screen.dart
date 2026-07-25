@@ -93,7 +93,7 @@ class WishlistScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            ProductDetailsScreen(product: item),
+                            ProductDetailsScreen(productDoc: item),
                       ),
                     );
                   },
