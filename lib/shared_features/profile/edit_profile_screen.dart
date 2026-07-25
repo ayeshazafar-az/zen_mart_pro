@@ -189,8 +189,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           setState(() => _obscureNew = !_obscureNew)),
                 ),
                 validator: (val) {
-                  if (val != null && val.isNotEmpty && val.length < 6)
+                  if (val != null && val.isNotEmpty && val.length < 6) {
                     return 'Password must be at least 6 characters';
+                  }
                   return null;
                 },
               ),

@@ -280,8 +280,9 @@ class _ManageVendorProductsScreenState
             .where('vendorId', isEqualTo: userId)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty)
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const SizedBox.shrink();
+          }
           final shopDocId = snapshot.data!.docs.first.id;
           return FloatingActionButton(
             onPressed: () => _showProductDialog(shopDocId),

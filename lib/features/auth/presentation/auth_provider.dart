@@ -349,8 +349,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       final user = _auth.currentUser;
-      if (user == null || user.email == null)
+      if (user == null || user.email == null) {
         throw Exception("User not logged in");
+      }
 
       // Re-authenticate
       auth.AuthCredential credential = auth.EmailAuthProvider.credential(
@@ -384,8 +385,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       final user = _auth.currentUser;
-      if (user == null || _currentUser == null)
+      if (user == null || _currentUser == null) {
         throw Exception("User not logged in");
+      }
 
       final updates = <String, dynamic>{
         'name': name.trim(),
