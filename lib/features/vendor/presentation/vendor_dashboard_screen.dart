@@ -10,6 +10,7 @@ import 'manage_vendor_products_screen.dart';
 import 'manage_vendor_orders_screen.dart';
 import 'manage_vendor_shop_banner_screen.dart';
 import 'view_vendor_reviews_screen.dart';
+import '../../../shared_features/profile/edit_profile_screen.dart';
 
 class VendorDashboardScreen extends StatelessWidget {
   const VendorDashboardScreen({super.key});
@@ -55,14 +56,15 @@ class VendorDashboardScreen extends StatelessWidget {
                       backgroundColor: Colors.orangeAccent,
                       child: Icon(Icons.store, size: 35, color: Colors.white),
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Welcome, ${user?.name ?? "Vendor"}!',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -71,6 +73,20 @@ class VendorDashboardScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                    ActionChip(
+                      label: const Text('Edit Profile',
+                          style: TextStyle(fontSize: 12)),
+                      avatar: const Icon(Icons.edit, size: 16),
+                      onPressed: () {
+                        if (user != null) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      EditProfileScreen(user: user)));
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -98,7 +114,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageAssignedShopScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ManageAssignedShopScreen()),
                     );
                   },
                 ),
@@ -109,7 +127,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageVendorProductsScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ManageVendorProductsScreen()),
                     );
                   },
                 ),
@@ -120,7 +140,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageVendorOrdersScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ManageVendorOrdersScreen()),
                     );
                   },
                 ),
@@ -131,7 +153,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageVendorCategoriesScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ManageVendorCategoriesScreen()),
                     );
                   },
                 ),
@@ -142,7 +166,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageVendorShopBannerScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ManageVendorShopBannerScreen()),
                     );
                   },
                 ),
@@ -153,7 +179,9 @@ class VendorDashboardScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ViewVendorReviewsScreen()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ViewVendorReviewsScreen()),
                     );
                   },
                 ),
@@ -199,7 +227,8 @@ class _VendorDashboardCard extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
               Text(

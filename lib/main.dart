@@ -65,22 +65,8 @@ class _ZenMartAppState extends State<ZenMartApp> {
             title: 'Zen Mart Pro',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.themeMode,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor:
-                    const Color(0xFF0D47A1), // Professional, clean aesthetic
-                brightness: Brightness.light,
-              ),
-              useMaterial3: true,
-            ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor:
-                    const Color(0xFF0D47A1), // Professional, clean aesthetic
-                brightness: Brightness.dark,
-              ),
-              useMaterial3: true,
-            ),
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
             routerConfig: _router,
           );
         },

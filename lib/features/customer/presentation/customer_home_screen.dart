@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_screen.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
@@ -84,18 +85,7 @@ class CustomerHomeScreen extends StatelessWidget {
                     FirebaseFirestore.instance.collection('shops').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text('Welcome to Zenvyro Mart Pro',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
-                    );
+                    return _buildFallbackBanner('Welcome to Zenith Mart Pro');
                   }
 
                   final shops = snapshot.data!.docs.where((doc) {
@@ -105,23 +95,20 @@ class CustomerHomeScreen extends StatelessWidget {
                   }).toList();
 
                   if (shops.isEmpty) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text('Discover Local Stores & Products',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
-                    );
+                    return _buildFallbackBanner(
+                        'Discover Local Stores & Premium Products');
                   }
 
-                  return PageView.builder(
+                  return CarouselSlider.builder(
                     itemCount: shops.length,
-                    itemBuilder: (context, index) {
+                    options: CarouselOptions(
+                      height: 140,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      viewportFraction: 0.9,
+                      aspectRatio: 2.0,
+                    ),
+                    itemBuilder: (context, index, realIndex) {
                       final data = shops[index].data() as Map<String, dynamic>;
                       final bannerUrl = data['bannerImageUrl'];
                       final bannerTitle = data['bannerTitle'] ??
@@ -129,9 +116,16 @@ class CustomerHomeScreen extends StatelessWidget {
                           'Special Offer';
 
                       return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(0, 4),
+                                blurRadius: 10)
+                          ],
                           image: DecorationImage(
                             image: NetworkImage(bannerUrl),
                             fit: BoxFit.cover,
@@ -139,23 +133,23 @@ class CustomerHomeScreen extends StatelessWidget {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             gradient: LinearGradient(
                               colors: [
-                                Colors.black.withValues(alpha: 0.6),
+                                Colors.black.withValues(alpha: 0.7),
                                 Colors.transparent
                               ],
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                             ),
                           ),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           alignment: Alignment.bottomLeft,
                           child: Text(
                             bannerTitle,
                             style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -252,6 +246,33 @@ class CustomerHomeScreen extends StatelessWidget {
             const SizedBox(height: 24),
             const Center(child: ZenvyroBrandingWidget(compact: true)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackBanner(String text) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6F00), Color(0xFFFF9100)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10)
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.1,
         ),
       ),
     );

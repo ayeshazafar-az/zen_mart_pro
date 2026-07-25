@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../auth/data/user_model.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_screen.dart';
 import 'saved_addresses_screen.dart';
 import 'wishlist_screen.dart';
 import 'notifications_screen.dart';
 import 'help_support_screen.dart';
+import '../../../shared_features/profile/edit_profile_screen.dart';
 import '../../../core/theme/theme_provider.dart';
 
 class CustomerProfileMenuScreen extends StatelessWidget {
@@ -27,7 +26,12 @@ class CustomerProfileMenuScreen extends StatelessWidget {
             elevation: 2,
             child: InkWell(
               onTap: () {
-                _showEditProfileDialog(context, user);
+                if (user != null) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => EditProfileScreen(user: user)));
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -68,7 +72,12 @@ class CustomerProfileMenuScreen extends StatelessWidget {
             title: const Text('Edit Profile'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              _showEditProfileDialog(context, user);
+              if (user != null) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => EditProfileScreen(user: user)));
+              }
             },
           ),
           ListTile(
@@ -142,65 +151,6 @@ class CustomerProfileMenuScreen extends StatelessWidget {
                 );
               }
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditProfileDialog(BuildContext context, UserModel? user) {
-    if (user == null) return;
-    final nameController = TextEditingController(text: user.name);
-    final phoneController = TextEditingController(text: user.phone);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
-            ),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone Number'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newName = nameController.text.trim();
-              final newPhone = phoneController.text.trim();
-              if (newName.isNotEmpty) {
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.uid)
-                    .update({
-                  'name': newName,
-                  'phone': newPhone,
-                });
-
-                // Force AuthProvider to update local user model cache
-                if (context.mounted) {
-                  Provider.of<AuthProvider>(context, listen: false)
-                      .clearError();
-                  // In a real app we'd directly update _currentUser or re-fetch.
-                  // For now, logging out/in or reloading shows the fix.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Profile updated!')));
-                  Navigator.pop(ctx);
-                }
-              }
-            },
-            child: const Text('Save'),
           ),
         ],
       ),

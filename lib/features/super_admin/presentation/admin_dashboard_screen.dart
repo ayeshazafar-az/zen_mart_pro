@@ -17,6 +17,7 @@ import 'view_all_orders_screen.dart';
 import 'handle_complaints_screen.dart';
 import 'view_reports_analytics_screen.dart';
 import 'manage_approvals_screen.dart';
+import '../../../shared_features/profile/edit_profile_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -58,7 +59,7 @@ class AdminDashboardScreen extends StatelessWidget {
                       child: Icon(Icons.admin_panel_settings,
                           size: 35, color: Colors.white),
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,6 +76,20 @@ class AdminDashboardScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                    ActionChip(
+                      label: const Text('Edit Profile',
+                          style: TextStyle(fontSize: 12)),
+                      avatar: const Icon(Icons.edit, size: 16),
+                      onPressed: () {
+                        if (user != null) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      EditProfileScreen(user: user)));
+                        }
+                      },
                     ),
                   ],
                 ),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:image_picker/image_picker.dart'; // Future integration
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../features/auth/data/user_model.dart';
 import '../../features/auth/presentation/auth_provider.dart';
-import 'change_password_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  final UserModel user;
+
+  const EditProfileScreen({super.key, required this.user});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -15,68 +18,108 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  late TextEditingController _emailController;
+
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _isLoading = false;
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
 
   @override
   void initState() {
     super.initState();
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final user = authProvider.currentUser;
-    _nameController = TextEditingController(text: user?.name ?? '');
-    _phoneController = TextEditingController(text: user?.phone ?? '');
-    _emailController = TextEditingController(text: user?.email ?? '');
+    _nameController = TextEditingController(text: widget.user.name);
+    _phoneController = TextEditingController(text: widget.user.phone);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveProfile() async {
+  Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    bool success = await authProvider.updateUserProfile(
-      name: _nameController.text,
-      phone: _phoneController.text,
-      // photoUrl: _uploadedPhotoUrl, // Optional image upload via storage
-    );
+    try {
+      final authUser = FirebaseAuth.instance.currentUser;
+      if (authUser == null) throw Exception("Authentication error.");
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (success) {
+      // 1. Update basic profile info in Firestore (Applies to Name & Phone)
+      final newName = _nameController.text.trim();
+      final newPhone = _phoneController.text.trim();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.user.uid)
+          .update({
+        'name': newName,
+        'phone': newPhone,
+      });
+
+      // 2. Handle Password update if requested
+      final newPassword = _newPasswordController.text;
+      final currentPassword = _currentPasswordController.text;
+
+      if (newPassword.isNotEmpty) {
+        if (currentPassword.isEmpty) {
+          throw Exception(
+              "You must provide your current password to set a new one.");
+        }
+
+        // Re-authenticate user before changing password
+        final cred = EmailAuthProvider.credential(
+          email: authUser.email!,
+          password: currentPassword,
+        );
+
+        await authUser.reauthenticateWithCredential(cred);
+        await authUser.updatePassword(newPassword);
+      }
+
+      if (mounted) {
+        // Force auth provider to refresh state
+        Provider.of<AuthProvider>(context, listen: false).clearError();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Profile updated successfully!'),
               backgroundColor: Colors.green),
         );
         Navigator.pop(context);
-      } else {
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(authProvider.errorMessage ?? 'Update failed'),
+              content: Text(e.message ?? 'Authentication error occurred'),
               backgroundColor: Colors.red),
         );
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-            const Text('Edit Profile', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      appBar: AppBar(title: const Text('Edit Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -84,110 +127,105 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.orange.shade100,
-                      child: const Icon(Icons.person,
-                          size: 60, color: Colors.orange),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.camera_alt,
-                            color: Colors.white, size: 20),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _emailController,
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Email Address (Non-changeable)',
-                  filled: true,
-                  fillColor: Colors.grey.shade200,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.email, color: Colors.grey),
-                ),
-              ),
+              const Text('Personal Information',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.person, color: Colors.orange),
-                ),
+                decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person)),
                 validator: (val) =>
-                    val == null || val.isEmpty ? 'Enter your name' : null,
+                    val == null || val.isEmpty ? 'Required field' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Contact Number',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.phone, color: Colors.orange),
-                ),
+                decoration: const InputDecoration(
+                    labelText: 'Contact Number',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone)),
                 keyboardType: TextInputType.phone,
-                validator: (val) => val == null || val.length < 5
-                    ? 'Enter a valid contact number'
-                    : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Required field' : null,
               ),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChangePasswordScreen()),
-                  );
-                },
-                icon: const Icon(Icons.lock_reset, color: Colors.orange),
-                label: const Text('Change Password',
-                    style: TextStyle(color: Colors.orange)),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Colors.orange),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+              const SizedBox(height: 32),
+              const Text('Change Password (Optional)',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text(
+                  'Leave blank if you do not wish to change your password.',
+                  style: TextStyle(color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _currentPasswordController,
+                obscureText: _obscureCurrent,
+                decoration: InputDecoration(
+                  labelText: 'Current Password',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                      icon: Icon(_obscureCurrent
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () =>
+                          setState(() => _obscureCurrent = !_obscureCurrent)),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _newPasswordController,
+                obscureText: _obscureNew,
+                decoration: InputDecoration(
+                  labelText: 'New Password',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                      icon: Icon(_obscureNew
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () =>
+                          setState(() => _obscureNew = !_obscureNew)),
+                ),
+                validator: (val) {
+                  if (val != null && val.isNotEmpty && val.length < 6)
+                    return 'Password must be at least 6 characters';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirm,
+                decoration: InputDecoration(
+                  labelText: 'Confirm New Password',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () =>
+                          setState(() => _obscureConfirm = !_obscureConfirm)),
+                ),
+                validator: (val) {
+                  if (_newPasswordController.text.isNotEmpty &&
+                      val != _newPasswordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
               SizedBox(
-                height: 55,
+                height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: _isLoading ? null : _saveProfile,
+                  onPressed: _isLoading ? null : _updateProfile,
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Save Changes',
-                          style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      : const Text('Update Profile',
+                          style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
