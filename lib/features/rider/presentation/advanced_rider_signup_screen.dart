@@ -240,16 +240,21 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
                         ),
                       ),
                       validator: (val) {
-                        if (val == null || val.isEmpty)
+                        if (val == null || val.isEmpty) {
                           return 'Please enter a password';
-                        if (val.length < 8)
+                        }
+                        if (val.length < 8) {
                           return 'Must be at least 8 characters long';
-                        if (!RegExp(r'(?=.*[A-Z])').hasMatch(val))
+                        }
+                        if (!RegExp(r'(?=.*[A-Z])').hasMatch(val)) {
                           return 'Must contain at least one uppercase letter';
-                        if (!RegExp(r'(?=.*[0-9])').hasMatch(val))
+                        }
+                        if (!RegExp(r'(?=.*[0-9])').hasMatch(val)) {
                           return 'Must contain at least one number';
-                        if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val))
+                        }
+                        if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val)) {
                           return 'Must contain at least one special character (!@#\$&*~)';
+                        }
                         return null;
                       },
                     ),
@@ -270,10 +275,12 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
                         ),
                       ),
                       validator: (val) {
-                        if (val == null || val.isEmpty)
+                        if (val == null || val.isEmpty) {
                           return 'Please confirm your password';
-                        if (val != _passwordController.text)
+                        }
+                        if (val != _passwordController.text) {
                           return 'Passwords do not match';
+                        }
                         return null;
                       },
                     ),

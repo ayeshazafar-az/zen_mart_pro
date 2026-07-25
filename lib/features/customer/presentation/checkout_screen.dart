@@ -145,8 +145,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       value: 'Online Wallet', child: Text('Online Wallet')),
                 ],
                 onChanged: (value) {
-                  if (value != null)
+                  if (value != null) {
                     setState(() => _selectedPaymentMethod = value);
+                  }
                 },
               ),
               const SizedBox(height: 32),

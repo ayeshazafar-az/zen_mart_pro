@@ -19,7 +19,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
 
   // Default role choice for self-registration (Vendor removed per task requirements)
-  String _selectedRole = 'customer';
+  final String _selectedRole = 'customer';
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -152,7 +152,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               // Role Selection (Only Customer)
               DropdownButtonFormField<String>(
-                value: 'customer',
+                initialValue: 'customer',
                 decoration: const InputDecoration(
                   labelText: 'Register As',
                   border: OutlineInputBorder(),
@@ -182,16 +182,21 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 obscureText: _obscurePassword,
                 validator: (val) {
-                  if (val == null || val.isEmpty)
+                  if (val == null || val.isEmpty) {
                     return 'Please enter a password';
-                  if (val.length < 8)
+                  }
+                  if (val.length < 8) {
                     return 'Must be at least 8 characters long';
-                  if (!RegExp(r'(?=.*[A-Z])').hasMatch(val))
+                  }
+                  if (!RegExp(r'(?=.*[A-Z])').hasMatch(val)) {
                     return 'Must contain at least one uppercase letter';
-                  if (!RegExp(r'(?=.*[0-9])').hasMatch(val))
+                  }
+                  if (!RegExp(r'(?=.*[0-9])').hasMatch(val)) {
                     return 'Must contain at least one number';
-                  if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val))
+                  }
+                  if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val)) {
                     return 'Must contain at least one special character (!@#\$&*~)';
+                  }
                   return null;
                 },
               ),
@@ -214,10 +219,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 obscureText: _obscureConfirmPassword,
                 validator: (val) {
-                  if (val == null || val.isEmpty)
+                  if (val == null || val.isEmpty) {
                     return 'Please confirm your password';
-                  if (val != _passwordController.text)
+                  }
+                  if (val != _passwordController.text) {
                     return 'Passwords do not match';
+                  }
                   return null;
                 },
               ),
