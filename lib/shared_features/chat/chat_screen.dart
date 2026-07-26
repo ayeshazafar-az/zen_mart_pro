@@ -72,16 +72,41 @@ class _ChatScreenState extends State<ChatScreen> {
     final userEmail = authProvider.currentUser?.email ?? 'User';
 
     return Scaffold(
+      backgroundColor:
+          const Color(0xFFE5DDD5), // WhatsApp chat background color
       appBar: AppBar(
-        title: Text('Chat with ${widget.recipientName}'),
+        backgroundColor: const Color(0xFF075E54), // WhatsApp brand color
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          children: [
+            const CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white24,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                widget.recipientName,
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (widget.recipientPhone != null &&
               widget.recipientPhone!.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.call),
+              icon: const Icon(Icons.call, color: Colors.white),
               tooltip: 'Voice Call',
               onPressed: () => _makePhoneCall(widget.recipientPhone!),
             ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
@@ -120,17 +145,33 @@ class _ChatScreenState extends State<ChatScreen> {
                       alignment:
                           isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(
+                            bottom: 8, left: 16, right: 16),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isMe ? Colors.orange : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            color:
+                                isMe ? const Color(0xFFDCF8C6) : Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(12),
+                              topRight: const Radius.circular(12),
+                              bottomLeft: isMe
+                                  ? const Radius.circular(12)
+                                  : Radius.zero,
+                              bottomRight: isMe
+                                  ? Radius.zero
+                                  : const Radius.circular(12),
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 1,
+                                  offset: Offset(0, 1))
+                            ]),
                         child: Text(
                           messageText,
-                          style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black),
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 16),
                         ),
                       ),
                     );
@@ -141,24 +182,34 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
-            color: Colors.white,
+            color: Colors.transparent,
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: const InputDecoration(
+                        hintText: 'Message',
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.orange),
-                  onPressed: () => _sendMessage(userId, userEmail),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: const Color(0xFF075E54),
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                    onPressed: () => _sendMessage(userId, userEmail),
+                  ),
                 ),
               ],
             ),

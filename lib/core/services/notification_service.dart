@@ -36,7 +36,7 @@ class NotificationService {
       iOS: iosInitSettings,
     );
 
-    await _localNotificationsPlugin.initialize(initSettings);
+    await _localNotificationsPlugin.initialize(settings: initSettings);
 
     // Setup message handlers
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
@@ -92,10 +92,10 @@ class NotificationService {
     );
 
     await _localNotificationsPlugin.show(
-      DateTime.now().millisecond,
-      title ?? 'Zen Mart',
-      body ?? 'You have a new update!',
-      platformDetails,
+      id: DateTime.now().millisecond,
+      title: title ?? 'Zen Mart',
+      body: body ?? 'You have a new update!',
+      notificationDetails: platformDetails,
     );
   }
 

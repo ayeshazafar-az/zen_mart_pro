@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../features/auth/data/user_model.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 
@@ -22,6 +26,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   bool _isLoading = false;
   bool _obscureCurrent = true;
@@ -45,6 +52,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -54,7 +71,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final authUser = FirebaseAuth.instance.currentUser;
       if (authUser == null) throw Exception("Authentication error.");
 
-      // 1. Update basic profile info in Firestore (Applies to Name & Phone)
+      // 1. Upload new image if selected
+      String? imageUrl = widget.user.profileImageUrl;
+      if (_imageFile != null) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('profiles')
+            .child(widget.user.uid)
+            .child('avatar.jpg');
+        final TaskSnapshot snapshot = await ref.putFile(_imageFile!);
+        imageUrl = await snapshot.ref.getDownloadURL();
+      }
+
+      // 2. Update basic profile info in Firestore (Applies to Name & Phone)
       final newName = _nameController.text.trim();
       final newPhone = _phoneController.text.trim();
 
@@ -64,9 +93,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           .update({
         'name': newName,
         'phone': newPhone,
+        'profileImageUrl': imageUrl,
       });
 
-      // 2. Handle Password update if requested
+      // 3. Handle Password update if requested
       final newPassword = _newPasswordController.text;
       final currentPassword = _currentPasswordController.text;
 
@@ -127,6 +157,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.orangeAccent,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (widget.user.profileImageUrl != null
+                              ? CachedNetworkImageProvider(
+                                  widget.user.profileImageUrl!)
+                              : null) as ImageProvider?,
+                      child: _imageFile == null &&
+                              widget.user.profileImageUrl == null
+                          ? const Icon(Icons.person,
+                              size: 50, color: Colors.white)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.camera_alt,
+                              color: Colors.orange, size: 24),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
               const Text('Personal Information',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),

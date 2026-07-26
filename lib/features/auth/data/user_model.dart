@@ -5,6 +5,7 @@ class UserModel {
   final String role; // 'super_admin', 'vendor', 'rider', 'customer'
   final String? phone;
   final bool isApproved; // NEW: Required for Rider pending status
+  final String? profileImageUrl;
 
   UserModel({
     required this.uid,
@@ -13,6 +14,7 @@ class UserModel {
     required this.role,
     this.phone,
     this.isApproved = true, // Defaults to true to protect older accounts
+    this.profileImageUrl,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
@@ -24,6 +26,7 @@ class UserModel {
       phone: map['phone'],
       // If the field doesn't exist in Firestore, assume approved
       isApproved: map['isApproved'] ?? true,
+      profileImageUrl: map['profileImageUrl'],
     );
   }
 
@@ -34,6 +37,7 @@ class UserModel {
       'role': role,
       'phone': phone,
       'isApproved': isApproved,
+      'profileImageUrl': profileImageUrl,
     };
   }
 }

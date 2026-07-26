@@ -142,7 +142,7 @@ class CustomerProfileMenuScreen extends StatelessWidget {
               return ListTile(
                 leading: const Icon(Icons.language, color: Colors.green),
                 title:
-                    Text('Language: \${langProvider.getText("toggle_lang")}'),
+                    Text("Language: \${langProvider.getText('toggle_lang')}"),
                 trailing: const Icon(Icons.sync),
                 onTap: () {
                   langProvider.toggleLanguage();
