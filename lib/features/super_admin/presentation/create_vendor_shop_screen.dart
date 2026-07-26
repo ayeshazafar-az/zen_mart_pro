@@ -60,6 +60,8 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
         password: _vendorPasswordController.text.trim(),
       );
 
+      await userCredential.user!.sendEmailVerification();
+
       final String vendorUid = userCredential.user!.uid;
 
       // 3. Create Vendor User Document in Firestore

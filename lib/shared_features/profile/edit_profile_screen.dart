@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
@@ -166,8 +167,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : (widget.user.profileImageUrl != null
-                              ? CachedNetworkImageProvider(
-                                  widget.user.profileImageUrl!)
+                              ? (widget.user.profileImageUrl!.startsWith('http')
+                                  ? CachedNetworkImageProvider(
+                                      widget.user.profileImageUrl!)
+                                  : MemoryImage(base64Decode(
+                                      widget.user.profileImageUrl!)))
                               : null) as ImageProvider?,
                       child: _imageFile == null &&
                               widget.user.profileImageUrl == null

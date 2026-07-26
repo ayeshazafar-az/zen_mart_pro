@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_constants.dart';
 
 class CreateShopScreen extends StatefulWidget {
@@ -19,6 +22,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   String? _selectedVendorUid;
   bool _isLoading = false;
+
+  String? _base64Image;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (pickedFile != null) {
+      final bytes = await File(pickedFile.path).readAsBytes();
+      setState(() {
+        _base64Image = base64Encode(bytes);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -49,10 +66,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         'description': _descriptionController.text.trim(),
         'address': _addressController.text.trim(),
         'phone': _phoneController.text.trim(),
-        'imageUrl': _imageUrlController.text.trim().isNotEmpty
-            ? _imageUrlController.text.trim()
-            : 'https://via.placeholder.com/150',
-        'vendorUid': _selectedVendorUid,
+        'imageUrl': _base64Image ??
+            (_imageUrlController.text.trim().isNotEmpty
+                ? _imageUrlController.text.trim()
+                : 'https://via.placeholder.com/150'),
+        'vendorId': _selectedVendorUid,
         'isApproved': true, // Created by super admin, so approved by default
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -187,11 +205,42 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
               TextFormField(
                 controller: _imageUrlController,
                 decoration: const InputDecoration(
-                  labelText: 'Shop Image / Banner URL (Optional)',
+                  labelText: 'Shop Banner URL (Optional if uploading)',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.image),
+                  prefixIcon: Icon(Icons.link),
                 ),
                 keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                  child: _base64Image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: _base64Image!.startsWith('http')
+                              ? Image.network(_base64Image!, fit: BoxFit.cover)
+                              : Image.memory(base64Decode(_base64Image!),
+                                  fit: BoxFit.cover),
+                        )
+                      : const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_a_photo,
+                                size: 40, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Upload Shop Image',
+                                style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

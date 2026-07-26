@@ -124,13 +124,8 @@ class AuthProvider with ChangeNotifier {
 
       bool isAdmin = _currentUser?.role == 'super_admin' ||
           email.trim().toLowerCase() == 'admin@zenmart.com';
-      bool isVendor = _currentUser?.role == AppConstants.roleVendor;
-
-      // Strict Email Verification Check (Bypassed for Admin and Vendor)
-      if (!isAdmin &&
-          !isVendor &&
-          refreshedUser != null &&
-          !refreshedUser.emailVerified) {
+      // Strict Email Verification Check (Bypassed for Admin ONLY)
+      if (!isAdmin && refreshedUser != null && !refreshedUser.emailVerified) {
         await _auth.signOut();
         _currentUser = null;
         _errorMessage =
