@@ -3,10 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../features/auth/presentation/auth_provider.dart';
+import '../../core/services/notification_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String orderId;
   final String recipientName;
+  final String recipientId;
   final String chatChannel; // e.g., 'vendor_messages' or 'rider_messages'
   final String? recipientPhone; // For Calling
 
@@ -14,6 +16,7 @@ class ChatScreen extends StatefulWidget {
     super.key,
     required this.orderId,
     required this.recipientName,
+    required this.recipientId,
     required this.chatChannel,
     this.recipientPhone,
   });
@@ -63,6 +66,18 @@ class _ChatScreenState extends State<ChatScreen> {
       'message': text,
       'createdAt': FieldValue.serverTimestamp(),
     });
+
+    try {
+      if (widget.recipientId.isNotEmpty) {
+        await NotificationService().sendMockNotificationToUser(
+          widget.recipientId,
+          "New Message from \$senderEmail",
+          text,
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to send chat notification: \$e');
+    }
   }
 
   @override

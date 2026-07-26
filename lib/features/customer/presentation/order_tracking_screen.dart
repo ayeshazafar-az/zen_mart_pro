@@ -290,6 +290,7 @@ class OrderTrackingScreen extends StatelessWidget {
                               orderId: orderId,
                               recipientName: 'Rider',
                               chatChannel: 'rider_messages',
+                              recipientId: riderId?.toString() ?? '',
                             ),
                           ),
                         );
@@ -318,6 +319,8 @@ class OrderTrackingScreen extends StatelessWidget {
                             orderId: orderId,
                             recipientName: 'Vendor',
                             chatChannel: 'vendor_messages',
+                            recipientId:
+                                '', // Ideally fetched from shop document
                           ),
                         ),
                       );

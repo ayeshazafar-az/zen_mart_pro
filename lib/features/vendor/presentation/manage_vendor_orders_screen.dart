@@ -99,6 +99,32 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                           Text('Customer: $customerEmail'),
                           Text('Total Amount: Rs. $totalAmount'),
                           const SizedBox(height: 12),
+                          const Text('Items:',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          if (data['items'] != null &&
+                              (data['items'] as List).isNotEmpty)
+                            ...((data['items'] as List).map((item) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.circle,
+                                        size: 6, color: Colors.grey),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                          '\${item['name']} (x\${item['quantity']}) - Rs. \${item['price']}'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }))
+                          else
+                            const Text('No items specified',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 12)),
+                          const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -175,6 +201,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                         chatChannel: 'vendor_messages',
                                         recipientPhone:
                                             data['phone'], // Customer's phone
+                                        recipientId: customerId,
                                       ),
                                     ),
                                   );

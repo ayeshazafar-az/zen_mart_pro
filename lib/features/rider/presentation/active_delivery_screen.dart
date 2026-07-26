@@ -63,7 +63,8 @@ class ActiveDeliveryScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
+                          Text(
+                              'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                           const Chip(
@@ -132,6 +133,7 @@ class ActiveDeliveryScreen extends StatelessWidget {
                                   recipientName: customerEmail.split('@')[0],
                                   chatChannel: 'rider_messages',
                                   recipientPhone: phone,
+                                  recipientId: data['customerId'] ?? '',
                                 ),
                               ),
                             );
@@ -149,4 +151,3 @@ class ActiveDeliveryScreen extends StatelessWidget {
     );
   }
 }
-
