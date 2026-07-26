@@ -22,10 +22,17 @@ class SafeImage extends StatelessWidget {
     }
 
     int? getCacheWidth() {
-      if (width != null && width != double.infinity) {
-        return (width! * 2.5).toInt();
+      int calculatedWidth = 500; // Safe fallback
+      if (width != null && width != double.infinity && width! > 0) {
+        calculatedWidth = (width! * 2.5).toInt();
+      } else {
+        final screenWidth = MediaQuery.of(context).size.width;
+        if (screenWidth > 0) {
+          calculatedWidth = (screenWidth * 2.5).toInt();
+        }
       }
-      return (MediaQuery.of(context).size.width * 2.5).toInt();
+      // Ensure we never pass 0 to the native image decoder (causes SIG 9 JVM crash)
+      return calculatedWidth > 0 ? calculatedWidth : null;
     }
 
     if (imageUrl.startsWith('http')) {

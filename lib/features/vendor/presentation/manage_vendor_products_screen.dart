@@ -46,7 +46,11 @@ class _ManageVendorProductsScreenState
                     onTap: () async {
                       final picker = ImagePicker();
                       final pickedFile = await picker.pickImage(
-                          source: ImageSource.gallery, imageQuality: 50);
+                        source: ImageSource.gallery,
+                        imageQuality: 50,
+                        maxWidth: 800,
+                        maxHeight: 800,
+                      );
                       if (pickedFile != null) {
                         final bytes = await File(pickedFile.path).readAsBytes();
                         setStateBuilder(() {

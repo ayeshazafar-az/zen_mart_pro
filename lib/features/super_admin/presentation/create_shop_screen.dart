@@ -28,8 +28,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (pickedFile != null) {
       final bytes = await File(pickedFile.path).readAsBytes();
       setState(() {

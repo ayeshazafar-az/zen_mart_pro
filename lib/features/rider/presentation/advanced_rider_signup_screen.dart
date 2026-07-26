@@ -46,7 +46,7 @@ class _AdvancedRiderSignupScreenState extends State<AdvancedRiderSignupScreen> {
     try {
       final pickedFile = await _picker.pickImage(
           source: ImageSource.gallery,
-          imageQuality: 30,
+          imageQuality: 70,
           maxWidth: 800,
           maxHeight: 800);
       if (pickedFile != null) {
