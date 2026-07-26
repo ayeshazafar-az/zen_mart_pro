@@ -96,7 +96,26 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text('Customer: $customerEmail'),
+                          FutureBuilder<DocumentSnapshot>(
+                            future: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(customerId)
+                                .get(),
+                            builder: (context, userSnapshot) {
+                              String displayName = customerEmail;
+                              if (userSnapshot.hasData &&
+                                  userSnapshot.data != null &&
+                                  userSnapshot.data!.exists) {
+                                final userData = userSnapshot.data!.data()
+                                    as Map<String, dynamic>?;
+                                if (userData != null &&
+                                    userData.containsKey('name')) {
+                                  displayName = userData['name'];
+                                }
+                              }
+                              return Text('Customer: $displayName');
+                            },
+                          ),
                           Text('Total Amount: Rs. $totalAmount'),
                           const SizedBox(height: 12),
                           const Text('Order Items',
@@ -122,13 +141,13 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            '\${item["quantity"]}x \${item["name"]}',
+                                            '${item["quantity"]}x ${item["name"]}',
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w500),
                                           ),
                                         ),
                                         Text(
-                                          'Rs. \${item["price"]}',
+                                          'Rs. ${item["price"]}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.green),

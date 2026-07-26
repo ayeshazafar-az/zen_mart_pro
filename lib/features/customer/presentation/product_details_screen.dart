@@ -27,6 +27,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         data['description'] ?? 'No description available for this product.';
     final imageUrl = data['imageUrl'] ?? '';
     final stock = data['stock'] ?? 0;
+    final categoryId = data['categoryId'] as String?;
 
     return Scaffold(
       appBar: AppBar(
@@ -116,6 +117,29 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         color: Colors.green,
                         fontWeight: FontWeight.bold),
                   ),
+                  if (categoryId != null) ...[
+                    const SizedBox(height: 8),
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('shops')
+                          .doc(widget.productDoc.reference.parent.parent?.id)
+                          .collection('categories')
+                          .doc(categoryId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data!.exists) {
+                          final catName = snapshot.data!['name'] ?? 'Category';
+                          return Chip(
+                            label: Text(catName,
+                                style: const TextStyle(fontSize: 12)),
+                            backgroundColor: Colors.blue.shade50,
+                            side: BorderSide.none,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Text(
                     stock > 0 ? 'In Stock ($stock available)' : 'Out of Stock',
