@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_constants.dart';
@@ -225,10 +226,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   child: _base64Image != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: _base64Image!.startsWith('http')
-                              ? Image.network(_base64Image!, fit: BoxFit.cover)
-                              : Image.memory(base64Decode(_base64Image!),
-                                  fit: BoxFit.cover),
+                          child: SafeImage(
+                              imageUrl: _base64Image!, fit: BoxFit.cover),
                         )
                       : const Column(
                           mainAxisAlignment: MainAxisAlignment.center,

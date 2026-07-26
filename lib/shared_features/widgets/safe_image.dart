@@ -21,12 +21,20 @@ class SafeImage extends StatelessWidget {
       return _buildPlaceholder();
     }
 
+    int? getCacheWidth() {
+      if (width != null && width != double.infinity) {
+        return (width! * 2.5).toInt();
+      }
+      return (MediaQuery.of(context).size.width * 2.5).toInt();
+    }
+
     if (imageUrl.startsWith('http')) {
       return Image.network(
         imageUrl,
         width: width,
         height: height,
         fit: fit,
+        cacheWidth: getCacheWidth(),
         errorBuilder: (_, __, ___) => _buildPlaceholder(),
       );
     }
@@ -38,6 +46,7 @@ class SafeImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        cacheWidth: getCacheWidth(),
         errorBuilder: (_, __, ___) => _buildPlaceholder(),
       );
     } catch (e) {

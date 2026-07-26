@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -68,12 +69,9 @@ class _ManageVendorProductsScreenState
                               dialogBase64Image!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: dialogBase64Image!.startsWith('http')
-                                  ? Image.network(dialogBase64Image!,
-                                      fit: BoxFit.cover)
-                                  : Image.memory(
-                                      base64Decode(dialogBase64Image!),
-                                      fit: BoxFit.cover),
+                              child: SafeImage(
+                                  imageUrl: dialogBase64Image!,
+                                  fit: BoxFit.cover),
                             )
                           : const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -89,9 +87,12 @@ class _ManageVendorProductsScreenState
                   ),
                   TextField(
                     controller: nameController,
-                    decoration:
-                        const InputDecoration(labelText: 'Product Name'),
+                    decoration: const InputDecoration(
+                      labelText: 'Product Name',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
+                  const SizedBox(height: 16),
                   FutureBuilder<QuerySnapshot>(
                     future: FirebaseFirestore.instance
                         .collection('shops')
@@ -121,40 +122,58 @@ class _ManageVendorProductsScreenState
                         selectedCategoryId = null;
                       }
 
-                      return DropdownButtonFormField<String>(
-                        value: selectedCategoryId,
-                        hint: const Text('Select a Category'),
-                        decoration:
-                            const InputDecoration(labelText: 'Category'),
-                        items: categories.map((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          return DropdownMenuItem<String>(
-                            value: doc.id,
-                            child: Text(data['name'] ?? 'Unnamed Category'),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setStateBuilder(() {
-                            selectedCategoryId = value;
-                          });
-                        },
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          DropdownButtonFormField<String>(
+                            value: selectedCategoryId,
+                            hint: const Text('Select a Category'),
+                            decoration: const InputDecoration(
+                              labelText: 'Category',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: categories.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              return DropdownMenuItem<String>(
+                                value: doc.id,
+                                child: Text(data['name'] ?? 'Unnamed Category'),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setStateBuilder(() {
+                                selectedCategoryId = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                       );
                     },
                   ),
                   TextField(
                     controller: priceController,
-                    decoration: const InputDecoration(labelText: 'Price'),
+                    decoration: const InputDecoration(
+                      labelText: 'Price',
+                      border: OutlineInputBorder(),
+                    ),
                     keyboardType: TextInputType.number,
                   ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: stockController,
-                    decoration:
-                        const InputDecoration(labelText: 'Stock Quantity'),
+                    decoration: const InputDecoration(
+                      labelText: 'Stock Quantity',
+                      border: OutlineInputBorder(),
+                    ),
                     keyboardType: TextInputType.number,
                   ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: descriptionController,
-                    decoration: const InputDecoration(labelText: 'Description'),
+                    decoration: const InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ],
               ),
@@ -307,19 +326,12 @@ class _ManageVendorProductsScreenState
                         child: imageUrl.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: imageUrl.startsWith('http')
-                                    ? Image.network(imageUrl,
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.broken_image))
-                                    : Image.memory(base64Decode(imageUrl),
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.broken_image)),
+                                child: SafeImage(
+                                  imageUrl: imageUrl,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
                               )
                             : const Icon(Icons.shopping_bag,
                                 color: Colors.grey),

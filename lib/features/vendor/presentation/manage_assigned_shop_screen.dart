@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -143,11 +144,8 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
                       child: _base64Image != null && _base64Image!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: _base64Image!.startsWith('http')
-                                  ? Image.network(_base64Image!,
-                                      fit: BoxFit.cover)
-                                  : Image.memory(base64Decode(_base64Image!),
-                                      fit: BoxFit.cover),
+                              child: SafeImage(
+                                  imageUrl: _base64Image!, fit: BoxFit.cover),
                             )
                           : const Column(
                               mainAxisAlignment: MainAxisAlignment.center,

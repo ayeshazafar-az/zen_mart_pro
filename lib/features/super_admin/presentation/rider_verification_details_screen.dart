@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 
@@ -25,9 +25,7 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   insetPadding: const EdgeInsets.all(10),
                   child: InteractiveViewer(
-                    child: url.startsWith('http')
-                        ? Image.network(url, fit: BoxFit.contain)
-                        : Image.memory(base64Decode(url), fit: BoxFit.contain),
+                    child: SafeImage(imageUrl: url, fit: BoxFit.contain),
                   ),
                 ),
               );
@@ -37,20 +35,28 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: Colors.grey.shade200,
-                image: DecorationImage(
-                    image: url.startsWith('http')
-                        ? NetworkImage(url) as ImageProvider
-                        : MemoryImage(base64Decode(url)),
-                    fit: BoxFit.cover),
               ),
-              child: const Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.zoom_in,
-                      color: Colors.white,
-                      shadows: [Shadow(color: Colors.black, blurRadius: 4)]),
-                ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SafeImage(
+                        imageUrl: url,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover),
+                  ),
+                  const Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.zoom_in, color: Colors.white, shadows: [
+                        Shadow(color: Colors.black, blurRadius: 4)
+                      ]),
+                    ),
+                  ),
+                ],
               ),
             ),
           )
@@ -136,19 +142,25 @@ class RiderVerificationDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.orange.shade100,
-                backgroundImage: data['profileImageUrl'] != null &&
-                        data['profileImageUrl'].isNotEmpty
-                    ? (data['profileImageUrl'].toString().startsWith('http')
-                        ? NetworkImage(data['profileImageUrl']) as ImageProvider
-                        : MemoryImage(base64Decode(data['profileImageUrl'])))
-                    : null,
-                child: data['profileImageUrl'] == null ||
-                        data['profileImageUrl'].isEmpty
-                    ? const Icon(Icons.person, size: 60, color: Colors.orange)
-                    : null,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: data['profileImageUrl'] != null &&
+                          data['profileImageUrl'].isNotEmpty
+                      ? SafeImage(
+                          imageUrl: data['profileImageUrl'],
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        )
+                      : const Icon(Icons.person,
+                          size: 60, color: Colors.orange),
+                ),
               ),
             ),
             const SizedBox(height: 24),
