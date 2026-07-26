@@ -33,30 +33,101 @@ class HandleComplaintsScreen extends StatelessWidget {
               final message = data['message'] ?? 'No message provided';
               final status = data['status'] ?? 'Open';
 
-              Color statusColor = status == 'Resolved' ? Colors.green : Colors.orange;
+              Color statusColor =
+                  status == 'Resolved' ? Colors.green : Colors.orange;
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Complaint from $userEmail'),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Status: $status',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: statusColor)),
+                              const SizedBox(height: 16),
+                              const Text('Message:',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text(message),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                          if (status != 'Resolved')
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance
+                                    .collection('complaints')
+                                    .doc(docId)
+                                    .update({'status': 'Resolved'});
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                              child: const Text('Mark Resolved',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          if (status != 'Unresolved')
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance
+                                    .collection('complaints')
+                                    .doc(docId)
+                                    .update({'status': 'Unresolved'});
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                              child: const Text('Mark Unresolved',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          if (status != 'Pending')
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance
+                                    .collection('complaints')
+                                    .doc(docId)
+                                    .update({'status': 'Pending'});
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                              child: const Text('Mark Pending',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
                   leading: const CircleAvatar(
                     child: Icon(Icons.report_problem),
                   ),
-                  title: Text('From: $userEmail', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Complaint: $message\nStatus: $status'),
+                  title: Text('From: $userEmail',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(
+                    'Complaint: ${message.length > 50 ? '${message.substring(0, 50)}...' : message}\nStatus: $status',
+                  ),
                   isThreeLine: true,
-                  trailing: status != 'Resolved'
-                      ? ElevatedButton(
-                    onPressed: () async {
-                      await FirebaseFirestore.instance
-                          .collection('complaints')
-                          .doc(docId)
-                          .update({'status': 'Resolved'});
-                    },
-                    child: const Text('Resolve'),
-                  )
-                      : Chip(
-                    backgroundColor: Colors.green[50],
-                    label: const Text('Resolved'), // Keep const on inner widgets if they are constant
+                  trailing: Chip(
+                    backgroundColor: status == 'Resolved'
+                        ? Colors.green[50]
+                        : (status == 'Pending'
+                            ? Colors.orange[50]
+                            : Colors.red[50]),
+                    label: Text(status),
                   ),
                 ),
               );

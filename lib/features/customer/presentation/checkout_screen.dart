@@ -78,6 +78,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           shopId = data['shopId'];
         }
         itemsList.add(data);
+
+        // Decrease stock
+        final productId = data['productId'];
+        final itemShopId = data['shopId'];
+        final qty = data['quantity'] ?? 1;
+
+        if (productId != null && itemShopId != null) {
+          try {
+            await FirebaseFirestore.instance
+                .collection('shops')
+                .doc(itemShopId)
+                .collection('products')
+                .doc(productId)
+                .update({
+              'stock': FieldValue.increment(-qty),
+            });
+          } catch (e) {
+            debugPrint('Failed to decrease stock: $e');
+          }
+        }
       }
 
       final orderRef =

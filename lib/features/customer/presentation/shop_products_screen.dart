@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'product_details_screen.dart';
@@ -78,16 +79,27 @@ class ShopProductsScreen extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(12)),
                           child: imageUrl.isNotEmpty
-                              ? Image.network(
-                                  imageUrl,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    color: Colors.grey[200],
-                                    child: const Icon(Icons.image,
-                                        size: 40, color: Colors.grey),
-                                  ),
-                                )
+                              ? (imageUrl.startsWith('http')
+                                  ? Image.network(
+                                      imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.image,
+                                            size: 40, color: Colors.grey),
+                                      ),
+                                    )
+                                  : Image.memory(
+                                      base64Decode(imageUrl),
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.image,
+                                            size: 40, color: Colors.grey),
+                                      ),
+                                    ))
                               : Container(
                                   color: Colors.grey[200],
                                   child: const Icon(Icons.shopping_bag,
@@ -109,7 +121,7 @@ class ShopProductsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '\$ $price',
+                              'Rs. $price',
                               style: const TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.w600,

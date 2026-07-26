@@ -74,7 +74,9 @@ class OrderTrackingScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Order #${orderId.substring(0, 8)}',
+                              orderId.length > 8
+                                  ? 'Order #${orderId.substring(0, 8)}'
+                                  : 'Order #$orderId',
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),

@@ -72,7 +72,9 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Order #${orderId.substring(0, 8)}',
+                                orderId.length > 8
+                                    ? 'Order #${orderId.substring(0, 8)}'
+                                    : 'Order #$orderId',
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),

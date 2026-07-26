@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'shop_products_screen.dart';
@@ -42,7 +43,8 @@ class BrowseShopsScreen extends StatelessWidget {
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
@@ -61,18 +63,33 @@ class BrowseShopsScreen extends StatelessWidget {
                     children: [
                       if (imageUrl.isNotEmpty)
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                          child: Image.network(
-                            imageUrl,
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 140,
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.store, size: 50, color: Colors.grey),
-                            ),
-                          ),
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12)),
+                          child: imageUrl.startsWith('http')
+                              ? Image.network(
+                                  imageUrl,
+                                  height: 140,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    height: 140,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.store,
+                                        size: 50, color: Colors.grey),
+                                  ),
+                                )
+                              : Image.memory(
+                                  base64Decode(imageUrl),
+                                  height: 140,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    height: 140,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.store,
+                                        size: 50, color: Colors.grey),
+                                  ),
+                                ),
                         ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -81,28 +98,38 @@ class BrowseShopsScreen extends StatelessWidget {
                           children: [
                             Text(
                               name,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             if (bannerTitle.isNotEmpty)
                               Text(
                                 bannerTitle,
-                                style: const TextStyle(fontSize: 13, color: Colors.orange, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.w600),
                               ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                                const Icon(Icons.location_on,
+                                    size: 16, color: Colors.grey),
                                 const SizedBox(width: 4),
-                                Expanded(child: Text(address, style: const TextStyle(color: Colors.grey))),
+                                Expanded(
+                                    child: Text(address,
+                                        style: const TextStyle(
+                                            color: Colors.grey))),
                               ],
                             ),
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                const Icon(Icons.phone, size: 16, color: Colors.grey),
+                                const Icon(Icons.phone,
+                                    size: 16, color: Colors.grey),
                                 const SizedBox(width: 4),
-                                Text(phone, style: const TextStyle(color: Colors.grey)),
+                                Text(phone,
+                                    style: const TextStyle(color: Colors.grey)),
                               ],
                             ),
                           ],

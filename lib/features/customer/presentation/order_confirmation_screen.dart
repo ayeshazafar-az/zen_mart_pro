@@ -27,7 +27,7 @@ class OrderConfirmationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Order ID: #${orderId.substring(0, 8)}',
+                'Order ID: #${orderId.length > 8 ? orderId.substring(0, 8) : orderId}',
                 style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 32),
@@ -39,11 +39,13 @@ class OrderConfirmationScreen extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => OrderTrackingScreen(orderId: orderId),
+                        builder: (context) =>
+                            OrderTrackingScreen(orderId: orderId),
                       ),
                     );
                   },
-                  child: const Text('Track Order Status', style: TextStyle(fontSize: 16)),
+                  child: const Text('Track Order Status',
+                      style: TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -54,7 +56,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.popUntil(context, (route) => route.isFirst);
                   },
-                  child: const Text('Back to Home', style: TextStyle(fontSize: 16)),
+                  child: const Text('Back to Home',
+                      style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],

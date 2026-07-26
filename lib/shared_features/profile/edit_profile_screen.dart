@@ -79,8 +79,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             .ref()
             .child('profiles')
             .child(widget.user.uid)
-            .child('avatar.jpg');
-        final TaskSnapshot snapshot = await ref.putFile(_imageFile!);
+            .child('avatar_${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+        final bytes = await _imageFile!.readAsBytes();
+        final TaskSnapshot snapshot = await ref.putData(bytes);
         imageUrl = await snapshot.ref.getDownloadURL();
       }
 
