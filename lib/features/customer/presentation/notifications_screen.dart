@@ -18,7 +18,7 @@ class NotificationsScreen extends StatelessWidget {
             .collection('users')
             .doc(userId)
             .collection('notifications')
-            .orderBy('createdAt', descending: true)
+            .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -48,7 +48,7 @@ class NotificationsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final data = notifications[index].data() as Map<String, dynamic>;
               final title = data['title'] ?? 'Notification';
-              final message = data['message'] ?? '';
+              final message = data['body'] ?? '';
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),

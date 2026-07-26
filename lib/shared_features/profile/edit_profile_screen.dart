@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../features/auth/data/user_model.dart';
@@ -75,15 +74,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // 1. Upload new image if selected
       String? imageUrl = widget.user.profileImageUrl;
       if (_imageFile != null) {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('profiles')
-            .child(widget.user.uid)
-            .child('avatar_${DateTime.now().millisecondsSinceEpoch}.jpg');
-
         final bytes = await _imageFile!.readAsBytes();
-        final TaskSnapshot snapshot = await ref.putData(bytes);
-        imageUrl = await snapshot.ref.getDownloadURL();
+        imageUrl = base64Encode(bytes);
       }
 
       // 2. Update basic profile info in Firestore (Applies to Name & Phone)
@@ -166,15 +158,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.orangeAccent,
-                      backgroundImage: _imageFile != null
-                          ? FileImage(_imageFile!)
-                          : (widget.user.profileImageUrl != null
-                              ? (widget.user.profileImageUrl!.startsWith('http')
-                                  ? CachedNetworkImageProvider(
-                                      widget.user.profileImageUrl!)
-                                  : MemoryImage(base64Decode(
-                                      widget.user.profileImageUrl!)))
-                              : null) as ImageProvider?,
+                      backgroundImage: () {
+                        if (_imageFile != null) return FileImage(_imageFile!);
+                        final url = widget.user.profileImageUrl;
+                        if (url != null && url.isNotEmpty) {
+                          if (url.startsWith('http')) {
+                            return CachedNetworkImageProvider(url);
+                          }
+                          try {
+                            return MemoryImage(base64Decode(url));
+                          } catch (e) {
+                            return null;
+                          }
+                        }
+                        return null;
+                      }() as ImageProvider?,
                       child: _imageFile == null &&
                               widget.user.profileImageUrl == null
                           ? const Icon(Icons.person,

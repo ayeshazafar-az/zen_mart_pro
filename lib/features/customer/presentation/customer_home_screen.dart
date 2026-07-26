@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -127,7 +128,9 @@ class CustomerHomeScreen extends StatelessWidget {
                                 blurRadius: 10)
                           ],
                           image: DecorationImage(
-                            image: NetworkImage(bannerUrl),
+                            image: bannerUrl.startsWith('http')
+                                ? NetworkImage(bannerUrl) as ImageProvider
+                                : MemoryImage(base64Decode(bannerUrl)),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -211,14 +214,21 @@ class CustomerHomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: imageUrl.isNotEmpty
-                            ? ClipRRect(
+                            : ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(imageUrl,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.store)),
+                                child: imageUrl.startsWith('http')
+                                    ? Image.network(imageUrl,
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.store))
+                                    : Image.memory(base64Decode(imageUrl),
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.store)),
                               )
                             : const CircleAvatar(child: Icon(Icons.store)),
                         title: Text(name,

@@ -261,50 +261,68 @@ class _ManageVendorCategoriesScreenState
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined,
-                                        color: Colors.blue),
-                                    onPressed: () =>
-                                        _editCategory(shopDocId, docId, name),
-                                    tooltip: 'Edit',
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.edit_outlined,
+                                          color: Colors.blue.shade700,
+                                          size: 20),
+                                      onPressed: () =>
+                                          _editCategory(shopDocId, docId, name),
+                                      tooltip: 'Edit',
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline,
-                                        color: Colors.red),
-                                    onPressed: () async {
-                                      // Confirm deletion
-                                      bool? confirm = await showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Delete Category'),
-                                          content: const Text(
-                                              'Are you sure you want to delete this category?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context, false),
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context, true),
-                                              child: const Text('Delete',
-                                                  style: TextStyle(
-                                                      color: Colors.red)),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                      if (confirm == true) {
-                                        await FirebaseFirestore.instance
-                                            .collection('shops')
-                                            .doc(shopDocId)
-                                            .collection('categories')
-                                            .doc(docId)
-                                            .delete();
-                                      }
-                                    },
-                                    tooltip: 'Delete',
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.delete_outline,
+                                          color: Colors.red.shade700, size: 20),
+                                      onPressed: () async {
+                                        // Confirm deletion
+                                        bool? confirm = await showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title:
+                                                const Text('Delete Category'),
+                                            content: const Text(
+                                                'Are you sure you want to delete this category?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, false),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, true),
+                                                style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.white,
+                                                    backgroundColor:
+                                                        Colors.red),
+                                                child: const Text('Delete'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          await FirebaseFirestore.instance
+                                              .collection('shops')
+                                              .doc(shopDocId)
+                                              .collection('categories')
+                                              .doc(docId)
+                                              .delete();
+                                        }
+                                      },
+                                      tooltip: 'Delete',
+                                    ),
                                   ),
                                 ],
                               ),

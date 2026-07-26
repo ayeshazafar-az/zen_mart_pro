@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 
@@ -80,17 +81,31 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (imageUrl.isNotEmpty)
-              Image.network(
-                imageUrl,
-                height: 280,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 280,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image, size: 80, color: Colors.grey),
-                ),
-              )
+              (imageUrl.startsWith('http')
+                  ? Image.network(
+                      imageUrl,
+                      height: 280,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        height: 280,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image,
+                            size: 80, color: Colors.grey),
+                      ),
+                    )
+                  : Image.memory(
+                      base64Decode(imageUrl),
+                      height: 280,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        height: 280,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image,
+                            size: 80, color: Colors.grey),
+                      ),
+                    ))
             else
               Container(
                 height: 280,

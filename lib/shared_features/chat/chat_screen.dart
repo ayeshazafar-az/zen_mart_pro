@@ -1,9 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../../features/auth/presentation/auth_provider.dart';
 import '../../core/services/notification_service.dart';
 
@@ -48,11 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final bytes = await pickedFile.readAsBytes();
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${pickedFile.name}';
-      final ref = FirebaseStorage.instance.ref().child('chat_images/$fileName');
-      final uploadTask = await ref.putData(bytes);
-      final imageUrl = await uploadTask.ref.getDownloadURL();
+      final imageUrl = base64Encode(bytes);
 
       await FirebaseFirestore.instance
           .collection('orders')

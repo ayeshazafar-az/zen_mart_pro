@@ -29,6 +29,8 @@ class _ManageVendorProductsScreenState
 
     String? dialogBase64Image = isEditing ? productDoc['imageUrl'] : null;
 
+    String? selectedCategoryId = isEditing ? productDoc['categoryId'] : null;
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -90,6 +92,55 @@ class _ManageVendorProductsScreenState
                     decoration:
                         const InputDecoration(labelText: 'Product Name'),
                   ),
+                  FutureBuilder<QuerySnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('shops')
+                        .doc(shopId)
+                        .collection('categories')
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                              'No categories exist. Please add one first.',
+                              style: TextStyle(color: Colors.red)),
+                        );
+                      }
+                      final categories = snapshot.data!.docs;
+                      // Ensure selectedCategoryId exists in the options
+                      if (selectedCategoryId != null &&
+                          !categories
+                              .any((doc) => doc.id == selectedCategoryId)) {
+                        selectedCategoryId = null;
+                      }
+
+                      return DropdownButtonFormField<String>(
+                        value: selectedCategoryId,
+                        hint: const Text('Select a Category'),
+                        decoration:
+                            const InputDecoration(labelText: 'Category'),
+                        items: categories.map((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return DropdownMenuItem<String>(
+                            value: doc.id,
+                            child: Text(data['name'] ?? 'Unnamed Category'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setStateBuilder(() {
+                            selectedCategoryId = value;
+                          });
+                        },
+                      );
+                    },
+                  ),
                   TextField(
                     controller: priceController,
                     decoration: const InputDecoration(labelText: 'Price'),
@@ -122,7 +173,16 @@ class _ManageVendorProductsScreenState
                   final imageUrl = dialogBase64Image ?? '';
                   final description = descriptionController.text.trim();
 
-                  if (name.isEmpty) return;
+                  if (name.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Please enter a product name.')));
+                    return;
+                  }
+                  if (selectedCategoryId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Please select a category.')));
+                    return;
+                  }
 
                   final productsRef = FirebaseFirestore.instance
                       .collection('shops')
@@ -136,6 +196,7 @@ class _ManageVendorProductsScreenState
                       'stock': stock,
                       'imageUrl': imageUrl,
                       'description': description,
+                      'categoryId': selectedCategoryId,
                       'updatedAt': FieldValue.serverTimestamp(),
                     });
                   } else {
@@ -145,6 +206,7 @@ class _ManageVendorProductsScreenState
                       'stock': stock,
                       'imageUrl': imageUrl,
                       'description': description,
+                      'categoryId': selectedCategoryId,
                       'createdAt': FieldValue.serverTimestamp(),
                     });
                   }
@@ -225,44 +287,151 @@ class _ManageVendorProductsScreenState
                   final price = data['price']?.toString() ?? '0.00';
                   final stock = data['stock']?.toString() ?? '0';
                   final imageUrl = data['imageUrl'] ?? '';
+                  final categoryId = data['categoryId'];
 
                   return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      leading: imageUrl.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: imageUrl.startsWith('http')
-                                  ? Image.network(imageUrl,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.broken_image))
-                                  : Image.memory(base64Decode(imageUrl),
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.broken_image)),
-                            )
-                          : const Icon(Icons.shopping_bag),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      leading: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300)),
+                        child: imageUrl.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: imageUrl.startsWith('http')
+                                    ? Image.network(imageUrl,
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.broken_image))
+                                    : Image.memory(base64Decode(imageUrl),
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.broken_image)),
+                              )
+                            : const Icon(Icons.shopping_bag,
+                                color: Colors.grey),
+                      ),
                       title: Text(name,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('Price: Rs. $price | Stock: $stock'),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text('Price: Rs. $price | Stock: $stock',
+                              style: TextStyle(color: Colors.grey.shade700)),
+                          if (categoryId != null)
+                            FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('shops')
+                                  .doc(shopDocId)
+                                  .collection('categories')
+                                  .doc(categoryId)
+                                  .get(),
+                              builder: (context, catSnapshot) {
+                                if (catSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Text('Loading category...',
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey));
+                                }
+                                if (catSnapshot.hasData &&
+                                    catSnapshot.data!.exists) {
+                                  final catData = catSnapshot.data!.data()
+                                      as Map<String, dynamic>;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                          color: Colors.deepOrange.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color:
+                                                  Colors.deepOrange.shade200)),
+                                      child: Text(
+                                        catData['name'] ?? 'Unnamed',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.deepOrange.shade700,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                        ],
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () =>
-                                _showProductDialog(shopDocId, productDoc: doc),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.edit_outlined,
+                                  color: Colors.blue.shade700, size: 20),
+                              onPressed: () => _showProductDialog(shopDocId,
+                                  productDoc: doc),
+                            ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              await doc.reference.delete();
-                            },
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.delete_outline,
+                                  color: Colors.red.shade700, size: 20),
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete Product'),
+                                    content: Text(
+                                        'Are you sure you want to delete "$name"?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        style: TextButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.red),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await doc.reference.delete();
+                                }
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -284,9 +453,12 @@ class _ManageVendorProductsScreenState
             return const SizedBox.shrink();
           }
           final shopDocId = snapshot.data!.docs.first.id;
-          return FloatingActionButton(
+          return FloatingActionButton.extended(
             onPressed: () => _showProductDialog(shopDocId),
-            child: const Icon(Icons.add),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Product'),
+            backgroundColor: Colors.blueAccent,
+            foregroundColor: Colors.white,
           );
         },
       ),
