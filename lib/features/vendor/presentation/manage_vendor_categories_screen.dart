@@ -7,10 +7,12 @@ class ManageVendorCategoriesScreen extends StatefulWidget {
   const ManageVendorCategoriesScreen({super.key});
 
   @override
-  State<ManageVendorCategoriesScreen> createState() => _ManageVendorCategoriesScreenState();
+  State<ManageVendorCategoriesScreen> createState() =>
+      _ManageVendorCategoriesScreenState();
 }
 
-class _ManageVendorCategoriesScreenState extends State<ManageVendorCategoriesScreen> {
+class _ManageVendorCategoriesScreenState
+    extends State<ManageVendorCategoriesScreen> {
   final _categoryController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -49,7 +51,8 @@ class _ManageVendorCategoriesScreenState extends State<ManageVendorCategoriesScr
     }
   }
 
-  Future<void> _editCategory(String shopId, String categoryId, String currentName) async {
+  Future<void> _editCategory(
+      String shopId, String categoryId, String currentName) async {
     final editController = TextEditingController(text: currentName);
 
     bool? confirm = await showDialog(
@@ -126,30 +129,65 @@ class _ManageVendorCategoriesScreenState extends State<ManageVendorCategoriesScr
             child: Column(
               children: [
                 // Add Category Form
-                Form(
-                  key: _formKey,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _categoryController,
-                          decoration: const InputDecoration(
-                            labelText: 'New Category Name',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter category name' : null,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () => _addCategory(shopDocId),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        ),
-                        child: const Text('Add'),
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _categoryController,
+                            decoration: InputDecoration(
+                              labelText: 'New Category Name',
+                              hintText: 'e.g. Fast Food, Drinks',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a name';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _addCategory(shopDocId);
+                              FocusScope.of(context)
+                                  .unfocus(); // Dismiss keyboard
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 24),
+                            ),
+                            child: const Text('Add'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -171,43 +209,102 @@ class _ManageVendorCategoriesScreenState extends State<ManageVendorCategoriesScr
                         .orderBy('createdAt', descending: true)
                         .snapshots(),
                     builder: (context, categorySnapshot) {
-                      if (categorySnapshot.connectionState == ConnectionState.waiting) {
+                      if (categorySnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      if (!categorySnapshot.hasData || categorySnapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text('No categories added yet.'));
+                      if (!categorySnapshot.hasData ||
+                          categorySnapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No categories added yet.',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        );
                       }
 
                       final categories = categorySnapshot.data!.docs;
 
-                      return ListView.builder(
+                      return ListView.separated(
                         itemCount: categories.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 8),
                         itemBuilder: (context, index) {
-                          final data = categories[index].data() as Map<String, dynamic>;
+                          final data =
+                              categories[index].data() as Map<String, dynamic>;
                           final name = data['name'] ?? 'Unnamed';
                           final docId = categories[index].id;
 
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
                             child: ListTile(
-                              title: Text(name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 4),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.category,
+                                    color: Colors.orange, size: 20),
+                              ),
+                              title: Text(
+                                name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () => _editCategory(shopDocId, docId, name),
+                                    icon: const Icon(Icons.edit_outlined,
+                                        color: Colors.blue),
+                                    onPressed: () =>
+                                        _editCategory(shopDocId, docId, name),
+                                    tooltip: 'Edit',
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    icon: const Icon(Icons.delete_outline,
+                                        color: Colors.red),
                                     onPressed: () async {
-                                      await FirebaseFirestore.instance
-                                          .collection('shops')
-                                          .doc(shopDocId)
-                                          .collection('categories')
-                                          .doc(docId)
-                                          .delete();
+                                      // Confirm deletion
+                                      bool? confirm = await showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Delete Category'),
+                                          content: const Text(
+                                              'Are you sure you want to delete this category?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, false),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, true),
+                                              child: const Text('Delete',
+                                                  style: TextStyle(
+                                                      color: Colors.red)),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        await FirebaseFirestore.instance
+                                            .collection('shops')
+                                            .doc(shopDocId)
+                                            .collection('categories')
+                                            .doc(docId)
+                                            .delete();
+                                      }
                                     },
+                                    tooltip: 'Delete',
                                   ),
                                 ],
                               ),

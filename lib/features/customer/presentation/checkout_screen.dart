@@ -25,6 +25,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isLoading = false;
   double _discountAmount = 0.0;
   String _appliedCoupon = '';
+  final double _deliveryFee = 50.0;
 
   @override
   void dispose() {
@@ -107,6 +108,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'shopId': shopId.isNotEmpty ? shopId : 'unknown_shop',
         'items': itemsList,
         'subtotal': widget.subtotal,
+        'deliveryFee': _deliveryFee,
         'discount': _discountAmount,
         'appliedCoupon': _appliedCoupon,
         'totalAmount': finalTotal,
@@ -208,8 +210,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
     final userId = authProvider.currentUser?.uid ?? '';
     final userEmail = authProvider.currentUser?.email ?? 'Customer';
-    final finalTotal = widget.subtotal - _discountAmount > 0
-        ? widget.subtotal - _discountAmount
+    final finalTotal = widget.subtotal + _deliveryFee - _discountAmount > 0
+        ? widget.subtotal + _deliveryFee - _discountAmount
         : 0.0;
 
     return Scaffold(
@@ -321,6 +323,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ],
                         ),
                       ],
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Delivery Fee:',
+                              style: TextStyle(fontSize: 16)),
+                          Text('Rs. ${_deliveryFee.toStringAsFixed(2)}',
+                              style: const TextStyle(fontSize: 16)),
+                        ],
+                      ),
                       const Divider(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

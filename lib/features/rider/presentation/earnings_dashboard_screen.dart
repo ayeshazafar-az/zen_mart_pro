@@ -30,7 +30,9 @@ class EarningsDashboardScreen extends StatelessWidget {
             totalDeliveries = snapshot.data!.docs.length;
             for (var doc in snapshot.data!.docs) {
               final data = doc.data() as Map<String, dynamic>;
-              final amount = (data['totalAmount'] ?? 0.0) as num;
+              // A rider earns the static delivery fee per delivered order.
+              // If an old order does not have deliveryFee, default to 0.0 or 50.0 based on fallback.
+              final amount = (data['deliveryFee'] ?? 0.0) as num;
               totalEarnings += amount.toDouble();
             }
           }
@@ -40,7 +42,9 @@ class EarningsDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Earnings Overview', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text('Earnings Overview',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -52,9 +56,14 @@ class EarningsDashboardScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Total Earnings', style: TextStyle(color: Colors.grey)),
+                              const Text('Total Earnings',
+                                  style: TextStyle(color: Colors.grey)),
                               const SizedBox(height: 8),
-                              Text('Rs. ${totalEarnings.toStringAsFixed(2)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
+                              Text('Rs. ${totalEarnings.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange)),
                             ],
                           ),
                         ),
@@ -69,9 +78,14 @@ class EarningsDashboardScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Deliveries', style: TextStyle(color: Colors.grey)),
+                              const Text('Deliveries',
+                                  style: TextStyle(color: Colors.grey)),
                               const SizedBox(height: 8),
-                              Text('$totalDeliveries', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue)),
+                              Text('$totalDeliveries',
+                                  style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue)),
                             ],
                           ),
                         ),
@@ -80,13 +94,16 @@ class EarningsDashboardScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 32),
-                const Text('Payout Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('Payout Summary',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 const Card(
                   child: ListTile(
                     leading: Icon(Icons.account_balance, color: Colors.orange),
                     title: Text('Weekly Payout Status'),
-                    subtitle: Text('Processed every Monday via Bank Transfer / Wallet'),
+                    subtitle: Text(
+                        'Processed every Monday via Bank Transfer / Wallet'),
                   ),
                 ),
               ],
