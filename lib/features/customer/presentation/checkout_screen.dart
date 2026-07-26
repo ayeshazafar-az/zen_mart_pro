@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import 'order_confirmation_screen.dart';
 import '../../../core/services/notification_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<QueryDocumentSnapshot> cartItems;
@@ -160,11 +161,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void _processCheckout(String userId, String userEmail, double finalTotal) {
+  Future<void> _processCheckout(
+      String userId, String userEmail, double finalTotal) async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedPaymentMethod == 'Online Wallet / QR Code') {
-      showDialog(
+      final proceed = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
@@ -173,8 +175,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.qr_code_2,
-                        size: 200, color: Colors.black87),
+                    SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: QrImageView(
+                        data:
+                            'upi://pay?pa=vendor@finbank&pn=ZenMartPro&am=${finalTotal.toStringAsFixed(2)}&cu=PKR',
+                        version: QrVersions.auto,
+                        size: 200.0,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Text('Total Amount: Rs. ${finalTotal.toStringAsFixed(2)}',
                         style: const TextStyle(
@@ -187,19 +198,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context), // Cancel
+                    onPressed: () => Navigator.pop(context, false), // Cancel
                     child: const Text('Cancel',
                         style: TextStyle(color: Colors.red)),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close dialog
-                      _placeOrder(userId, userEmail, finalTotal);
-                    },
+                    onPressed: () => Navigator.pop(context, true), // Done
                     child: const Text('Payment Complete'),
                   ),
                 ],
               ));
+
+      if (proceed == true) {
+        _placeOrder(userId, userEmail, finalTotal);
+      }
     } else {
       _placeOrder(userId, userEmail, finalTotal);
     }
