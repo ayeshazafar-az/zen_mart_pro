@@ -122,7 +122,7 @@ class HelpSupportScreen extends StatelessWidget {
                     await NotificationService().sendMockNotificationToUser(
                       adminDoc.id,
                       "New Complaint Received \u{26A0}\u{FE0F}",
-                      "From \${user?.email ?? 'Anonymous'}: \$message",
+                      "From ${user?.email ?? 'Anonymous'}: $message",
                     );
                   }
                 } catch (e) {

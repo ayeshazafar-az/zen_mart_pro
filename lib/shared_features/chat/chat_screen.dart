@@ -70,7 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (widget.recipientId.isNotEmpty) {
         await NotificationService().sendMockNotificationToUser(
           widget.recipientId,
-          "New Photo from \$senderEmail",
+          "New Photo from $senderEmail",
           "[\u{1F4F7} Image]",
         );
       }
@@ -127,7 +127,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (widget.recipientId.isNotEmpty) {
         await NotificationService().sendMockNotificationToUser(
           widget.recipientId,
-          "New Message from \$senderEmail",
+          "New Message from $senderEmail",
           text,
         );
       }
@@ -250,21 +250,47 @@ class _ChatScreenState extends State<ChatScreen> {
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    imageUrl,
-                                    width: 150,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder:
-                                        (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return const SizedBox(
-                                        height: 150,
-                                        width: 150,
-                                        child: Center(
-                                            child: CircularProgressIndicator()),
-                                      );
-                                    },
-                                  ),
+                                  child: imageUrl.startsWith('http')
+                                      ? Image.network(
+                                          imageUrl,
+                                          width: 150,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (context, child,
+                                              loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const SizedBox(
+                                              height: 150,
+                                              width: 150,
+                                              child: Center(
+                                                  child:
+                                                      CircularProgressIndicator()),
+                                            );
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const SizedBox(
+                                                      height: 150,
+                                                      width: 150,
+                                                      child: Icon(
+                                                          Icons.broken_image,
+                                                          size: 50,
+                                                          color: Colors.grey)),
+                                        )
+                                      : Image.memory(
+                                          base64Decode(imageUrl),
+                                          width: 150,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const SizedBox(
+                                                      height: 150,
+                                                      width: 150,
+                                                      child: Icon(
+                                                          Icons.broken_image,
+                                                          size: 50,
+                                                          color: Colors.grey)),
+                                        ),
                                 ),
                               ),
                             if (messageText.isNotEmpty)

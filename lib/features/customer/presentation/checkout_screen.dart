@@ -125,7 +125,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         await NotificationService().sendMockNotificationToUser(
           userId,
           "Order Confirmed! \u{1F389}",
-          "Your order #\${orderRef.id.characters.take(6)} has been placed successfully.",
+          "Your order #${orderRef.id.characters.take(6)} has been placed successfully.",
         );
       } catch (e) {
         debugPrint('Failed to send notification: \$e');
@@ -180,7 +180,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       height: 200,
                       child: QrImageView(
                         data:
-                            'upi://pay?pa=vendor@finbank&pn=ZenMartPro&am=${finalTotal.toStringAsFixed(2)}&cu=PKR',
+                            'https://zenmartpro.web.app/checkout/pay?amount=${finalTotal.toStringAsFixed(2)}',
                         version: QrVersions.auto,
                         size: 200.0,
                         backgroundColor: Colors.white,

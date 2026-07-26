@@ -300,7 +300,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
 
     // --- FCM TRIGGER: Notify Customer ---
     String title = "Order Update";
-    String body = "Your order status is now: \$status";
+    String body = "Your order status is now: $status";
 
     if (status == 'Accepted') body = "The vendor has accepted your order.";
     if (status == 'Rejected') {
