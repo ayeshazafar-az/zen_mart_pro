@@ -99,31 +99,50 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                           Text('Customer: $customerEmail'),
                           Text('Total Amount: Rs. $totalAmount'),
                           const SizedBox(height: 12),
-                          const Text('Items:',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
+                          const Text('Order Items',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 8),
                           if (data['items'] != null &&
                               (data['items'] as List).isNotEmpty)
-                            ...((data['items'] as List).map((item) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 4.0),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.circle,
-                                        size: 6, color: Colors.grey),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                          '\${item['name']} (x\${item['quantity']}) - Rs. \${item['price']}'),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: Column(
+                                children: ((data['items'] as List).map((item) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            '\${item["quantity"]}x \${item["name"]}',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Rs. \${item["price"]}',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            }))
+                                  );
+                                })).toList(),
+                              ),
+                            )
                           else
                             const Text('No items specified',
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 12)),
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 12)),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -190,21 +209,38 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                               child: OutlinedButton.icon(
                                 icon: const Icon(Icons.chat),
                                 label: const Text('Chat & Call Customer'),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                        orderId: orderId,
-                                        recipientName:
-                                            customerEmail.split('@')[0],
-                                        chatChannel: 'vendor_messages',
-                                        recipientPhone:
-                                            data['phone'], // Customer's phone
-                                        recipientId: customerId,
+                                onPressed: () async {
+                                  String realCustomerName =
+                                      customerEmail.split('@')[0];
+                                  try {
+                                    if (customerId.isNotEmpty) {
+                                      final doc = await FirebaseFirestore
+                                          .instance
+                                          .collection('users')
+                                          .doc(customerId)
+                                          .get();
+                                      if (doc.exists) {
+                                        realCustomerName =
+                                            doc.data()?['name'] ??
+                                                realCustomerName;
+                                      }
+                                    }
+                                  } catch (e) {}
+
+                                  if (context.mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          orderId: orderId,
+                                          recipientName: realCustomerName,
+                                          chatChannel: 'vendor_messages',
+                                          recipientPhone: data['phone'],
+                                          recipientId: customerId,
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  }
                                 },
                               ),
                             ),

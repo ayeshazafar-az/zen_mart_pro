@@ -124,19 +124,37 @@ class ActiveDeliveryScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.chat),
                           label: const Text('Chat & Call Customer'),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  orderId: orderId,
-                                  recipientName: customerEmail.split('@')[0],
-                                  chatChannel: 'rider_messages',
-                                  recipientPhone: phone,
-                                  recipientId: data['customerId'] ?? '',
+                          onPressed: () async {
+                            String realCustomerName =
+                                customerEmail.split('@')[0];
+                            try {
+                              final cId = data['customerId'] ?? '';
+                              if (cId.isNotEmpty) {
+                                final doc = await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(cId)
+                                    .get();
+                                if (doc.exists) {
+                                  realCustomerName =
+                                      doc.data()?['name'] ?? realCustomerName;
+                                }
+                              }
+                            } catch (e) {}
+
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    orderId: orderId,
+                                    recipientName: realCustomerName,
+                                    chatChannel: 'rider_messages',
+                                    recipientPhone: phone,
+                                    recipientId: data['customerId'] ?? '',
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                         ),
                       ),

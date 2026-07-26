@@ -282,18 +282,34 @@ class OrderTrackingScreen extends StatelessWidget {
                       icon: const Icon(Icons.chat),
                       label: const Text('Chat with Rider',
                           style: TextStyle(fontSize: 16)),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(
-                              orderId: orderId,
-                              recipientName: 'Rider',
-                              chatChannel: 'rider_messages',
-                              recipientId: riderId?.toString() ?? '',
+                      onPressed: () async {
+                        String realRiderName = 'Rider';
+                        try {
+                          if (riderId != null &&
+                              riderId.toString().isNotEmpty) {
+                            final doc = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(riderId.toString())
+                                .get();
+                            if (doc.exists) {
+                              realRiderName = doc.data()?['name'] ?? 'Rider';
+                            }
+                          }
+                        } catch (e) {}
+
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                orderId: orderId,
+                                recipientName: realRiderName,
+                                chatChannel: 'rider_messages',
+                                recipientId: riderId?.toString() ?? '',
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       },
                     ),
                   ),
@@ -311,19 +327,35 @@ class OrderTrackingScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            orderId: orderId,
-                            recipientName: 'Vendor',
-                            chatChannel: 'vendor_messages',
-                            recipientId:
-                                '', // Ideally fetched from shop document
+                    onPressed: () async {
+                      String realVendorName = 'Vendor';
+                      String realVendorId = '';
+                      try {
+                        if (shopId.isNotEmpty) {
+                          final doc = await FirebaseFirestore.instance
+                              .collection('shops')
+                              .doc(shopId)
+                              .get();
+                          if (doc.exists) {
+                            realVendorName = doc.data()?['name'] ?? 'Vendor';
+                            realVendorId = doc.data()?['vendorId'] ?? '';
+                          }
+                        }
+                      } catch (e) {}
+
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              orderId: orderId,
+                              recipientName: realVendorName,
+                              chatChannel: 'vendor_messages',
+                              recipientId: realVendorId,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   ),
                 ),
