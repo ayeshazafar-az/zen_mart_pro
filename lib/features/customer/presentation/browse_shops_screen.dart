@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'shop_products_screen.dart';
 
 class BrowseShopsScreen extends StatelessWidget {
@@ -65,31 +66,12 @@ class BrowseShopsScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(12)),
-                          child: imageUrl.startsWith('http')
-                              ? Image.network(
-                                  imageUrl,
-                                  height: 140,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    height: 140,
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.store,
-                                        size: 50, color: Colors.grey),
-                                  ),
-                                )
-                              : Image.memory(
-                                  base64Decode(imageUrl),
-                                  height: 140,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    height: 140,
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.store,
-                                        size: 50, color: Colors.grey),
-                                  ),
-                                ),
+                          child: SafeImage(
+                            imageUrl: imageUrl,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),

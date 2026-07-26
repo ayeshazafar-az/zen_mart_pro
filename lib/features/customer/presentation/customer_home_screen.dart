@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -127,34 +127,40 @@ class CustomerHomeScreen extends StatelessWidget {
                                 offset: Offset(0, 4),
                                 blurRadius: 10)
                           ],
-                          image: DecorationImage(
-                            image: bannerUrl.startsWith('http')
-                                ? NetworkImage(bannerUrl) as ImageProvider
-                                : MemoryImage(base64Decode(bannerUrl)),
-                            fit: BoxFit.cover,
-                          ),
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.black.withValues(alpha: 0.7),
-                                Colors.transparent
-                              ],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: SafeImage(
+                                imageUrl: bannerUrl,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                          padding: const EdgeInsets.all(20),
-                          alignment: Alignment.bottomLeft,
-                          child: Text(
-                            bannerTitle,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.7),
+                                    Colors.transparent
+                                  ],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(20),
+                              alignment: Alignment.bottomLeft,
+                              child: Text(
+                                bannerTitle,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -214,21 +220,14 @@ class CustomerHomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: imageUrl.isNotEmpty
-                            : ClipRRect(
+                            ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: imageUrl.startsWith('http')
-                                    ? Image.network(imageUrl,
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.store))
-                                    : Image.memory(base64Decode(imageUrl),
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.store)),
+                                child: SafeImage(
+                                  imageUrl: imageUrl,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
                               )
                             : const CircleAvatar(child: Icon(Icons.store)),
                         title: Text(name,

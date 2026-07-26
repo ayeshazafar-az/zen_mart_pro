@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'product_details_screen.dart';
 
 class ShopProductsScreen extends StatelessWidget {
@@ -79,27 +80,11 @@ class ShopProductsScreen extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(12)),
                           child: imageUrl.isNotEmpty
-                              ? (imageUrl.startsWith('http')
-                                  ? Image.network(
-                                      imageUrl,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        color: Colors.grey[200],
-                                        child: const Icon(Icons.image,
-                                            size: 40, color: Colors.grey),
-                                      ),
-                                    )
-                                  : Image.memory(
-                                      base64Decode(imageUrl),
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        color: Colors.grey[200],
-                                        child: const Icon(Icons.image,
-                                            size: 40, color: Colors.grey),
-                                      ),
-                                    ))
+                              ? SafeImage(
+                                  imageUrl: imageUrl,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
                               : Container(
                                   color: Colors.grey[200],
                                   child: const Icon(Icons.shopping_bag,

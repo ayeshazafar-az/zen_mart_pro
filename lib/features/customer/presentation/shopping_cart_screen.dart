@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
@@ -69,19 +70,12 @@ class ShoppingCartScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: imageUrl.isNotEmpty
-                            ? (imageUrl.startsWith('http')
-                                ? Image.network(imageUrl,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.image))
-                                : Image.memory(base64Decode(imageUrl),
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.image)))
+                            ? SafeImage(
+                                imageUrl: imageUrl,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              )
                             : const Icon(Icons.shopping_bag),
                         title: Text(name,
                             style:
