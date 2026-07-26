@@ -19,17 +19,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _couponController = TextEditingController();
   String _selectedPaymentMethod = 'Cash on Delivery';
   bool _isLoading = false;
+  double _discountAmount = 0.0;
+  String _appliedCoupon = '';
 
   @override
   void dispose() {
     _addressController.dispose();
     _phoneController.dispose();
+    _couponController.dispose();
     super.dispose();
   }
 
-  Future<void> _placeOrder(String userId, String userEmail) async {
+  void _applyCoupon() {
+    final code = _couponController.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    // Simulate static coupons
+    if (code == 'ZENVYRO20') {
+      setState(() {
+        _discountAmount = widget.subtotal * 0.20;
+        _appliedCoupon = code;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('20% discount applied!')));
+    } else if (code == 'WELCOME10') {
+      setState(() {
+        _discountAmount = widget.subtotal * 0.10;
+        _appliedCoupon = code;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('10% discount applied!')));
+    } else {
+      setState(() {
+        _discountAmount = 0.0;
+        _appliedCoupon = '';
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Invalid coupon code')));
+    }
+  }
+
+  Future<void> _placeOrder(
+      String userId, String userEmail, double finalTotal) async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -51,7 +85,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'customerEmail': userEmail,
         'shopId': shopId.isNotEmpty ? shopId : 'unknown_shop',
         'items': itemsList,
-        'totalAmount': widget.subtotal,
+        'subtotal': widget.subtotal,
+        'discount': _discountAmount,
+        'appliedCoupon': _appliedCoupon,
+        'totalAmount': finalTotal,
         'shippingAddress': _addressController.text.trim(),
         'phone': _phoneController.text.trim(),
         'paymentMethod': _selectedPaymentMethod,
@@ -94,6 +131,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
     final userId = authProvider.currentUser?.uid ?? '';
     final userEmail = authProvider.currentUser?.email ?? 'Customer';
+    final finalTotal = widget.subtotal - _discountAmount > 0
+        ? widget.subtotal - _discountAmount
+        : 0.0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout & Payment')),
@@ -128,6 +168,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     : null,
               ),
               const SizedBox(height: 24),
+              const Text('Discount & Coupons',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _couponController,
+                      decoration: const InputDecoration(
+                          hintText: 'Enter Coupon Code',
+                          border: OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: _applyCoupon,
+                    child: const Text('Apply'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               const Text('Payment Method',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
@@ -157,17 +218,45 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      const Text('Total Amount:',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text('\$ ${widget.subtotal.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Subtotal:',
+                              style: TextStyle(fontSize: 16)),
+                          Text('\$ ${widget.subtotal.toStringAsFixed(2)}',
+                              style: const TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                      if (_discountAmount > 0) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Discount:',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.green)),
+                            Text('- \$ ${_discountAmount.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                    fontSize: 16, color: Colors.green)),
+                          ],
+                        ),
+                      ],
+                      const Divider(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Total Amount:',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text('\$ ${finalTotal.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green)),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -177,8 +266,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed:
-                      _isLoading ? null : () => _placeOrder(userId, userEmail),
+                  onPressed: _isLoading
+                      ? null
+                      : () => _placeOrder(userId, userEmail, finalTotal),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Place Order',

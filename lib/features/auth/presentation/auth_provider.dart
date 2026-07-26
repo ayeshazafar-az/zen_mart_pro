@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 import '../data/user_model.dart';
+import '../../../core/services/notification_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
@@ -93,6 +94,10 @@ class AuthProvider with ChangeNotifier {
         }
       }
       notifyListeners();
+
+      // Setup push notifications for the newly logged-in user
+      NotificationService().saveTokenToDatabase(uid);
+      NotificationService().listenToDatabaseNotifications(uid);
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();

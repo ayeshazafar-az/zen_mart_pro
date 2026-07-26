@@ -32,6 +32,7 @@ dependencies:
   fl_chart: ^1.2.0
   google_fonts: ^8.2.0
   carousel_slider: ^5.1.2
+  flutter_local_notifications: ^22.2.0
 
 dev_dependencies:
   flutter_test:

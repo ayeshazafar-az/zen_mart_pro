@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/services/notification_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -18,6 +19,10 @@ void main() async {
 
   // Set up Firebase Messaging background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Initialize Notification Service
+  final notificationService = NotificationService();
+  await notificationService.initialize();
 
   // Request permission for iOS/Web and initialize token
   final messaging = FirebaseMessaging.instance;
