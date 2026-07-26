@@ -18,7 +18,6 @@ class OrderHistoryScreen extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('orders')
             .where('customerId', isEqualTo: userId)
-            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -39,7 +38,17 @@ class OrderHistoryScreen extends StatelessWidget {
             );
           }
 
-          final orders = snapshot.data!.docs;
+          final orders = snapshot.data!.docs.toList();
+          orders.sort((a, b) {
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+            final aTime = aData['createdAt'] as Timestamp?;
+            final bTime = bData['createdAt'] as Timestamp?;
+            if (aTime == null && bTime == null) return 0;
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+            return bTime.compareTo(aTime);
+          });
 
           return ListView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -55,10 +64,10 @@ class OrderHistoryScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  title: Text('Order #${orderId.substring(0, 8)}',
+                  title: Text('Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      'Total: \$ $totalAmount\nPayment: $paymentMethod\nStatus: $status'),
+                      'Total: Rs. $totalAmount\nPayment: $paymentMethod\nStatus: $status'),
                   isThreeLine: true,
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -79,3 +88,4 @@ class OrderHistoryScreen extends StatelessWidget {
     );
   }
 }
+

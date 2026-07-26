@@ -174,7 +174,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     const Icon(Icons.qr_code_2,
                         size: 200, color: Colors.black87),
                     const SizedBox(height: 16),
-                    Text('Total Amount: \$ ${finalTotal.toStringAsFixed(2)}',
+                    Text('Total Amount: Rs. ${finalTotal.toStringAsFixed(2)}',
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -303,7 +303,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         children: [
                           const Text('Subtotal:',
                               style: TextStyle(fontSize: 16)),
-                          Text('\$ ${widget.subtotal.toStringAsFixed(2)}',
+                          Text('Rs. ${widget.subtotal.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 16)),
                         ],
                       ),
@@ -315,7 +315,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             const Text('Discount:',
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.green)),
-                            Text('- \$ ${_discountAmount.toStringAsFixed(2)}',
+                            Text('- Rs. ${_discountAmount.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                     fontSize: 16, color: Colors.green)),
                           ],
@@ -328,7 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           const Text('Total Amount:',
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text('\$ ${finalTotal.toStringAsFixed(2)}',
+                          Text('Rs. ${finalTotal.toStringAsFixed(2)}',
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,

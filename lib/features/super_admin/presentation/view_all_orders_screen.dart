@@ -52,10 +52,10 @@ class ViewAllOrdersScreen extends StatelessWidget {
                   leading: const CircleAvatar(
                     child: Icon(Icons.receipt_long),
                   ),
-                  title: Text('Order ID: ${orderId.substring(0, 8)}...',
+                  title: Text('Order ID: ${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}...',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle:
-                      Text('Customer: $customerEmail\nTotal: \$ $totalAmount'),
+                      Text('Customer: $customerEmail\nTotal: Rs. $totalAmount'),
                   isThreeLine: true,
                   trailing: Container(
                     padding:
@@ -82,3 +82,4 @@ class ViewAllOrdersScreen extends StatelessWidget {
     );
   }
 }
+

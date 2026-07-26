@@ -110,7 +110,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$ $price',
+                    'Rs. $price',
                     style: const TextStyle(
                         fontSize: 20,
                         color: Colors.green,

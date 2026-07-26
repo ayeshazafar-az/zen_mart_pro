@@ -82,7 +82,7 @@ class OrderTrackingScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Total: \$ $totalAmount',
+                              'Total: Rs. $totalAmount',
                               style: const TextStyle(
                                   fontSize: 16,
                                   color: Colors.green,
@@ -218,7 +218,7 @@ class OrderTrackingScreen extends StatelessWidget {
                             style:
                                 const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text('Qty: $itemQty'),
-                        trailing: Text('\$ $itemPrice',
+                        trailing: Text('Rs. $itemPrice',
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.green)),

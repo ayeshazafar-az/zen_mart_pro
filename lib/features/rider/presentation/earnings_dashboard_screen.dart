@@ -54,7 +54,7 @@ class EarningsDashboardScreen extends StatelessWidget {
                             children: [
                               const Text('Total Earnings', style: TextStyle(color: Colors.grey)),
                               const SizedBox(height: 8),
-                              Text('\$ ${totalEarnings.toStringAsFixed(2)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
+                              Text('Rs. ${totalEarnings.toStringAsFixed(2)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
                             ],
                           ),
                         ),

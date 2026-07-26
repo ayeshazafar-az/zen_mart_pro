@@ -63,7 +63,7 @@ class ActiveDeliveryScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order #${orderId.substring(0, 8)}',
+                          Text('Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                           const Chip(
@@ -75,7 +75,7 @@ class ActiveDeliveryScreen extends StatelessWidget {
                       Text('Customer: $customerEmail'),
                       Text('Phone: $phone'),
                       Text('Address: $address'),
-                      Text('Payout: \$ $totalAmount',
+                      Text('Payout: Rs. $totalAmount',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green)),
@@ -149,3 +149,4 @@ class ActiveDeliveryScreen extends StatelessWidget {
     );
   }
 }
+

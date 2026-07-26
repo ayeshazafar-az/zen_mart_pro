@@ -54,8 +54,8 @@ class DeliveryHistoryScreen extends StatelessWidget {
                     backgroundColor: Colors.green,
                     child: Icon(Icons.check, color: Colors.white),
                   ),
-                  title: Text('Order #${orderId.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Address: $address\nEarned: \$ $totalAmount'),
+                  title: Text('Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text('Address: $address\nEarned: Rs. $totalAmount'),
                   isThreeLine: true,
                 ),
               );

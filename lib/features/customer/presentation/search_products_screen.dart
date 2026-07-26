@@ -176,7 +176,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '\$ $price',
+                                    'Rs. $price',
                                     style: const TextStyle(
                                         color: Colors.green,
                                         fontWeight: FontWeight.w600,

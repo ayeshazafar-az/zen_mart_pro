@@ -36,7 +36,6 @@ class ManageVendorOrdersScreen extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('orders')
                 .where('shopId', isEqualTo: shopId)
-                .orderBy('createdAt', descending: true)
                 .snapshots(),
             builder: (context, orderSnapshot) {
               if (orderSnapshot.connectionState == ConnectionState.waiting) {
@@ -47,7 +46,17 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                 return const Center(child: Text('No orders received yet.'));
               }
 
-              final orders = orderSnapshot.data!.docs;
+              final orders = orderSnapshot.data!.docs.toList();
+              orders.sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+                final aTime = aData['createdAt'] as Timestamp?;
+                final bTime = bData['createdAt'] as Timestamp?;
+                if (aTime == null && bTime == null) return 0;
+                if (aTime == null) return 1;
+                if (bTime == null) return -1;
+                return bTime.compareTo(aTime);
+              });
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16.0),
@@ -88,7 +97,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text('Customer: $customerEmail'),
-                          Text('Total Amount: \$ $totalAmount'),
+                          Text('Total Amount: Rs. $totalAmount'),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,

@@ -249,7 +249,7 @@ class _ManageVendorProductsScreenState
                           : const Icon(Icons.shopping_bag),
                       title: Text(name,
                           style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('Price: \$ $price | Stock: $stock'),
+                      subtitle: Text('Price: Rs. $price | Stock: $stock'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

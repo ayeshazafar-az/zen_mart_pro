@@ -78,7 +78,7 @@ class ShoppingCartScreen extends StatelessWidget {
                         title: Text(name,
                             style:
                                 const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Price: \$ $price | Qty: $quantity'),
+                        subtitle: Text('Price: Rs. $price | Qty: $quantity'),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
@@ -109,7 +109,7 @@ class ShoppingCartScreen extends StatelessWidget {
                       children: [
                         const Text('Subtotal:',
                             style: TextStyle(fontSize: 16, color: Colors.grey)),
-                        Text('\$ ${subtotal.toStringAsFixed(2)}',
+                        Text('Rs. ${subtotal.toStringAsFixed(2)}',
                             style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ],

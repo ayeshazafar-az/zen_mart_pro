@@ -24,7 +24,8 @@ class ViewVendorReviewsScreen extends StatelessWidget {
           }
 
           if (!shopSnapshot.hasData || shopSnapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No shop assigned to your account.'));
+            return const Center(
+                child: Text('No shop assigned to your account.'));
           }
 
           final shopId = shopSnapshot.data!.docs.first.id;
@@ -33,25 +34,37 @@ class ViewVendorReviewsScreen extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('reviews')
                 .where('shopId', isEqualTo: shopId)
-                .orderBy('createdAt', descending: true)
                 .snapshots(),
             builder: (context, reviewSnapshot) {
               if (reviewSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (!reviewSnapshot.hasData || reviewSnapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('No customer reviews found yet.'));
+              if (!reviewSnapshot.hasData ||
+                  reviewSnapshot.data!.docs.isEmpty) {
+                return const Center(
+                    child: Text('No customer reviews found yet.'));
               }
 
-              final reviews = reviewSnapshot.data!.docs;
+              final reviews = reviewSnapshot.data!.docs.toList();
+              reviews.sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+                final aTime = aData['createdAt'] as Timestamp?;
+                final bTime = bData['createdAt'] as Timestamp?;
+                if (aTime == null && bTime == null) return 0;
+                if (aTime == null) return 1;
+                if (bTime == null) return -1;
+                return bTime.compareTo(aTime);
+              });
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: reviews.length,
                 itemBuilder: (context, index) {
                   final data = reviews[index].data() as Map<String, dynamic>;
-                  final customerEmail = data['customerEmail'] ?? 'Anonymous Customer';
+                  final customerEmail =
+                      data['customerEmail'] ?? 'Anonymous Customer';
                   final rating = (data['rating'] ?? 5.0).toDouble();
                   final comment = data['comment'] ?? 'No comment provided.';
 
@@ -67,13 +80,16 @@ class ViewVendorReviewsScreen extends StatelessWidget {
                             children: [
                               Text(
                                 customerEmail,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                               Row(
                                 children: List.generate(
                                   5,
-                                      (starIndex) => Icon(
-                                    starIndex < rating ? Icons.star : Icons.star_border,
+                                  (starIndex) => Icon(
+                                    starIndex < rating
+                                        ? Icons.star
+                                        : Icons.star_border,
                                     color: Colors.amber,
                                     size: 18,
                                   ),
@@ -82,7 +98,8 @@ class ViewVendorReviewsScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text(comment, style: const TextStyle(color: Colors.black87)),
+                          Text(comment,
+                              style: const TextStyle(color: Colors.black87)),
                         ],
                       ),
                     ),
