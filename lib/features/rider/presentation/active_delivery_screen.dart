@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../../shared_features/chat/chat_screen.dart';
+import '../../../core/services/notification_service.dart';
 
 class ActiveDeliveryScreen extends StatelessWidget {
   const ActiveDeliveryScreen({super.key});
@@ -88,6 +89,22 @@ class ActiveDeliveryScreen extends StatelessWidget {
                             await orderDoc.reference.update({
                               'status': 'Delivered',
                             });
+
+                            // --- FCM TRIGGER: Notify Customer ---
+                            try {
+                              final customerId = data['customerId'] ?? '';
+                              if (customerId.isNotEmpty) {
+                                await NotificationService()
+                                    .sendMockNotificationToUser(
+                                  customerId,
+                                  "Order Delivered! \u{1F389}",
+                                  "Your order has been delivered successfully. Enjoy!",
+                                );
+                              }
+                            } catch (e) {
+                              debugPrint('Failed to notify customer: \$e');
+                            }
+
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

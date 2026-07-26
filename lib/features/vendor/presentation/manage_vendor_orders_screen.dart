@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../../shared_features/chat/chat_screen.dart';
+import '../../../core/services/notification_service.dart';
 
 class ManageVendorOrdersScreen extends StatelessWidget {
   const ManageVendorOrdersScreen({super.key});
@@ -58,6 +59,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                   final totalAmount = data['totalAmount']?.toString() ?? '0.00';
                   final status = data['status'] ?? 'Pending';
                   final customerEmail = data['customerEmail'] ?? 'Customer';
+                  final customerId = data['customerId'] ?? '';
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -91,16 +93,16 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             children: [
                               if (status == 'Pending') ...[
                                 OutlinedButton(
-                                  onPressed: () =>
-                                      _updateOrderStatus(orderId, 'Rejected'),
+                                  onPressed: () => _updateOrderStatus(
+                                      orderId, 'Rejected', customerId),
                                   style: OutlinedButton.styleFrom(
                                       foregroundColor: Colors.red),
                                   child: const Text('Reject'),
                                 ),
                                 const SizedBox(width: 8),
                                 ElevatedButton(
-                                  onPressed: () =>
-                                      _updateOrderStatus(orderId, 'Accepted'),
+                                  onPressed: () => _updateOrderStatus(
+                                      orderId, 'Accepted', customerId),
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green),
                                   child: const Text('Accept'),
@@ -131,7 +133,8 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                   ],
                                   onChanged: (newStatus) {
                                     if (newStatus != null) {
-                                      _updateOrderStatus(orderId, newStatus);
+                                      _updateOrderStatus(
+                                          orderId, newStatus, customerId);
                                     }
                                   },
                                 ),
@@ -196,9 +199,31 @@ class ManageVendorOrdersScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _updateOrderStatus(String orderId, String status) async {
+  Future<void> _updateOrderStatus(
+      String orderId, String status, String customerId) async {
     await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
       'status': status,
     });
+
+    // --- FCM TRIGGER: Notify Customer ---
+    String title = "Order Update";
+    String body = "Your order status is now: \$status";
+
+    if (status == 'Accepted') body = "The vendor has accepted your order.";
+    if (status == 'Rejected') {
+      title = "Order Cancelled";
+      body = "Unfortunately, the vendor rejected your order.";
+    }
+    if (status == 'Preparing') body = "The vendor is preparing your order.";
+
+    try {
+      await NotificationService().sendMockNotificationToUser(
+        customerId,
+        title,
+        body,
+      );
+    } catch (e) {
+      debugPrint('Failed to send vendor update notification: \$e');
+    }
   }
 }

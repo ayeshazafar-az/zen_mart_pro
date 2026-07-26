@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import 'order_confirmation_screen.dart';
+import '../../../core/services/notification_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<QueryDocumentSnapshot> cartItems;
@@ -96,6 +97,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      // --- FCM TRIGGER: Notify Customer ---
+      try {
+        await NotificationService().sendMockNotificationToUser(
+          userId,
+          "Order Confirmed! \u{1F389}",
+          "Your order #\${orderRef.id.characters.take(6)} has been placed successfully.",
+        );
+      } catch (e) {
+        debugPrint('Failed to send notification: \$e');
+      }
+
       // Clear cart
       final cartDocs = await FirebaseFirestore.instance
           .collection('users')
@@ -123,6 +135,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _processCheckout(String userId, String userEmail, double finalTotal) {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedPaymentMethod == 'Online Wallet / QR Code') {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+                title:
+                    const Text('Scan QR to Pay', textAlign: TextAlign.center),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.qr_code_2,
+                        size: 200, color: Colors.black87),
+                    const SizedBox(height: 16),
+                    Text('Total Amount: \$ ${finalTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    const Text(
+                        'Scan using your mobile banking app to complete payment.',
+                        textAlign: TextAlign.center),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Cancel
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      _placeOrder(userId, userEmail, finalTotal);
+                    },
+                    child: const Text('Payment Complete'),
+                  ),
+                ],
+              ));
+    } else {
+      _placeOrder(userId, userEmail, finalTotal);
     }
   }
 
@@ -203,7 +260,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       value: 'Credit / Debit Card',
                       child: Text('Credit / Debit Card')),
                   DropdownMenuItem(
-                      value: 'Online Wallet', child: Text('Online Wallet')),
+                      value: 'Online Wallet / QR Code',
+                      child: Text('Online Wallet / QR Code')),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -268,7 +326,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading
                       ? null
-                      : () => _placeOrder(userId, userEmail, finalTotal),
+                      : () => _processCheckout(userId, userEmail, finalTotal),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Place Order',

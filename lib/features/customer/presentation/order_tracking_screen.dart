@@ -156,6 +156,10 @@ class OrderTrackingScreen extends StatelessWidget {
                       );
                     }).toList(),
                   ),
+                  if (status == 'Out for Delivery') ...[
+                    const SizedBox(height: 16),
+                    const LiveRiderSimulation(),
+                  ],
                 ],
                 const SizedBox(height: 16),
 
@@ -401,5 +405,74 @@ class OrderTrackingScreen extends StatelessWidget {
       default:
         return Colors.grey;
     }
+  }
+}
+
+class LiveRiderSimulation extends StatefulWidget {
+  const LiveRiderSimulation({super.key});
+
+  @override
+  State<LiveRiderSimulation> createState() => _LiveRiderSimulationState();
+}
+
+class _LiveRiderSimulationState extends State<LiveRiderSimulation> {
+  double distance = 5.0; // Simulated km
+  int mins = 15; // Simulated ETA
+
+  @override
+  void initState() {
+    super.initState();
+    _simulateMovement();
+  }
+
+  void _simulateMovement() async {
+    while (mounted && distance > 0.1) {
+      await Future.delayed(const Duration(seconds: 5));
+      if (!mounted) break;
+      setState(() {
+        if (distance > 0.5) distance -= 0.5;
+        if (mins > 1) mins -= 2;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.blue[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.delivery_dining, size: 40, color: Colors.blue),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Live Rider Tracking \u{1F4E1}',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.blue)),
+                      Text(
+                          'Rider is \${distance.toStringAsFixed(1)} km away (\${mins} mins ETA)',
+                          style: const TextStyle(color: Colors.blueAccent)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+                value: 1.0 - (distance / 5.0),
+                backgroundColor: Colors.white,
+                color: Colors.blue),
+          ],
+        ),
+      ),
+    );
   }
 }

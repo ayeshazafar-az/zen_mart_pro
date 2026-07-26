@@ -8,6 +8,7 @@ import 'notifications_screen.dart';
 import 'help_support_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/language/language_provider.dart';
 
 class CustomerProfileMenuScreen extends StatelessWidget {
   const CustomerProfileMenuScreen({super.key});
@@ -132,6 +133,19 @@ class CustomerProfileMenuScreen extends StatelessWidget {
                 value: themeProvider.isDarkMode,
                 onChanged: (bool value) {
                   themeProvider.toggleTheme(value);
+                },
+              );
+            },
+          ),
+          Consumer<LanguageProvider>(
+            builder: (context, langProvider, child) {
+              return ListTile(
+                leading: const Icon(Icons.language, color: Colors.green),
+                title:
+                    Text('Language: \${langProvider.getText("toggle_lang")}'),
+                trailing: const Icon(Icons.sync),
+                onTap: () {
+                  langProvider.toggleLanguage();
                 },
               );
             },

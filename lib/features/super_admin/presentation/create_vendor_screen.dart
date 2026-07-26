@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/notification_service.dart';
 
 class CreateVendorScreen extends StatefulWidget {
   const CreateVendorScreen({super.key});
@@ -40,8 +41,9 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
         options: Firebase.app().options,
       );
 
-      auth.UserCredential credential = await auth.FirebaseAuth.instanceFor(app: secondaryApp)
-          .createUserWithEmailAndPassword(
+      auth.UserCredential credential =
+          await auth.FirebaseAuth.instanceFor(app: secondaryApp)
+              .createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -60,6 +62,24 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
         'role': 'vendor',
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // --- FCM TRIGGER: Notify Admins of New Vendor ---
+      try {
+        final adminQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('role', isEqualTo: 'Admin')
+            .get();
+
+        for (var adminDoc in adminQuery.docs) {
+          await NotificationService().sendMockNotificationToUser(
+            adminDoc.id,
+            "New Vendor Registered \u{1F464}",
+            "Vendor \${_nameController.text.trim()} account created.",
+          );
+        }
+      } catch (e) {
+        debugPrint('Failed to send admin notification: \$e');
+      }
 
       // Cleanup secondary app
       await secondaryApp.delete();
@@ -105,7 +125,7 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
                   prefixIcon: Icon(Icons.person),
                 ),
                 validator: (value) =>
-                value == null || value.isEmpty ? 'Enter vendor name' : null,
+                    value == null || value.isEmpty ? 'Enter vendor name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -116,8 +136,9 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
                   prefixIcon: Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Enter email address' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter email address'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -141,21 +162,22 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Enter phone number' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter phone number'
+                    : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _createVendor,
                 child: _isLoading
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text('Create Vendor'),
               ),
             ],

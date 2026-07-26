@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../../core/services/notification_service.dart';
 
 class AvailableOrdersScreen extends StatelessWidget {
   const AvailableOrdersScreen({super.key});
@@ -94,6 +95,22 @@ class AvailableOrdersScreen extends StatelessWidget {
                               'riderId': riderId,
                               'status': 'Out for Delivery',
                             });
+
+                            // --- FCM TRIGGER: Notify Customer ---
+                            try {
+                              final customerId = data['customerId'] ?? '';
+                              if (customerId.isNotEmpty) {
+                                await NotificationService()
+                                    .sendMockNotificationToUser(
+                                  customerId,
+                                  "Rider Assigned \u{1F6F5}",
+                                  "Your delivery rider is heading out!",
+                                );
+                              }
+                            } catch (e) {
+                              debugPrint('Failed to notify customer: \$e');
+                            }
+
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
