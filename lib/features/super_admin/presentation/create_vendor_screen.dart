@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/notification_service.dart';
 
@@ -91,10 +92,50 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
       await secondaryApp.delete();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vendor account created successfully!')),
+        final email = _emailController.text.trim();
+        final password = _passwordController.text.trim();
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Vendor Created'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Share these credentials with the vendor:'),
+                const SizedBox(height: 12),
+                Text('Email: $email',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Password: $password',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(
+                      text: 'Login Email: $email\nPassword: $password'));
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                          content: Text('Credentials copied to clipboard!')),
+                    );
+                  }
+                },
+                child: const Text('Copy to Clipboard'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pop(context);
+                },
+                child: const Text('Done'),
+              ),
+            ],
+          ),
         );
-        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {

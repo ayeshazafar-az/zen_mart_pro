@@ -284,15 +284,16 @@ class OrderTrackingScreen extends StatelessWidget {
                           style: TextStyle(fontSize: 16)),
                       onPressed: () async {
                         String realRiderName = 'Rider';
+                        String? realRiderPhone;
                         try {
-                          if (riderId != null &&
-                              riderId.toString().isNotEmpty) {
+                          if (riderId != null) {
                             final doc = await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(riderId.toString())
                                 .get();
                             if (doc.exists) {
                               realRiderName = doc.data()?['name'] ?? 'Rider';
+                              realRiderPhone = doc.data()?['phone'];
                             }
                           }
                         } catch (e) {}
@@ -306,6 +307,7 @@ class OrderTrackingScreen extends StatelessWidget {
                                 recipientName: realRiderName,
                                 chatChannel: 'rider_messages',
                                 recipientId: riderId?.toString() ?? '',
+                                recipientPhone: realRiderPhone,
                               ),
                             ),
                           );
@@ -330,6 +332,7 @@ class OrderTrackingScreen extends StatelessWidget {
                     onPressed: () async {
                       String realVendorName = 'Vendor';
                       String realVendorId = '';
+                      String? realVendorPhone;
                       try {
                         if (shopId.isNotEmpty) {
                           final doc = await FirebaseFirestore.instance
@@ -339,6 +342,7 @@ class OrderTrackingScreen extends StatelessWidget {
                           if (doc.exists) {
                             realVendorName = doc.data()?['name'] ?? 'Vendor';
                             realVendorId = doc.data()?['vendorId'] ?? '';
+                            realVendorPhone = doc.data()?['phone'];
                           }
                         }
                       } catch (e) {}
@@ -352,6 +356,7 @@ class OrderTrackingScreen extends StatelessWidget {
                               recipientName: realVendorName,
                               chatChannel: 'vendor_messages',
                               recipientId: realVendorId,
+                              recipientPhone: realVendorPhone,
                             ),
                           ),
                         );
