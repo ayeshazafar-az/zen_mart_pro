@@ -25,6 +25,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final data = widget.productDoc.data() as Map<String, dynamic>;
     final name = data['name'] ?? 'Product Name';
     final price = data['price']?.toString() ?? '0.00';
+    final originalPrice = data['originalPrice']?.toString();
+    final discount = data['discountPercentage'] ?? 0;
     final description =
         data['description'] ?? 'No description available for this product.';
     final imageUrl = data['imageUrl'] ?? '';
@@ -107,12 +109,53 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Rs. $price',
-                    style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold),
+                  if (discount > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.redAccent.withValues(alpha: 0.5)),
+                      ),
+                      child: Text(
+                        '-$discount% Special Discount',
+                        style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      Text(
+                        'Rs. $price',
+                        style: TextStyle(
+                            fontSize: 24,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.green.shade400
+                                    : Colors.green.shade700,
+                            fontWeight: FontWeight.w900),
+                      ),
+                      if (originalPrice != null && discount > 0) ...[
+                        const SizedBox(width: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 3.0),
+                          child: Text(
+                            'Rs. $originalPrice',
+                            style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough),
+                          ),
+                        ),
+                      ]
+                    ],
                   ),
                   if (categoryId != null) ...[
                     const SizedBox(height: 8),

@@ -22,7 +22,19 @@ class _ManageVendorProductsScreenState
     final nameController =
         TextEditingController(text: isEditing ? productDoc['name'] : '');
     final priceController = TextEditingController(
-        text: isEditing ? productDoc['price']?.toString() : '');
+        text: isEditing
+            ? (productDoc.data() as Map<String, dynamic>)
+                    .containsKey('originalPrice')
+                ? productDoc['originalPrice']?.toString()
+                : productDoc['price']?.toString()
+            : '');
+    final discountController = TextEditingController(
+        text: isEditing
+            ? (productDoc.data() as Map<String, dynamic>)
+                    .containsKey('discountPercentage')
+                ? productDoc['discountPercentage']?.toString()
+                : '0'
+            : '');
     final stockController = TextEditingController(
         text: isEditing ? productDoc['stock']?.toString() : '');
     final descriptionController =
@@ -157,7 +169,16 @@ class _ManageVendorProductsScreenState
                   TextField(
                     controller: priceController,
                     decoration: const InputDecoration(
-                      labelText: 'Price',
+                      labelText: 'Original Price (Rs.)',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: discountController,
+                    decoration: const InputDecoration(
+                      labelText: 'Discount Percentage (%) - Optional',
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -190,8 +211,16 @@ class _ManageVendorProductsScreenState
               ElevatedButton(
                 onPressed: () async {
                   final name = nameController.text.trim();
-                  final price =
+                  final originalPrice =
                       double.tryParse(priceController.text.trim()) ?? 0.0;
+                  final discountPercentage =
+                      int.tryParse(discountController.text.trim()) ?? 0;
+                  // Dynamic final price calculation
+                  final finalPrice = discountPercentage > 0
+                      ? originalPrice -
+                          (originalPrice * (discountPercentage / 100))
+                      : originalPrice;
+
                   final stock = int.tryParse(stockController.text.trim()) ?? 0;
                   final imageUrl = dialogBase64Image ?? '';
                   final description = descriptionController.text.trim();
@@ -215,7 +244,10 @@ class _ManageVendorProductsScreenState
                   if (isEditing) {
                     await productsRef.doc(productDoc.id).update({
                       'name': name,
-                      'price': price,
+                      'price':
+                          finalPrice, // Checkout still reads 'price' correctly
+                      'originalPrice': originalPrice,
+                      'discountPercentage': discountPercentage,
                       'stock': stock,
                       'imageUrl': imageUrl,
                       'description': description,
@@ -225,7 +257,9 @@ class _ManageVendorProductsScreenState
                   } else {
                     await productsRef.add({
                       'name': name,
-                      'price': price,
+                      'price': finalPrice,
+                      'originalPrice': originalPrice,
+                      'discountPercentage': discountPercentage,
                       'stock': stock,
                       'imageUrl': imageUrl,
                       'description': description,

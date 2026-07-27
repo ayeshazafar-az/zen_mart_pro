@@ -50,6 +50,9 @@ class WishlistScreen extends StatelessWidget {
               final item = wishlistItems[index];
               final data = item.data() as Map<String, dynamic>;
 
+              final discount = data['discountPercentage'] ?? 0;
+              final originalPrice = data['originalPrice']?.toString();
+
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
                 child: ListTile(
@@ -70,9 +73,28 @@ class WishlistScreen extends StatelessWidget {
                   ),
                   title: Text(data['name'] ?? 'Unknown Product',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('\$${data['price']?.toString() ?? '0.00'}',
-                      style: const TextStyle(
-                          color: Colors.green, fontWeight: FontWeight.bold)),
+                  subtitle: Row(
+                    children: [
+                      Text('Rs. ${data['price']?.toString() ?? '0.00'}',
+                          style: TextStyle(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.green.shade400
+                                  : Colors.green.shade700,
+                              fontWeight: FontWeight.bold)),
+                      if (originalPrice != null && discount > 0) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          'Rs. $originalPrice',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ]
+                    ],
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.remove_circle_outline,
                         color: Colors.red),
