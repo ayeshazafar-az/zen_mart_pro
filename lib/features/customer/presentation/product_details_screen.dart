@@ -67,7 +67,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 content: Text('Removed from wishlist')));
                       }
                     } else {
-                      await docRef.set(data);
+                      final parsedShopId = data['shopId'] ??
+                          widget.productDoc.reference.parent.parent?.id;
+                      final savedData = Map<String, dynamic>.from(data);
+                      if (parsedShopId != null) {
+                        savedData['shopId'] = parsedShopId;
+                      }
+                      await docRef.set(savedData);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Added to wishlist')));
@@ -171,8 +177,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           final catName = snapshot.data!['name'] ?? 'Category';
                           return Chip(
                             label: Text(catName,
-                                style: const TextStyle(fontSize: 12)),
-                            backgroundColor: Colors.blue.shade50,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.blue.shade100
+                                        : Colors.blue.shade900)),
+                            backgroundColor: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? Colors.blue.shade900.withValues(alpha: 0.3)
+                                : Colors.blue.shade50,
                             side: BorderSide.none,
                           );
                         }
@@ -242,9 +256,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     if (userId.isEmpty) return;
 
                     try {
-                      // Get shopId from the product's parent collection path
+                      // Get shopId from the product mapping or fallback to parent hierarchy
                       final productRef = widget.productDoc.reference;
-                      final shopId = productRef.parent.parent?.id ?? '';
+                      final shopId =
+                          data['shopId'] ?? productRef.parent.parent?.id ?? '';
 
                       await FirebaseFirestore.instance
                           .collection('users')

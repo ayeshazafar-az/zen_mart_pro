@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../shared_features/widgets/safe_image.dart';
 import '../../auth/presentation/auth_provider.dart';
 import 'product_details_screen.dart';
 
@@ -59,16 +59,11 @@ class WishlistScreen extends StatelessWidget {
                   contentPadding: const EdgeInsets.all(8),
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: CachedNetworkImage(
-                      imageUrl: data['imageUrl'] ??
-                          'https://placehold.co/100x100/png',
+                    child: SafeImage(
+                      imageUrl: data['imageUrl'] ?? '',
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.broken_image, size: 40),
                     ),
                   ),
                   title: Text(data['name'] ?? 'Unknown Product',
@@ -95,17 +90,62 @@ class WishlistScreen extends StatelessWidget {
                       ]
                     ],
                   ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle_outline,
-                        color: Colors.red),
-                    onPressed: () async {
-                      await item.reference.delete();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Removed from wishlist')));
-                      }
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_shopping_cart,
+                            color: Colors.orange),
+                        onPressed: () async {
+                          final shopId = data['shopId'] ??
+                              item.reference.parent.parent?.id ??
+                              '';
+                          if (shopId.isEmpty) return;
+
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userId)
+                                .collection('cart')
+                                .add({
+                              'productId': item.id,
+                              'shopId': shopId,
+                              'name': data['name'],
+                              'price': data['price'] ?? 0.0,
+                              'quantity': 1,
+                              'imageUrl': data['imageUrl'] ?? '',
+                              'addedAt': FieldValue.serverTimestamp(),
+                            });
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Added ${data['name']} to cart!')),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text('Error adding to cart: $e')),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline,
+                            color: Colors.red),
+                        onPressed: () async {
+                          await item.reference.delete();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Removed from wishlist')));
+                          }
+                        },
+                      ),
+                    ],
                   ),
                   onTap: () {
                     // Navigate to product details but require a DocumentReference for the actual product if possible.
