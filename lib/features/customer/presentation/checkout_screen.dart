@@ -249,6 +249,99 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (proceed == true) {
         _placeOrder(userId, userEmail, finalTotal);
       }
+    } else if (_selectedPaymentMethod == 'Easypaisa' ||
+        _selectedPaymentMethod == 'JazzCash') {
+      final isJazzCash = _selectedPaymentMethod == 'JazzCash';
+      final proceed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+                title: Text(
+                    isJazzCash ? 'JazzCash Transfer' : 'Easypaisa Transfer',
+                    textAlign: TextAlign.center),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.account_balance_wallet,
+                        size: 40,
+                        color: isJazzCash ? Colors.red : Colors.green),
+                    const SizedBox(height: 16),
+                    Text('Total Amount: Rs. ${finalTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    const Text(
+                        'Send payment to:\n0300-1234567\nAccount Title: Zen Mart Pro',
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    const TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Transaction ID (TID)',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Verify & Complete'),
+                  ),
+                ],
+              ));
+
+      if (proceed == true) {
+        _placeOrder(userId, userEmail, finalTotal);
+      }
+    } else if (_selectedPaymentMethod == 'PayPal' ||
+        _selectedPaymentMethod == 'Credit / Debit Card') {
+      final isPaypal = _selectedPaymentMethod == 'PayPal';
+      final proceed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+                title: Text(isPaypal ? 'PayPal Checkout' : 'Card Payment',
+                    textAlign: TextAlign.center),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(isPaypal ? Icons.paypal : Icons.credit_card,
+                        size: 40, color: isPaypal ? Colors.blue : Colors.black),
+                    const SizedBox(height: 16),
+                    Text('Total Amount: Rs. ${finalTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText:
+                            isPaypal ? 'PayPal Email Address' : 'Card Number',
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Pay Now'),
+                  ),
+                ],
+              ));
+
+      if (proceed == true) {
+        _placeOrder(userId, userEmail, finalTotal);
+      }
     } else {
       _placeOrder(userId, userEmail, finalTotal);
     }
@@ -339,6 +432,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         DropdownMenuItem(
                             value: 'Online Wallet / QR Code',
                             child: Text('Online Wallet / QR Code')),
+                        DropdownMenuItem(
+                            value: 'Easypaisa', child: Text('Easypaisa')),
+                        DropdownMenuItem(
+                            value: 'JazzCash', child: Text('JazzCash')),
+                        DropdownMenuItem(
+                            value: 'PayPal', child: Text('PayPal')),
                       ],
                       onChanged: (value) {
                         if (value != null) {

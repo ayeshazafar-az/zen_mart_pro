@@ -220,6 +220,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                   value: [
                                     'Accepted',
                                     'Preparing',
+                                    'Ready',
                                     'Out for Delivery',
                                     'Delivered'
                                   ].contains(status)
@@ -232,6 +233,8 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                     DropdownMenuItem(
                                         value: 'Preparing',
                                         child: Text('Preparing')),
+                                    DropdownMenuItem(
+                                        value: 'Ready', child: Text('Ready')),
                                     DropdownMenuItem(
                                         value: 'Out for Delivery',
                                         child: Text('Out for Delivery')),
@@ -254,6 +257,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             'Pending',
                             'Accepted',
                             'Preparing',
+                            'Ready',
                             'Out for Delivery'
                           ].contains(status))
                             SizedBox(
@@ -318,6 +322,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
       case 'cancelled':
         return Colors.red;
       case 'preparing':
+      case 'ready':
       case 'out for delivery':
         return Colors.orange;
       default:
@@ -341,6 +346,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
       body = "Unfortunately, the vendor rejected your order.";
     }
     if (status == 'Preparing') body = "The vendor is preparing your order.";
+    if (status == 'Ready') body = "Your order is ready.";
 
     try {
       await NotificationService().sendMockNotificationToUser(
