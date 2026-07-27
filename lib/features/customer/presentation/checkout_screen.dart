@@ -26,7 +26,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isLoading = false;
   double _discountAmount = 0.0;
   String _appliedCoupon = '';
-  final double _deliveryFee = 50.0;
+  double _deliveryFee = 50.0;
+  bool _fetchingFee = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDeliveryFee();
+  }
+
+  Future<void> _fetchDeliveryFee() async {
+    if (widget.cartItems.isNotEmpty) {
+      final data = widget.cartItems.first.data() as Map<String, dynamic>;
+      final shopId = data['shopId'];
+      if (shopId != null) {
+        try {
+          final shopDoc = await FirebaseFirestore.instance
+              .collection('shops')
+              .doc(shopId)
+              .get();
+          if (shopDoc.exists) {
+            final shopData = shopDoc.data() as Map<String, dynamic>;
+            if (shopData['deliveryFee'] != null) {
+              setState(() {
+                _deliveryFee = (shopData['deliveryFee'] as num).toDouble();
+              });
+            }
+          }
+        } catch (e) {
+          debugPrint('Failed to get delivery fee: $e');
+        }
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _fetchingFee = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -228,159 +265,172 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout & Payment')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Shipping Address',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                    labelText: 'Delivery Address',
-                    border: OutlineInputBorder()),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter delivery address'
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                    labelText: 'Contact Phone Number',
-                    border: OutlineInputBorder()),
-                keyboardType: TextInputType.phone,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter phone number'
-                    : null,
-              ),
-              const SizedBox(height: 24),
-              const Text('Discount & Coupons',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _couponController,
+      body: _fetchingFee
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Shipping Address',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _addressController,
                       decoration: const InputDecoration(
-                          hintText: 'Enter Coupon Code',
+                          labelText: 'Delivery Address',
                           border: OutlineInputBorder()),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Enter delivery address'
+                          : null,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _applyCoupon,
-                    child: const Text('Apply'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text('Payment Method',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedPaymentMethod,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                items: const [
-                  DropdownMenuItem(
-                      value: 'Cash on Delivery',
-                      child: Text('Cash on Delivery')),
-                  DropdownMenuItem(
-                      value: 'Credit / Debit Card',
-                      child: Text('Credit / Debit Card')),
-                  DropdownMenuItem(
-                      value: 'Online Wallet / QR Code',
-                      child: Text('Online Wallet / QR Code')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedPaymentMethod = value);
-                  }
-                },
-              ),
-              const SizedBox(height: 32),
-              const Text('Order Summary',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Subtotal:',
-                              style: TextStyle(fontSize: 16)),
-                          Text('Rs. ${widget.subtotal.toStringAsFixed(2)}',
-                              style: const TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                      if (_discountAmount > 0) ...[
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Discount:',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.green)),
-                            Text('- Rs. ${_discountAmount.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.green)),
-                          ],
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: const InputDecoration(
+                          labelText: 'Contact Phone Number',
+                          border: OutlineInputBorder()),
+                      keyboardType: TextInputType.phone,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Enter phone number'
+                          : null,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text('Discount & Coupons',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _couponController,
+                            decoration: const InputDecoration(
+                                hintText: 'Enter Coupon Code',
+                                border: OutlineInputBorder()),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: _applyCoupon,
+                          child: const Text('Apply'),
                         ),
                       ],
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Delivery Fee:',
-                              style: TextStyle(fontSize: 16)),
-                          Text('Rs. ${_deliveryFee.toStringAsFixed(2)}',
-                              style: const TextStyle(fontSize: 16)),
-                        ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text('Payment Method',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedPaymentMethod,
+                      decoration:
+                          const InputDecoration(border: OutlineInputBorder()),
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'Cash on Delivery',
+                            child: Text('Cash on Delivery')),
+                        DropdownMenuItem(
+                            value: 'Credit / Debit Card',
+                            child: Text('Credit / Debit Card')),
+                        DropdownMenuItem(
+                            value: 'Online Wallet / QR Code',
+                            child: Text('Online Wallet / QR Code')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedPaymentMethod = value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    const Text('Order Summary',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Subtotal:',
+                                    style: TextStyle(fontSize: 16)),
+                                Text(
+                                    'Rs. ${widget.subtotal.toStringAsFixed(2)}',
+                                    style: const TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                            if (_discountAmount > 0) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Discount:',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.green)),
+                                  Text(
+                                      '- Rs. ${_discountAmount.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                          fontSize: 16, color: Colors.green)),
+                                ],
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Delivery Fee:',
+                                    style: TextStyle(fontSize: 16)),
+                                Text('Rs. ${_deliveryFee.toStringAsFixed(2)}',
+                                    style: const TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                            const Divider(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Total Amount:',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold)),
+                                Text('Rs. ${finalTotal.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green)),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                      const Divider(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Total Amount:',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text('Rs. ${finalTotal.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green)),
-                        ],
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () =>
+                                _processCheckout(userId, userEmail, finalTotal),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text('Place Order',
+                                style: TextStyle(fontSize: 16)),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () => _processCheckout(userId, userEmail, finalTotal),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Place Order',
-                          style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

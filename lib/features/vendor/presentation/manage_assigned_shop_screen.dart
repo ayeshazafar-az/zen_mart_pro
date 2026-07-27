@@ -20,6 +20,7 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _deliveryFeeController = TextEditingController();
 
   bool _isLoading = false;
   String? _shopDocId;
@@ -48,6 +49,7 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
     _nameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
+    _deliveryFeeController.dispose();
     super.dispose();
   }
 
@@ -60,6 +62,8 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
         'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'phone': _phoneController.text.trim(),
+        'deliveryFee':
+            double.tryParse(_deliveryFeeController.text.trim()) ?? 50.0,
         if (_base64Image != null) 'imageUrl': _base64Image,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -119,6 +123,8 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
             _nameController.text = data['name'] ?? '';
             _addressController.text = data['address'] ?? '';
             _phoneController.text = data['phone'] ?? '';
+            _deliveryFeeController.text =
+                (data['deliveryFee'] ?? 50.0).toString();
             if (data['imageUrl'] != null &&
                 data['imageUrl'].toString().isNotEmpty) {
               _base64Image = data['imageUrl'];
@@ -194,6 +200,24 @@ class _ManageAssignedShopScreenState extends State<ManageAssignedShopScreen> {
                     validator: (value) => value == null || value.isEmpty
                         ? 'Enter phone number'
                         : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _deliveryFeeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Delivery Charge (Rs.)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.currency_rupee),
+                    ),
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Enter delivery fee';
+                      if (double.tryParse(value) == null)
+                        return 'Enter valid number';
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 24),
                   SizedBox(

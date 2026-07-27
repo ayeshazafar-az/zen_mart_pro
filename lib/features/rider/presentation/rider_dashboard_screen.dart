@@ -18,50 +18,49 @@ class RiderDashboardScreen extends StatefulWidget {
 class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    AvailableOrdersScreen(),
-    ActiveDeliveryScreen(),
-    DeliveryHistoryScreen(),
-    EarningsDashboardScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.currentUser;
+
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final List<Widget> _screens = [
+      const AvailableOrdersScreen(),
+      const ActiveDeliveryScreen(),
+      const DeliveryHistoryScreen(),
+      const EarningsDashboardScreen(),
+      EditProfileScreen(user: user),
+    ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rider Portal'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            tooltip: 'Edit Profile',
-            onPressed: () {
-              final user = authProvider.currentUser;
-              if (user != null) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => EditProfileScreen(user: user)));
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await authProvider.logout();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
-          ),
-        ],
+      appBar: _currentIndex == 4
+          ? null
+          : AppBar(
+              title: const Text('Rider Portal'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  tooltip: 'Logout',
+                  onPressed: () async {
+                    await authProvider.logout();
+                    if (context.mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
       ),
-      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
@@ -76,6 +75,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(
               icon: Icon(Icons.account_balance_wallet), label: 'Earnings'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

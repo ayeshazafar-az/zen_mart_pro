@@ -12,23 +12,75 @@ import 'manage_vendor_shop_banner_screen.dart';
 import 'view_vendor_reviews_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 
-class VendorDashboardScreen extends StatelessWidget {
+class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
+
+  @override
+  State<VendorDashboardScreen> createState() => _VendorDashboardScreenState();
+}
+
+class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
 
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final List<Widget> screens = [
+      _VendorHomeTab(user: user),
+      const ManageVendorOrdersScreen(),
+      const ManageVendorProductsScreen(),
+      const _VendorSettingsTab(),
+      EditProfileScreen(user: user),
+    ];
+
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long), label: 'Orders'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.inventory), label: 'Products'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}
+
+class _VendorHomeTab extends StatelessWidget {
+  final user;
+  const _VendorHomeTab({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vendor Portal'),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () async {
-              await authProvider.logout();
+              await Provider.of<AuthProvider>(context, listen: false).logout();
               if (context.mounted) {
                 Navigator.pushReplacement(
                   context,
@@ -44,9 +96,11 @@ class VendorDashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome Header Card
             Card(
-              elevation: 2,
+              elevation: 4,
+              shadowColor: Colors.black12,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
@@ -74,120 +128,68 @@ class VendorDashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    ActionChip(
-                      label: const Text('Edit Profile',
-                          style: TextStyle(fontSize: 12)),
-                      avatar: const Icon(Icons.edit, size: 16),
-                      onPressed: () {
-                        if (user != null) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      EditProfileScreen(user: user)));
-                        }
-                      },
-                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             const Text(
-              'Storefront Management',
+              'Quick Actions',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            // Grid of Vendor Modules
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
+            Row(
               children: [
-                _VendorDashboardCard(
-                  title: 'Manage Shop',
-                  icon: Icons.storefront,
-                  subtitle: 'Update shop info',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ManageAssignedShopScreen()),
-                    );
-                  },
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const ViewVendorReviewsScreen()));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Icon(Icons.star, color: Colors.orange, size: 30),
+                          SizedBox(height: 10),
+                          Text('Reviews',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                _VendorDashboardCard(
-                  title: 'Products',
-                  icon: Icons.shopping_bag,
-                  subtitle: 'Add, edit & stock',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ManageVendorProductsScreen()),
-                    );
-                  },
-                ),
-                _VendorDashboardCard(
-                  title: 'Orders',
-                  icon: Icons.receipt_long,
-                  subtitle: 'Receive & update orders',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ManageVendorOrdersScreen()),
-                    );
-                  },
-                ),
-                _VendorDashboardCard(
-                  title: 'Categories',
-                  icon: Icons.category,
-                  subtitle: 'Manage categories',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ManageVendorCategoriesScreen()),
-                    );
-                  },
-                ),
-                _VendorDashboardCard(
-                  title: 'Shop Banner',
-                  icon: Icons.image,
-                  subtitle: 'Manage banner & promo',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ManageVendorShopBannerScreen()),
-                    );
-                  },
-                ),
-                _VendorDashboardCard(
-                  title: 'Customer Reviews',
-                  icon: Icons.star,
-                  subtitle: 'View ratings & feedback',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ViewVendorReviewsScreen()),
-                    );
-                  },
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Icon(Icons.analytics, color: Colors.blue, size: 30),
+                        SizedBox(height: 10),
+                        Text('Analytics',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
             const Center(child: ZenvyroBrandingWidget(compact: true)),
           ],
         ),
@@ -196,51 +198,66 @@ class VendorDashboardScreen extends StatelessWidget {
   }
 }
 
-class _VendorDashboardCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _VendorDashboardCard({
-    required this.title,
-    required this.icon,
-    required this.subtitle,
-    required this.onTap,
-  });
+class _VendorSettingsTab extends StatelessWidget {
+  const _VendorSettingsTab();
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 32, color: Colors.orange),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('Store Settings')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSettingsTile(
+            context,
+            'Manage Assigned Shop',
+            'Update location and contact info',
+            Icons.storefront,
+            const ManageAssignedShopScreen(),
           ),
+          _buildSettingsTile(
+            context,
+            'Manage Categories',
+            'Organize your shop structure',
+            Icons.category,
+            const ManageVendorCategoriesScreen(),
+          ),
+          _buildSettingsTile(
+            context,
+            'Shop Banner',
+            'Upload a promotional image',
+            Icons.image,
+            const ManageVendorShopBannerScreen(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsTile(BuildContext context, String title, String subtitle,
+      IconData icon, Widget screen) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8)),
+          child: Icon(icon, color: Colors.orange),
         ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+        trailing:
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        onTap: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
       ),
     );
   }
