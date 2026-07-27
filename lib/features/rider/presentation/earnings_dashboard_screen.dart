@@ -45,12 +45,44 @@ class EarningsDashboardScreen extends StatelessWidget {
                 const Text('Earnings Overview',
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.green.withValues(alpha: 0.15)
+                        : Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.green.shade800
+                          : Colors.green.shade200,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.greenAccent
+                              : Colors.green.shade700),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'You earn 100% of the Delivery Charge attached to every completed order.',
+                          style: TextStyle(fontSize: 13, height: 1.3),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: Card(
-                        color: Colors.orange[50],
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.orange.withValues(alpha: 0.2)
+                            : Colors.orange[50],
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
@@ -72,7 +104,9 @@ class EarningsDashboardScreen extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Card(
-                        color: Colors.blue[50],
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.blue.withValues(alpha: 0.2)
+                            : Colors.blue[50],
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Column(

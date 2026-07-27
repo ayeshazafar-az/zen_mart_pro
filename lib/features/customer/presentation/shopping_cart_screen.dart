@@ -54,6 +54,28 @@ class ShoppingCartScreen extends StatelessWidget {
 
           return Column(
             children: [
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.blue.withValues(alpha: 0.2)
+                    : Colors.blue.shade50,
+                child: Row(
+                  children: [
+                    Icon(Icons.local_shipping,
+                        size: 20, color: Colors.blue.shade700),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Delivery Charges are calculated directly at checkout.',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16.0),
