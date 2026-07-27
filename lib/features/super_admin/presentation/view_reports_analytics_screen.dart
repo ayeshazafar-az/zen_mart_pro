@@ -97,8 +97,32 @@ class ViewReportsAnalyticsScreen extends StatelessWidget {
                     ),
                     child: LineChart(
                       LineChartData(
+                        lineTouchData: LineTouchData(
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipItems: (touchedSpots) {
+                              return touchedSpots.map((spot) {
+                                return LineTooltipItem(
+                                  'Rs. ${spot.y.toStringAsFixed(2)}',
+                                  const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
                         gridData: const FlGridData(show: false),
                         titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 45,
+                              getTitlesWidget: (value, meta) {
+                                return Text('Rs.${value.toInt()}',
+                                    style: const TextStyle(fontSize: 10));
+                              },
+                            ),
+                          ),
                           rightTitles: const AxisTitles(
                               sideTitles: SideTitles(showTitles: false)),
                           topTitles: const AxisTitles(

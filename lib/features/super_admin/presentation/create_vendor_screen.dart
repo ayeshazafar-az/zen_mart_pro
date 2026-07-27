@@ -74,7 +74,7 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
       try {
         final adminQuery = await FirebaseFirestore.instance
             .collection('users')
-            .where('role', isEqualTo: 'Admin')
+            .where('role', isEqualTo: 'super_admin')
             .get();
 
         for (var adminDoc in adminQuery.docs) {
