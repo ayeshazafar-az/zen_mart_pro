@@ -61,6 +61,12 @@ class AuthProvider with ChangeNotifier {
     _verificationId = null;
   }
 
+  Future<void> reloadUserData() async {
+    if (_auth.currentUser != null) {
+      await _fetchUserData(_auth.currentUser!.uid);
+    }
+  }
+
   Future<void> _fetchUserData(String uid) async {
     try {
       DocumentSnapshot doc = await _firestore

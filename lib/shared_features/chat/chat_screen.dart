@@ -169,8 +169,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: Colors.white24,
-                  backgroundImage:
-                      imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                  backgroundImage: imageUrl.isNotEmpty
+                      ? (imageUrl.startsWith('http')
+                              ? NetworkImage(imageUrl)
+                              : MemoryImage(base64Decode(imageUrl)))
+                          as ImageProvider
+                      : null,
                   child: imageUrl.isEmpty
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,

@@ -27,7 +27,13 @@ class LanguageProvider extends ChangeNotifier {
       'settings': 'Settings',
       'logout': 'Logout',
       'dashboard': 'Customer Dashboard',
-      'toggle_lang': 'Español'
+      'toggle_lang': 'Español',
+      'edit_profile': 'Edit Profile',
+      'profile_settings': 'Profile & Settings',
+      'saved_addresses': 'Saved Addresses',
+      'notifications': 'Notifications',
+      'dark_mode': 'Dark Mode',
+      'language_label': 'Language: English',
     },
     AppLanguage.spanish: {
       'welcome': '¡Bienvenido Usuario!',
@@ -40,7 +46,13 @@ class LanguageProvider extends ChangeNotifier {
       'settings': 'Ajustes',
       'logout': 'Cerrar Sesión',
       'dashboard': 'Panel de Clientes',
-      'toggle_lang': 'English'
+      'toggle_lang': 'English',
+      'edit_profile': 'Editar Perfil',
+      'profile_settings': 'Perfil y Ajustes',
+      'saved_addresses': 'Direcciones Guardadas',
+      'notifications': 'Notificaciones',
+      'dark_mode': 'Modo Oscuro',
+      'language_label': 'Idioma: Español',
     }
   };
 

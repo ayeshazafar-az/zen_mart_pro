@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import '../../../core/constants/app_constants.dart';
 
 class ManageCustomersScreen extends StatelessWidget {
@@ -38,8 +39,12 @@ class ManageCustomersScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundImage:
-                        imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                    backgroundImage: imageUrl.isNotEmpty
+                        ? (imageUrl.startsWith('http')
+                                ? NetworkImage(imageUrl)
+                                : MemoryImage(base64Decode(imageUrl)))
+                            as ImageProvider
+                        : null,
                     child: imageUrl.isEmpty ? const Icon(Icons.person) : null,
                   ),
                   title: Text(name,

@@ -134,6 +134,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   final vendors = snapshot.data!.docs;
 
                   return DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _selectedVendorUid,
                     decoration: const InputDecoration(
                       labelText: 'Assign to Vendor',

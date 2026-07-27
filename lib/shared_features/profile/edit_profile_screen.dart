@@ -125,8 +125,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       if (mounted) {
-        // Force auth provider to refresh state
-        Provider.of<AuthProvider>(context, listen: false).clearError();
+        // Force auth provider to refresh state and reload user data
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        authProvider.clearError();
+        await authProvider.reloadUserData();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
