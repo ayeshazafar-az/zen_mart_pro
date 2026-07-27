@@ -215,26 +215,13 @@ class CustomerHomeScreen extends StatelessWidget {
                     final imageUrl = data['imageUrl'] ?? '';
 
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        leading: imageUrl.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: SafeImage(
-                                  imageUrl: imageUrl,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : const CircleAvatar(child: Icon(Icons.store)),
-                        title: Text(name,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(address),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Colors.grey.shade200)),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
@@ -246,6 +233,62 @@ class CustomerHomeScreen extends StatelessWidget {
                             ),
                           );
                         },
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              height: 100,
+                              child: imageUrl.isNotEmpty
+                                  ? SafeImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color: Colors.orange.shade50,
+                                      child: const Icon(Icons.store,
+                                          color: Colors.orange, size: 40),
+                                    ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16)),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.location_on,
+                                            size: 14,
+                                            color: Colors.grey.shade500),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            address,
+                                            style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 13),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(right: 16.0),
+                              child: Icon(Icons.arrow_forward_ios,
+                                  size: 16, color: Colors.orange),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -264,24 +307,29 @@ class CustomerHomeScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [Color(0xFFFF6F00), Color(0xFFFF9100)],
+          colors: [Color(0xFFFF9100), Color(0xFFFF3D00)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10)
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF3D00).withValues(alpha: 0.3),
+            offset: const Offset(0, 8),
+            blurRadius: 15,
+          )
         ],
       ),
       alignment: Alignment.center,
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.1,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
         ),
       ),
     );

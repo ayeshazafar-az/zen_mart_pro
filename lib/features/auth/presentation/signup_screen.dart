@@ -85,203 +85,225 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const Text(
-                'Join Zen Mart Pro',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Register as a customer or apply to become a delivery rider.',
-                style: TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Full Name Field
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
-                ),
-                validator: (val) => val == null || val.isEmpty
-                    ? 'Please enter your name'
-                    : null,
-              ),
-              const SizedBox(height: 16),
-
-              // Email Field
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (val) => val == null || !val.contains('@')
-                    ? 'Please enter a valid email'
-                    : null,
-              ),
-              const SizedBox(height: 16),
-
-              // Phone Number Field
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: '+92 3XX XXXXXXX',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (val) => val == null || val.length < 10
-                    ? 'Enter a valid phone number'
-                    : null,
-              ),
-              const SizedBox(height: 16),
-
-              // Role Selection (Only Customer)
-              DropdownButtonFormField<String>(
-                initialValue: 'customer',
-                decoration: const InputDecoration(
-                  labelText: 'Register As',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.badge),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'customer', child: Text('Customer')),
-                ],
-                onChanged: (val) {},
-              ),
-              const SizedBox(height: 16),
-
-              // Strong Password Field
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword
-                        ? Icons.visibility_off
-                        : Icons.visibility),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                obscureText: _obscurePassword,
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Please enter a password';
-                  }
-                  if (val.length < 8) {
-                    return 'Must be at least 8 characters long';
-                  }
-                  if (!RegExp(r'(?=.*[A-Z])').hasMatch(val)) {
-                    return 'Must contain at least one uppercase letter';
-                  }
-                  if (!RegExp(r'(?=.*[0-9])').hasMatch(val)) {
-                    return 'Must contain at least one number';
-                  }
-                  if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val)) {
-                    return 'Must contain at least one special character (!@#\$&*~)';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Confirm Password Field
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirmPassword
-                        ? Icons.visibility_off
-                        : Icons.visibility),
-                    onPressed: () => setState(() =>
-                        _obscureConfirmPassword = !_obscureConfirmPassword),
-                  ),
-                ),
-                obscureText: _obscureConfirmPassword,
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Please confirm your password';
-                  }
-                  if (val != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Submit Button
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _isLoading ? null : _handleSignup,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text('Complete Registration',
-                          style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Want to earn with us? '),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const AdvancedRiderSignupScreen()),
-                      );
-                    },
-                    child: const Text('Apply as a Rider',
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.orange),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 64.0),
+            child: Card(
+              elevation: 4,
+              shadowColor: Colors.orange.withValues(alpha: 0.3),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Icon(Icons.person_add_alt_1,
+                          size: 60, color: Color(0xFFFF6F00)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Join Zen Mart Pro',
                         style: TextStyle(
-                            color: Colors.orange, fontWeight: FontWeight.bold)),
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Create an account to start shopping',
+                        style: TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Full Name Field
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator: (val) => val == null || val.isEmpty
+                            ? 'Please enter your name'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Email Field
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email Address',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (val) => val == null || !val.contains('@')
+                            ? 'Please enter a valid email'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Phone Number Field
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone Number',
+                          hintText: '+92 3XX XXXXXXX',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.phone),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (val) => val == null || val.length < 10
+                            ? 'Enter a valid phone number'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Strong Password Field
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                            onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
+                          ),
+                        ),
+                        obscureText: _obscurePassword,
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (val.length < 8) {
+                            return 'Must be at least 8 characters long';
+                          }
+                          if (!RegExp(r'(?=.*[A-Z])').hasMatch(val)) {
+                            return 'Must contain at least one uppercase letter';
+                          }
+                          if (!RegExp(r'(?=.*[0-9])').hasMatch(val)) {
+                            return 'Must contain at least one number';
+                          }
+                          if (!RegExp(r'(?=.*[!@#\$&*~])').hasMatch(val)) {
+                            return 'Must contain at least one special character (!@#\$&*~)';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Confirm Password Field
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                            onPressed: () => setState(() =>
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword),
+                          ),
+                        ),
+                        obscureText: _obscureConfirmPassword,
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (val != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Submit Button
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                        onPressed: _isLoading ? null : _handleSignup,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Text('Complete Registration',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Want to earn with us? '),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdvancedRiderSignupScreen()),
+                              );
+                            },
+                            child: const Text('Apply as a Rider',
+                                style: TextStyle(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Already have an account?'),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Login',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Already have an account?'),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Login'),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
