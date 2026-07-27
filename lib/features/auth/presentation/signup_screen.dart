@@ -84,6 +84,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -92,9 +94,11 @@ class _SignupScreenState extends State<SignupScreen> {
         iconTheme: const IconThemeData(color: Colors.orange),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+            colors: isDark
+                ? const [Color(0xFF2C1900), Color(0xFF140B00)]
+                : const [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -105,7 +109,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 const EdgeInsets.symmetric(horizontal: 24.0, vertical: 64.0),
             child: Card(
               elevation: 4,
-              shadowColor: Colors.orange.withValues(alpha: 0.3),
+              shadowColor: isDark
+                  ? Colors.black54
+                  : Colors.orange.withValues(alpha: 0.3),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24)),
               child: Padding(
@@ -118,12 +124,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       const Icon(Icons.person_add_alt_1,
                           size: 60, color: Color(0xFFFF6F00)),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Join Zen Mart Pro',
                         style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: Colors.black87),
+                            color: isDark ? Colors.white : Colors.black87),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),

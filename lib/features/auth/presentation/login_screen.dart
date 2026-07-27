@@ -28,11 +28,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+            colors: isDark
+                ? const [Color(0xFF2C1900), Color(0xFF140B00)]
+                : const [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -42,7 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Card(
               elevation: 4,
-              shadowColor: Colors.orange.withValues(alpha: 0.3),
+              shadowColor: isDark
+                  ? Colors.black54
+                  : Colors.orange.withValues(alpha: 0.3),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24)),
               child: Padding(
@@ -56,12 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Icon(Icons.storefront,
                           size: 64, color: Color(0xFFFF6F00)),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Welcome Back',
                         style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
-                            color: Colors.black87),
+                            color: isDark ? Colors.white : Colors.black87),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),

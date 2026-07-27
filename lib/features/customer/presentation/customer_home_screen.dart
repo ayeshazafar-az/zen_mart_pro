@@ -17,6 +17,7 @@ class CustomerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +70,7 @@ class CustomerHomeScreen extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDark ? const Color(0xFF2C2C2C) : Colors.grey[200],
               ),
             ),
             const SizedBox(height: 20),
@@ -219,7 +220,10 @@ class CustomerHomeScreen extends StatelessWidget {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(color: Colors.grey.shade200)),
+                          side: BorderSide(
+                              color: isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200)),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () {
@@ -244,7 +248,9 @@ class CustomerHomeScreen extends StatelessWidget {
                                       fit: BoxFit.cover,
                                     )
                                   : Container(
-                                      color: Colors.orange.shade50,
+                                      color: isDark
+                                          ? Colors.orange.shade900
+                                          : Colors.orange.shade50,
                                       child: const Icon(Icons.store,
                                           color: Colors.orange, size: 40),
                                     ),
@@ -270,7 +276,9 @@ class CustomerHomeScreen extends StatelessWidget {
                                           child: Text(
                                             address,
                                             style: TextStyle(
-                                                color: Colors.grey.shade600,
+                                                color: isDark
+                                                    ? Colors.grey.shade400
+                                                    : Colors.grey.shade600,
                                                 fontSize: 13),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,

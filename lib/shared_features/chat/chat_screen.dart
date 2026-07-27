@@ -191,6 +191,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -222,8 +224,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                            color:
-                                isMe ? const Color(0xFFDCF8C6) : Colors.white,
+                            color: isMe
+                                ? (isDark
+                                    ? Colors.teal.shade900
+                                    : const Color(0xFFDCF8C6))
+                                : (isDark
+                                    ? Colors.grey.shade800
+                                    : Colors.white),
                             borderRadius: BorderRadius.only(
                               topLeft: const Radius.circular(12),
                               topRight: const Radius.circular(12),
@@ -296,8 +303,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             if (messageText.isNotEmpty)
                               Text(
                                 messageText,
-                                style: const TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                                style: TextStyle(
+                                    color: (isMe || !isDark)
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontSize: 16),
                               ),
                           ],
                         ),
@@ -316,7 +326,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextField(

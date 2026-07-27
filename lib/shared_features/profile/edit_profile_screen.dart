@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../features/auth/data/user_model.dart';
 import '../../features/auth/presentation/auth_provider.dart';
+import '../../core/theme/theme_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -314,6 +315,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       : const Text('Update Profile',
                           style: TextStyle(fontSize: 16)),
                 ),
+              ),
+              const SizedBox(height: 32),
+              const Divider(),
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return SwitchListTile(
+                    secondary:
+                        const Icon(Icons.dark_mode, color: Colors.blueGrey),
+                    title: const Text('Dark Mode'),
+                    value: themeProvider.isDarkMode,
+                    onChanged: (bool value) {
+                      themeProvider.toggleTheme(value);
+                    },
+                  );
+                },
               ),
             ],
           ),
