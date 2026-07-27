@@ -14,9 +14,8 @@ class AvailableOrdersScreen extends StatelessWidget {
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('orders')
-            .where('status', whereIn: ['Accepted', 'Preparing']).snapshots(),
+        stream: FirebaseFirestore.instance.collection('orders').where('status',
+            whereIn: ['Accepted', 'Preparing', 'Ready']).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -70,7 +69,8 @@ class AvailableOrdersScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
+                          Text(
+                              'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                           Chip(
@@ -133,4 +133,3 @@ class AvailableOrdersScreen extends StatelessWidget {
     );
   }
 }
-
