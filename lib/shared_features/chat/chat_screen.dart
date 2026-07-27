@@ -95,9 +95,9 @@ class _ChatScreenState extends State<ChatScreen> {
       scheme: 'tel',
       path: phoneNumber,
     );
-    if (await canLaunchUrl(launchUri)) {
+    try {
       await launchUrl(launchUri);
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not launch phone dialer')),

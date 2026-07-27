@@ -20,6 +20,7 @@ class _ManageVendorShopBannerScreenState
   final _formKey = GlobalKey<FormState>();
   final _bannerTitleController = TextEditingController();
   final _bannerImageUrlController = TextEditingController();
+  final _bannerEventController = TextEditingController(); // NEW
   bool _isLoading = false;
   bool _isInitialized = false;
 
@@ -53,6 +54,7 @@ class _ManageVendorShopBannerScreenState
   void dispose() {
     _bannerTitleController.dispose();
     _bannerImageUrlController.dispose();
+    _bannerEventController.dispose();
     super.dispose();
   }
 
@@ -68,8 +70,10 @@ class _ManageVendorShopBannerScreenState
       }
 
       await FirebaseFirestore.instance.collection('shops').doc(shopId).update({
-        'bannerTitle': _bannerTitleController.text.trim(),
-        'bannerImageUrl': bannerUrl,
+        'pendingBannerTitle': _bannerTitleController.text.trim(),
+        'pendingBannerImageUrl': bannerUrl,
+        'pendingBannerEvent': _bannerEventController.text.trim(),
+        'bannerStatus': 'pending', // require admin approval
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -118,8 +122,10 @@ class _ManageVendorShopBannerScreenState
           if (!_isInitialized) {
             _bannerTitleController.text = data['bannerTitle'] ?? '';
             _bannerImageUrlController.text = data['bannerImageUrl'] ?? '';
+            _bannerEventController.text = data['bannerEvent'] ?? '';
             _isInitialized = true;
           }
+          final bool isPending = data['bannerStatus'] == 'pending';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -127,6 +133,28 @@ class _ManageVendorShopBannerScreenState
               key: _formKey,
               child: Column(
                 children: [
+                  if (isPending)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        border: Border.all(color: Colors.orange),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.pending_actions, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Your new banner is pending admin approval. The current approved banner will remain visible to customers until then.',
+                              style: TextStyle(color: Colors.orange),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (_imageFile != null)
                     Container(
                       height: 160,
@@ -159,6 +187,14 @@ class _ManageVendorShopBannerScreenState
                     controller: _bannerTitleController,
                     decoration: const InputDecoration(
                       labelText: 'Banner Promo Title',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _bannerEventController,
+                    decoration: const InputDecoration(
+                      labelText: 'Banner Event (e.g., Azadi Sale, Flash Sale)',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -205,7 +241,7 @@ class _ManageVendorShopBannerScreenState
                           _isLoading ? null : () => _updateBanner(shopId),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Save Banner',
+                          : const Text('Submit Banner For Approval',
                               style: TextStyle(fontSize: 16)),
                     ),
                   ),

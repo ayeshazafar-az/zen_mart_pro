@@ -17,6 +17,7 @@ import 'view_all_orders_screen.dart';
 import 'handle_complaints_screen.dart';
 import 'view_reports_analytics_screen.dart';
 import 'manage_approvals_screen.dart';
+import 'manage_banner_approvals_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
@@ -112,10 +113,17 @@ class AdminDashboardScreen extends StatelessWidget {
               children: const [
                 // Pending Approvals Card prioritized at the top
                 _AdminDashboardCard(
-                  title: 'Pending Approvals',
+                  title: 'User Approvals',
                   icon: Icons.domain_verification,
-                  subtitle: 'Approve riders & vendors',
+                  subtitle: 'Approve personnel',
                   destination: ManageApprovalsScreen(),
+                ),
+                // Banner Approvals Card
+                _AdminDashboardCard(
+                  title: 'Banner Approvals',
+                  icon: Icons.collections,
+                  subtitle: 'Approve shop banners',
+                  destination: ManageBannerApprovalsScreen(),
                 ),
                 // Combo Workflow: Create both Vendor and Shop simultaneously
                 _AdminDashboardCard(

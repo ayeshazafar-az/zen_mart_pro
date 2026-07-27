@@ -117,6 +117,8 @@ class CustomerHomeScreen extends StatelessWidget {
                           data['name'] ??
                           'Special Offer';
 
+                      final bannerEvent = data['bannerEvent'] ?? '';
+
                       return Container(
                         width: MediaQuery.of(context).size.width,
                         margin: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -153,12 +155,35 @@ class CustomerHomeScreen extends StatelessWidget {
                               ),
                               padding: const EdgeInsets.all(20),
                               alignment: Alignment.bottomLeft,
-                              child: Text(
-                                bannerTitle,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (bannerEvent.isNotEmpty)
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.redAccent,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        bannerEvent.toUpperCase(),
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  Text(
+                                    bannerTitle,
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
                             ),
                           ],

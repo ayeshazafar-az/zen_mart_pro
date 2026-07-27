@@ -37,9 +37,13 @@ class ManageRidersScreen extends StatelessWidget {
 
               final isApproved = data['isApproved'] ?? false;
 
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
-                color: isApproved ? Colors.white : Colors.orange.shade50,
+                color: isApproved
+                    ? (isDark ? Colors.grey[850] : Colors.white)
+                    : (isDark ? Colors.orange[900] : Colors.orange.shade50),
                 child: ListTile(
                   onTap: () {
                     Navigator.push(
