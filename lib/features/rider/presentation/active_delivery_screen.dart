@@ -63,17 +63,68 @@ class ActiveDeliveryScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                              'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          Expanded(
+                            child: StreamBuilder<DocumentSnapshot>(
+                              stream: data['customerId'] != null
+                                  ? FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(data['customerId'])
+                                      .snapshots()
+                                  : null,
+                              builder: (context, userSnapshot) {
+                                String imageUrl = '';
+                                if (userSnapshot.hasData &&
+                                    userSnapshot.data!.exists) {
+                                  final uData = userSnapshot.data!.data()
+                                      as Map<String, dynamic>;
+                                  imageUrl = uData['profileImageUrl'] ?? '';
+                                }
+                                return Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor:
+                                          Colors.blueAccent.withOpacity(0.2),
+                                      backgroundImage: imageUrl.isNotEmpty
+                                          ? NetworkImage(imageUrl)
+                                          : null,
+                                      child: imageUrl.isEmpty
+                                          ? const Icon(Icons.person,
+                                              color: Colors.blue)
+                                          : null,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16),
+                                              overflow: TextOverflow.ellipsis),
+                                          Text('Customer: $customerEmail',
+                                              style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey),
+                                              overflow: TextOverflow.ellipsis),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
                           const Chip(
-                              label: Text('OUT FOR DELIVERY'),
+                              label: Text('OUT FOR DELIVERY',
+                                  style: TextStyle(fontSize: 10)),
                               backgroundColor: Colors.blueAccent),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text('Customer: $customerEmail'),
                       Text('Phone: $phone'),
                       Text('Address: $address'),
                       Text('Payout: Rs. $totalAmount',

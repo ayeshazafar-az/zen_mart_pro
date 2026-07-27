@@ -67,6 +67,7 @@ class ViewVendorReviewsScreen extends StatelessWidget {
                       data['customerEmail'] ?? 'Anonymous Customer';
                   final rating = (data['rating'] ?? 5.0).toDouble();
                   final comment = data['comment'] ?? 'No comment provided.';
+                  final customerId = data['customerId'] ?? '';
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -78,10 +79,53 @@ class ViewVendorReviewsScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                customerEmail,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              Expanded(
+                                child: StreamBuilder<DocumentSnapshot>(
+                                  stream: customerId.isNotEmpty
+                                      ? FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(customerId)
+                                          .snapshots()
+                                      : null,
+                                  builder: (context, snapshot) {
+                                    String imageUrl = '';
+                                    if (snapshot.hasData &&
+                                        snapshot.data!.exists) {
+                                      final userData = snapshot.data!.data()
+                                          as Map<String, dynamic>;
+                                      imageUrl =
+                                          userData['profileImageUrl'] ?? '';
+                                    }
+
+                                    return Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: Colors.orangeAccent
+                                              .withOpacity(0.3),
+                                          backgroundImage: imageUrl.isNotEmpty
+                                              ? NetworkImage(imageUrl)
+                                              : null,
+                                          child: imageUrl.isEmpty
+                                              ? const Icon(Icons.person,
+                                                  size: 20,
+                                                  color: Colors.orange)
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            customerEmail,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
                               Row(
                                 children: List.generate(

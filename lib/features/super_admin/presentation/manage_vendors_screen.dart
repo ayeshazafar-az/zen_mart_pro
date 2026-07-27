@@ -32,14 +32,18 @@ class ManageVendorsScreen extends StatelessWidget {
               final name = data['name'] ?? 'Unnamed';
               final email = data['email'] ?? '';
               final phone = data['phone'] ?? 'N/A';
+              final imageUrl = data['profileImageUrl'] ?? '';
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.store),
+                  leading: CircleAvatar(
+                    backgroundImage:
+                        imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                    child: imageUrl.isEmpty ? const Icon(Icons.store) : null,
                   ),
-                  title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('Email: $email\nPhone: $phone'),
                   isThreeLine: true,
                   trailing: IconButton(
@@ -49,7 +53,8 @@ class ManageVendorsScreen extends StatelessWidget {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Delete Vendor'),
-                          content: Text('Are you sure you want to delete $name?'),
+                          content:
+                              Text('Are you sure you want to delete $name?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -57,7 +62,8 @@ class ManageVendorsScreen extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),

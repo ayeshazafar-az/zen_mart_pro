@@ -103,17 +103,43 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                 .get(),
                             builder: (context, userSnapshot) {
                               String displayName = customerEmail;
+                              String imageUrl = '';
                               if (userSnapshot.hasData &&
                                   userSnapshot.data != null &&
                                   userSnapshot.data!.exists) {
                                 final userData = userSnapshot.data!.data()
                                     as Map<String, dynamic>?;
-                                if (userData != null &&
-                                    userData.containsKey('name')) {
-                                  displayName = userData['name'];
+                                if (userData != null) {
+                                  if (userData.containsKey('name')) {
+                                    displayName = userData['name'];
+                                  }
+                                  if (userData.containsKey('profileImageUrl')) {
+                                    imageUrl = userData['profileImageUrl'];
+                                  }
                                 }
                               }
-                              return Text('Customer: $displayName');
+                              return Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor:
+                                        Colors.orangeAccent.withOpacity(0.3),
+                                    backgroundImage: imageUrl.isNotEmpty
+                                        ? NetworkImage(imageUrl)
+                                        : null,
+                                    child: imageUrl.isEmpty
+                                        ? const Icon(Icons.person,
+                                            size: 20, color: Colors.orange)
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text('Customer: $displayName',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w500)),
+                                  ),
+                                ],
+                              );
                             },
                           ),
                           Text('Total Amount: Rs. $totalAmount'),

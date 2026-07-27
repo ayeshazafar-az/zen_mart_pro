@@ -34,6 +34,7 @@ class ManageRidersScreen extends StatelessWidget {
               final name = data['name'] ?? 'Unnamed Rider';
               final email = data['email'] ?? '';
               final phone = data['phone'] ?? 'N/A';
+              final imageUrl = data['profileImageUrl'] ?? '';
 
               final isApproved = data['isApproved'] ?? false;
 
@@ -54,8 +55,12 @@ class ManageRidersScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.delivery_dining),
+                  leading: CircleAvatar(
+                    backgroundImage:
+                        imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                    child: imageUrl.isEmpty
+                        ? const Icon(Icons.delivery_dining)
+                        : null,
                   ),
                   title: Text(name,
                       style: const TextStyle(fontWeight: FontWeight.bold)),

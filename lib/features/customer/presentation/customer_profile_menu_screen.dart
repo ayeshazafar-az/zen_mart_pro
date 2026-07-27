@@ -38,10 +38,18 @@ class CustomerProfileMenuScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.orangeAccent,
-                      child: Icon(Icons.person, size: 35, color: Colors.white),
+                      backgroundImage: user?.profileImageUrl != null &&
+                              user!.profileImageUrl!.isNotEmpty
+                          ? NetworkImage(user.profileImageUrl!)
+                          : null,
+                      child: user?.profileImageUrl == null ||
+                              user!.profileImageUrl!.isEmpty
+                          ? const Icon(Icons.person,
+                              size: 35, color: Colors.white)
+                          : null,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -141,8 +149,7 @@ class CustomerProfileMenuScreen extends StatelessWidget {
             builder: (context, langProvider, child) {
               return ListTile(
                 leading: const Icon(Icons.language, color: Colors.green),
-                title:
-                    Text("Language: \${langProvider.getText('toggle_lang')}"),
+                title: Text("Language: ${langProvider.getText('toggle_lang')}"),
                 trailing: const Icon(Icons.sync),
                 onTap: () {
                   langProvider.toggleLanguage();
