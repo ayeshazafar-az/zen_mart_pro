@@ -151,7 +151,9 @@ class _VendorHomeTab extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.orange.withValues(alpha: 0.2)
+                            : Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -172,7 +174,9 @@ class _VendorHomeTab extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.blue.withValues(alpha: 0.2)
+                          : Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(

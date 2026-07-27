@@ -127,9 +127,16 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.grey[100],
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey[850]
+                                    : Colors.grey[100],
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[300]!),
+                                border: Border.all(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey[800]!
+                                        : Colors.grey[300]!),
                               ),
                               child: Column(
                                 children: ((data['items'] as List).map((item) {
