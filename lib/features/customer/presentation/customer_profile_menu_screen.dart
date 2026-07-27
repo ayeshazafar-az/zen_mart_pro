@@ -6,7 +6,6 @@ import '../../auth/presentation/login_screen.dart';
 import 'saved_addresses_screen.dart';
 import 'wishlist_screen.dart';
 import 'notifications_screen.dart';
-import 'help_support_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/language/language_provider.dart';
@@ -128,18 +127,6 @@ class CustomerProfileMenuScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (_) => const NotificationsScreen()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.help, color: Colors.orange),
-                title: Text(langProvider.getText('support')),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const HelpSupportScreen()),
                   );
                 },
               ),

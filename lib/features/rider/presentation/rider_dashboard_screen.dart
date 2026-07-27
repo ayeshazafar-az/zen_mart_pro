@@ -7,6 +7,7 @@ import 'active_delivery_screen.dart';
 import 'delivery_history_screen.dart';
 import 'earnings_dashboard_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
+import '../../../shared_features/widgets/safe_image.dart';
 
 class RiderDashboardScreen extends StatefulWidget {
   const RiderDashboardScreen({super.key});
@@ -25,6 +26,30 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    Widget buildProfileIcon(bool isActive) {
+      if (user.profileImageUrl == null || user.profileImageUrl!.isEmpty) {
+        return Icon(Icons.person,
+            color: isActive ? Colors.orange : Colors.grey);
+      }
+      return Container(
+        padding: EdgeInsets.all(isActive ? 2 : 0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: isActive ? Border.all(color: Colors.orange, width: 2) : null,
+        ),
+        child: ClipOval(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: SafeImage(
+              imageUrl: user.profileImageUrl!,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
     }
 
     final List<Widget> _screens = [
@@ -67,15 +92,20 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
         selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
               icon: Icon(Icons.delivery_dining), label: 'Available'),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
               icon: Icon(Icons.directions_bike), label: 'Active'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.history), label: 'History'),
+          const BottomNavigationBarItem(
               icon: Icon(Icons.account_balance_wallet), label: 'Earnings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: buildProfileIcon(false),
+            activeIcon: buildProfileIcon(true),
+            label: 'Profile',
+          ),
         ],
       ),
     );

@@ -11,6 +11,7 @@ import 'manage_vendor_orders_screen.dart';
 import 'manage_vendor_shop_banner_screen.dart';
 import 'view_vendor_reviews_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
+import '../../../shared_features/widgets/safe_image.dart';
 
 class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
@@ -29,6 +30,30 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    Widget buildProfileIcon(bool isActive) {
+      if (user.profileImageUrl == null || user.profileImageUrl!.isEmpty) {
+        return Icon(Icons.person,
+            color: isActive ? Colors.orange : Colors.grey);
+      }
+      return Container(
+        padding: EdgeInsets.all(isActive ? 2 : 0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: isActive ? Border.all(color: Colors.orange, width: 2) : null,
+        ),
+        child: ClipOval(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: SafeImage(
+              imageUrl: user.profileImageUrl!,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
     }
 
     final List<Widget> screens = [
@@ -50,15 +75,20 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard), label: 'Home'),
+          const BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long), label: 'Orders'),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
               icon: Icon(Icons.inventory), label: 'Products'),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: buildProfileIcon(false),
+            activeIcon: buildProfileIcon(true),
+            label: 'Profile',
+          ),
         ],
       ),
     );
