@@ -262,7 +262,6 @@ class _VendorHomeTab extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('orders')
               .where('shopId', isEqualTo: shopId)
-              .orderBy('createdAt', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {
             if (!orderSnapshot.hasData) {
@@ -271,7 +270,19 @@ class _VendorHomeTab extends StatelessWidget {
 
             double totalRevenue = 0;
             int totalOrders = 0;
-            final orders = orderSnapshot.data!.docs;
+            final orders = orderSnapshot.data!.docs.toList();
+
+            // Sort by date locally to avoid composite index requirement
+            orders.sort((a, b) {
+              final aData = a.data() as Map<String, dynamic>;
+              final bData = b.data() as Map<String, dynamic>;
+              final aTime = aData['createdAt'] as Timestamp?;
+              final bTime = bData['createdAt'] as Timestamp?;
+              if (aTime == null && bTime == null) return 0;
+              if (aTime == null) return 1;
+              if (bTime == null) return -1;
+              return bTime.compareTo(aTime);
+            });
 
             for (var doc in orders) {
               final data = doc.data() as Map<String, dynamic>;

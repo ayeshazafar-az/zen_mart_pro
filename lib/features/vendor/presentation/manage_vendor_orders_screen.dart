@@ -324,18 +324,13 @@ class _ManageVendorOrdersScreenState extends State<ManageVendorOrdersScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? Colors.grey[850]
-                                              : Colors.grey[100],
+                                          color: Colors.grey
+                                              .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           border: Border.all(
-                                              color: Theme.of(context)
-                                                          .brightness ==
-                                                      Brightness.dark
-                                                  ? Colors.grey[800]!
-                                                  : Colors.grey[300]!),
+                                              color: Colors.grey
+                                                  .withValues(alpha: 0.2)),
                                         ),
                                         child: Column(
                                           children: ((data['items'] as List)
