@@ -24,6 +24,7 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
   // Shop Controllers
   final _shopNameController = TextEditingController();
   final _shopDescController = TextEditingController();
+  String? _selectedCategoryId;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -83,6 +84,7 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
         'vendorId': vendorUid,
         'name': _shopNameController.text.trim(),
         'description': _shopDescController.text.trim(),
+        'categoryId': _selectedCategoryId,
         'isActive': true,
         'bannerUrl': '', // Vendor can update this later
         'createdAt': FieldValue.serverTimestamp(),
@@ -211,6 +213,52 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
                           border: OutlineInputBorder()),
                       validator: (val) =>
                           val == null || val.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection(AppConstants.categoriesCollection)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Text(
+                            'No global categories found. Create one first.',
+                            style: TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final categories = snapshot.data!.docs;
+
+                        return DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _selectedCategoryId,
+                          decoration: const InputDecoration(
+                            labelText: 'Select Global Category',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.category),
+                          ),
+                          items: categories.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final name = data['name'] ?? 'Unnamed Category';
+                            return DropdownMenuItem<String>(
+                              value: doc.id,
+                              child: Text(name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategoryId = value;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? 'Please select a category' : null,
+                        );
+                      },
                     ),
                     const SizedBox(height: 32),
                     SizedBox(

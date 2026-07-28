@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/zenvyro_branding_widget.dart';
@@ -28,7 +29,8 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -39,6 +41,20 @@ class AdminDashboardScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         actions: [
+          Row(
+            children: [
+              Icon(isDark ? Icons.dark_mode : Icons.light_mode,
+                  color: isDark ? Colors.amber : Colors.blueGrey),
+              Switch(
+                value: isDark,
+                onChanged: (value) {
+                  themeProvider.toggleTheme(value);
+                },
+                activeTrackColor: Colors.amber.withValues(alpha: 0.5),
+                activeColor: Colors.amber,
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',

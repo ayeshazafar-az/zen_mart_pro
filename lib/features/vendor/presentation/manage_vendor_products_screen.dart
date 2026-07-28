@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../../core/constants/app_constants.dart';
 
 class ManageVendorProductsScreen extends StatefulWidget {
   const ManageVendorProductsScreen({super.key});
@@ -111,9 +112,7 @@ class _ManageVendorProductsScreenState
                   const SizedBox(height: 16),
                   FutureBuilder<QuerySnapshot>(
                     future: FirebaseFirestore.instance
-                        .collection('shops')
-                        .doc(shopId)
-                        .collection('categories')
+                        .collection(AppConstants.categoriesCollection)
                         .get(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -386,9 +385,7 @@ class _ManageVendorProductsScreenState
                           if (categoryId != null)
                             FutureBuilder<DocumentSnapshot>(
                               future: FirebaseFirestore.instance
-                                  .collection('shops')
-                                  .doc(shopDocId)
-                                  .collection('categories')
+                                  .collection(AppConstants.categoriesCollection)
                                   .doc(categoryId)
                                   .get(),
                               builder: (context, catSnapshot) {

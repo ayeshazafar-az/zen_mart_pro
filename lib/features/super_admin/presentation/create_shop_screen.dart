@@ -22,6 +22,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _imageUrlController = TextEditingController();
 
   String? _selectedVendorUid;
+  String? _selectedCategoryId;
   bool _isLoading = false;
 
   String? _base64Image;
@@ -76,6 +77,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 ? _imageUrlController.text.trim()
                 : 'https://via.placeholder.com/150'),
         'vendorId': _selectedVendorUid,
+        'categoryId': _selectedCategoryId, // Link to global category
         'isApproved': true, // Created by super admin, so approved by default
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -157,6 +159,50 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     },
                     validator: (value) =>
                         value == null ? 'Please select a vendor' : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection(AppConstants.categoriesCollection)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Text(
+                      'No global categories found. Create one first.',
+                      style: TextStyle(color: Colors.red),
+                    );
+                  }
+
+                  final categories = snapshot.data!.docs;
+
+                  return DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _selectedCategoryId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Global Category',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.category),
+                    ),
+                    items: categories.map((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final name = data['name'] ?? 'Unnamed Category';
+                      return DropdownMenuItem<String>(
+                        value: doc.id,
+                        child: Text(name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategoryId = value;
+                      });
+                    },
+                    validator: (value) =>
+                        value == null ? 'Please select a category' : null,
                   );
                 },
               ),

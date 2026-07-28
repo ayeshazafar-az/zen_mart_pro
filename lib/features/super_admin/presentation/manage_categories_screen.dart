@@ -27,7 +27,9 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Category added successfully'), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Category added successfully'),
+              backgroundColor: Colors.green),
         );
       }
     } catch (e) {
@@ -41,7 +43,10 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
   Future<void> _deleteCategory(String id) async {
     try {
-      await _firestore.collection(AppConstants.categoriesCollection).doc(id).delete();
+      await _firestore
+          .collection(AppConstants.categoriesCollection)
+          .doc(id)
+          .delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Category deleted')),
@@ -80,7 +85,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
           ),
           ElevatedButton(
             onPressed: _addCategory,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
             child: const Text('Save'),
           ),
         ],
@@ -104,8 +108,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
         onPressed: _showAddDialog,
         icon: const Icon(Icons.add),
         label: const Text('Add Category'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
@@ -153,7 +155,30 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => _deleteCategory(cat.id),
+                    onPressed: () async {
+                      bool? confirm = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Category'),
+                          content: Text(
+                              "Are you sure you want to delete '${data['name']}'?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        _deleteCategory(cat.id);
+                      }
+                    },
                     tooltip: 'Delete Category',
                   ),
                 ),
