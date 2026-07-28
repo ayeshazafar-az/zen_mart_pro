@@ -13,6 +13,8 @@ class ChatScreen extends StatefulWidget {
   final String recipientId;
   final String chatChannel; // e.g., 'vendor_messages' or 'rider_messages'
   final String? recipientPhone; // For Calling
+  final String?
+      shopLogoUrl; // Optional: show shop logo instead of personal avatar
 
   const ChatScreen({
     super.key,
@@ -21,6 +23,7 @@ class ChatScreen extends StatefulWidget {
     required this.recipientId,
     required this.chatChannel,
     this.recipientPhone,
+    this.shopLogoUrl,
   });
 
   @override
@@ -158,8 +161,9 @@ class _ChatScreenState extends State<ChatScreen> {
               .doc(widget.recipientId)
               .snapshots(),
           builder: (context, snapshot) {
-            String imageUrl = '';
-            if (snapshot.hasData && snapshot.data!.exists) {
+            // Prefer shop logo if provided, else fall back to personal avatar
+            String imageUrl = widget.shopLogoUrl ?? '';
+            if (imageUrl.isEmpty && snapshot.hasData && snapshot.data!.exists) {
               final data = snapshot.data!.data() as Map<String, dynamic>;
               imageUrl = data['profileImageUrl'] ?? '';
             }
@@ -176,7 +180,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           as ImageProvider
                       : null,
                   child: imageUrl.isEmpty
-                      ? const Icon(Icons.person, color: Colors.white)
+                      ? const Icon(Icons.store, color: Colors.white)
                       : null,
                 ),
                 const SizedBox(width: 10),

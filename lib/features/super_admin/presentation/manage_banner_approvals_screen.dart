@@ -194,19 +194,82 @@ class ManageBannerApprovalsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text('Promo Text: $pendingTitle'),
                       const SizedBox(height: 12),
-                      if (pendingImageUrl.isNotEmpty)
-                        Container(
-                          height: 150,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: SafeImage(
-                            imageUrl: pendingImageUrl,
-                            fit: BoxFit.cover,
+                      if (pendingImageUrl.isNotEmpty) ...[
+                        GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => Dialog(
+                                backgroundColor: Colors.black,
+                                insetPadding: EdgeInsets.zero,
+                                child: Stack(
+                                  children: [
+                                    InteractiveViewer(
+                                      child: Center(
+                                        child: SafeImage(
+                                          imageUrl: pendingImageUrl,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 12,
+                                      right: 12,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white, size: 30),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 150,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: SafeImage(
+                                    imageUrl: pendingImageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    color: Colors.black54,
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.zoom_in,
+                                            color: Colors.white, size: 14),
+                                        SizedBox(width: 4),
+                                        Text('Tap to preview full screen',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                      ],
                       const SizedBox(height: 16),
                       Row(
                         children: [

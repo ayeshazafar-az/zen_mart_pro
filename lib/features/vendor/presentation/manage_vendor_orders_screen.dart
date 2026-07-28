@@ -31,6 +31,9 @@ class ManageVendorOrdersScreen extends StatelessWidget {
           }
 
           final shopId = shopSnapshot.data!.docs.first.id;
+          final shopData =
+              shopSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+          final shopLogoUrl = shopData['logoUrl'] as String? ?? '';
 
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -293,6 +296,9 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                                           chatChannel: 'vendor_messages',
                                           recipientPhone: data['phone'],
                                           recipientId: customerId,
+                                          shopLogoUrl: shopLogoUrl.isNotEmpty
+                                              ? shopLogoUrl
+                                              : null,
                                         ),
                                       ),
                                     );

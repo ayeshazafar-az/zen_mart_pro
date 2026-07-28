@@ -132,7 +132,7 @@ class _ManageVendorCategoriesScreenState
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -237,9 +237,10 @@ class _ManageVendorCategoriesScreenState
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(
+                                  color: Theme.of(context).dividerColor),
                             ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(
@@ -263,12 +264,16 @@ class _ManageVendorCategoriesScreenState
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer,
                                       shape: BoxShape.circle,
                                     ),
                                     child: IconButton(
                                       icon: Icon(Icons.edit_outlined,
-                                          color: Colors.blue.shade700,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                           size: 20),
                                       onPressed: () =>
                                           _editCategory(shopDocId, docId, name),
@@ -278,12 +283,17 @@ class _ManageVendorCategoriesScreenState
                                   const SizedBox(width: 8),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.red.shade50,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .errorContainer,
                                       shape: BoxShape.circle,
                                     ),
                                     child: IconButton(
                                       icon: Icon(Icons.delete_outline,
-                                          color: Colors.red.shade700, size: 20),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .error,
+                                          size: 20),
                                       onPressed: () async {
                                         // Confirm deletion
                                         bool? confirm = await showDialog(

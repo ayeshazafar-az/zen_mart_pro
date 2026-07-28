@@ -111,179 +111,235 @@ class _ActiveDeliveryScreenState extends State<ActiveDeliveryScreen> {
 
           final orders = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: orders.length,
-            itemBuilder: (context, index) {
-              final orderDoc = orders[index];
-              final data = orderDoc.data() as Map<String, dynamic>;
-              final orderId = orderDoc.id;
-              final totalAmount = data['totalAmount']?.toString() ?? '0.00';
-              final address = data['shippingAddress'] ?? 'No address';
-              final customerEmail = data['customerEmail'] ?? 'Customer';
-              final phone = data['phone'] ?? 'N/A';
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: StreamBuilder<DocumentSnapshot>(
-                              stream: data['customerId'] != null
-                                  ? FirebaseFirestore.instance
-                                      .collection('users')
-                                      .doc(data['customerId'])
-                                      .snapshots()
-                                  : null,
-                              builder: (context, userSnapshot) {
-                                String imageUrl = '';
-                                if (userSnapshot.hasData &&
-                                    userSnapshot.data!.exists) {
-                                  final uData = userSnapshot.data!.data()
-                                      as Map<String, dynamic>;
-                                  imageUrl = uData['profileImageUrl'] ?? '';
-                                }
-                                return Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor:
-                                          Colors.blueAccent.withOpacity(0.2),
-                                      backgroundImage: imageUrl.isNotEmpty
-                                          ? NetworkImage(imageUrl)
-                                          : null,
-                                      child: imageUrl.isEmpty
-                                          ? const Icon(Icons.person,
-                                              color: Colors.blue)
-                                          : null,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                              'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16),
-                                              overflow: TextOverflow.ellipsis),
-                                          Text('Customer: $customerEmail',
-                                              style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.grey),
-                                              overflow: TextOverflow.ellipsis),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                          const Chip(
-                              label: Text('OUT FOR DELIVERY',
-                                  style: TextStyle(fontSize: 10)),
-                              backgroundColor: Colors.blueAccent),
+          return Column(
+            children: [
+              // Location sharing status bar
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on,
+                        color: Colors.green.shade700, size: 18),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '📍 Live Location Sharing Active',
+                        style: TextStyle(
+                            color: Colors.green.shade800,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13),
+                      ),
+                    ),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.5),
+                            blurRadius: 4,
+                            spreadRadius: 2,
+                          )
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text('Phone: $phone'),
-                      Text('Address: $address'),
-                      Text('Payout: Rs. $totalAmount',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green)),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green),
-                          onPressed: () async {
-                            await orderDoc.reference.update({
-                              'status': 'Delivered',
-                            });
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    final orderDoc = orders[index];
+                    final data = orderDoc.data() as Map<String, dynamic>;
+                    final orderId = orderDoc.id;
+                    final totalAmount =
+                        data['totalAmount']?.toString() ?? '0.00';
+                    final address = data['shippingAddress'] ?? 'No address';
+                    final customerEmail = data['customerEmail'] ?? 'Customer';
+                    final phone = data['phone'] ?? 'N/A';
 
-                            // --- FCM TRIGGER: Notify Customer ---
-                            try {
-                              final customerId = data['customerId'] ?? '';
-                              if (customerId.isNotEmpty) {
-                                await NotificationService()
-                                    .sendMockNotificationToUser(
-                                  customerId,
-                                  "Order Delivered! \u{1F389}",
-                                  "Your order has been delivered successfully. Enjoy!",
-                                );
-                              }
-                            } catch (e) {
-                              debugPrint('Failed to notify customer: \$e');
-                            }
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Order marked as Delivered!')),
-                              );
-                            }
-                          },
-                          child: const Text('Mark as Delivered',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.chat),
-                          label: const Text('Chat & Call Customer'),
-                          onPressed: () async {
-                            String realCustomerName =
-                                customerEmail.split('@')[0];
-                            try {
-                              final cId = data['customerId'] ?? '';
-                              if (cId.isNotEmpty) {
-                                final doc = await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(cId)
-                                    .get();
-                                if (doc.exists) {
-                                  realCustomerName =
-                                      doc.data()?['name'] ?? realCustomerName;
-                                }
-                              }
-                            } catch (e) {}
-
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    orderId: orderId,
-                                    recipientName: realCustomerName,
-                                    chatChannel: 'rider_messages',
-                                    recipientPhone: phone,
-                                    recipientId: data['customerId'] ?? '',
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: StreamBuilder<DocumentSnapshot>(
+                                    stream: data['customerId'] != null
+                                        ? FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(data['customerId'])
+                                            .snapshots()
+                                        : null,
+                                    builder: (context, userSnapshot) {
+                                      String imageUrl = '';
+                                      if (userSnapshot.hasData &&
+                                          userSnapshot.data!.exists) {
+                                        final uData = userSnapshot.data!.data()
+                                            as Map<String, dynamic>;
+                                        imageUrl =
+                                            uData['profileImageUrl'] ?? '';
+                                      }
+                                      return Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 20,
+                                            backgroundColor: Colors.blueAccent
+                                                .withOpacity(0.2),
+                                            backgroundImage: imageUrl.isNotEmpty
+                                                ? NetworkImage(imageUrl)
+                                                : null,
+                                            child: imageUrl.isEmpty
+                                                ? const Icon(Icons.person,
+                                                    color: Colors.blue)
+                                                : null,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    'Order #${(orderId.length > 8 ? orderId.substring(0, 8) : orderId)}',
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16),
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                                Text('Customer: $customerEmail',
+                                                    style: const TextStyle(
+                                                        fontSize: 13,
+                                                        color: Colors.grey),
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
-                              );
-                            }
-                          },
+                                const Chip(
+                                    label: Text('OUT FOR DELIVERY',
+                                        style: TextStyle(fontSize: 10)),
+                                    backgroundColor: Colors.blueAccent),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text('Phone: $phone'),
+                            Text('Address: $address'),
+                            Text('Payout: Rs. $totalAmount',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green)),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green),
+                                onPressed: () async {
+                                  await orderDoc.reference.update({
+                                    'status': 'Delivered',
+                                  });
+
+                                  // --- FCM TRIGGER: Notify Customer ---
+                                  try {
+                                    final customerId = data['customerId'] ?? '';
+                                    if (customerId.isNotEmpty) {
+                                      await NotificationService()
+                                          .sendMockNotificationToUser(
+                                        customerId,
+                                        "Order Delivered! \u{1F389}",
+                                        "Your order has been delivered successfully. Enjoy!",
+                                      );
+                                    }
+                                  } catch (e) {
+                                    debugPrint(
+                                        'Failed to notify customer: \$e');
+                                  }
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Order marked as Delivered!')),
+                                    );
+                                  }
+                                },
+                                child: const Text('Mark as Delivered',
+                                    style: TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.chat),
+                                label: const Text('Chat & Call Customer'),
+                                onPressed: () async {
+                                  String realCustomerName =
+                                      customerEmail.split('@')[0];
+                                  try {
+                                    final cId = data['customerId'] ?? '';
+                                    if (cId.isNotEmpty) {
+                                      final doc = await FirebaseFirestore
+                                          .instance
+                                          .collection('users')
+                                          .doc(cId)
+                                          .get();
+                                      if (doc.exists) {
+                                        realCustomerName =
+                                            doc.data()?['name'] ??
+                                                realCustomerName;
+                                      }
+                                    }
+                                  } catch (e) {}
+
+                                  if (context.mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          orderId: orderId,
+                                          recipientName: realCustomerName,
+                                          chatChannel: 'rider_messages',
+                                          recipientPhone: phone,
+                                          recipientId: data['customerId'] ?? '',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
