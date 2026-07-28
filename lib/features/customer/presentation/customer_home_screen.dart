@@ -240,7 +240,8 @@ class CustomerHomeScreen extends StatelessWidget {
                     final name = data['name'] ?? 'Unnamed Shop';
                     final address = data['address'] ?? 'No address';
                     final imageUrl = data['imageUrl'] ?? '';
-                    final categoryId = data['categoryId'];
+                    final categoryIds = data['categoryIds'] as List<dynamic>? ??
+                        [if (data['categoryId'] != null) data['categoryId']];
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -292,52 +293,68 @@ class CustomerHomeScreen extends StatelessWidget {
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16)),
-                                    if (categoryId != null)
-                                      FutureBuilder<DocumentSnapshot>(
-                                        future: FirebaseFirestore.instance
-                                            .collection(AppConstants
-                                                .categoriesCollection)
-                                            .doc(categoryId)
-                                            .get(),
-                                        builder: (context, catSnapshot) {
-                                          if (!catSnapshot.hasData ||
-                                              !catSnapshot.data!.exists) {
-                                            return const SizedBox.shrink();
-                                          }
-                                          final catData = catSnapshot.data!
-                                              .data() as Map<String, dynamic>;
-                                          return Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 4.0),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
+                                    if (categoryIds.isNotEmpty)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 4.0),
+                                        child: Wrap(
+                                          spacing: 4.0,
+                                          runSpacing: 4.0,
+                                          children:
+                                              categoryIds.take(3).map((catId) {
+                                            return FutureBuilder<
+                                                DocumentSnapshot>(
+                                              future: FirebaseFirestore.instance
+                                                  .collection(AppConstants
+                                                      .categoriesCollection)
+                                                  .doc(catId)
+                                                  .get(),
+                                              builder: (context, catSnapshot) {
+                                                if (!catSnapshot.hasData ||
+                                                    !catSnapshot.data!.exists) {
+                                                  return const SizedBox
+                                                      .shrink();
+                                                }
+                                                final catData =
+                                                    catSnapshot.data!.data()
+                                                        as Map<String, dynamic>;
+                                                return Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
                                                       horizontal: 8,
                                                       vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: isDark
-                                                    ? Colors.blue.shade900
-                                                    : Colors.blue.shade50,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                border: Border.all(
+                                                  decoration: BoxDecoration(
                                                     color: isDark
-                                                        ? Colors.blue.shade700
-                                                        : Colors.blue.shade200),
-                                              ),
-                                              child: Text(
-                                                catData['name'] ?? 'Category',
-                                                style: TextStyle(
-                                                  color: isDark
-                                                      ? Colors.blue.shade100
-                                                      : Colors.blue.shade700,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                                        ? Colors.blue.shade900
+                                                        : Colors.blue.shade50,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    border: Border.all(
+                                                        color: isDark
+                                                            ? Colors
+                                                                .blue.shade700
+                                                            : Colors
+                                                                .blue.shade200),
+                                                  ),
+                                                  child: Text(
+                                                    catData['name'] ??
+                                                        'Category',
+                                                    style: TextStyle(
+                                                      color: isDark
+                                                          ? Colors.blue.shade100
+                                                          : Colors
+                                                              .blue.shade700,
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          }).toList(),
+                                        ),
                                       ),
                                     const SizedBox(height: 6),
                                     Row(

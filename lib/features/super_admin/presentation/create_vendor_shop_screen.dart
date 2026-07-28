@@ -24,7 +24,7 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
   // Shop Controllers
   final _shopNameController = TextEditingController();
   final _shopDescController = TextEditingController();
-  String? _selectedCategoryId;
+  List<String> _selectedCategoryIds = [];
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -84,7 +84,7 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
         'vendorId': vendorUid,
         'name': _shopNameController.text.trim(),
         'description': _shopDescController.text.trim(),
-        'categoryId': _selectedCategoryId,
+        'categoryIds': _selectedCategoryIds,
         'isActive': true,
         'bannerUrl': '', // Vendor can update this later
         'createdAt': FieldValue.serverTimestamp(),
@@ -215,6 +215,11 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
                           val == null || val.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+                    const Text(
+                      'Select Global Categories',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
                     StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection(AppConstants.categoriesCollection)
@@ -234,29 +239,30 @@ class _CreateVendorShopScreenState extends State<CreateVendorShopScreen> {
 
                         final categories = snapshot.data!.docs;
 
-                        return DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          initialValue: _selectedCategoryId,
-                          decoration: const InputDecoration(
-                            labelText: 'Select Global Category',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.category),
-                          ),
-                          items: categories.map((doc) {
+                        return Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: categories.map((doc) {
                             final data = doc.data() as Map<String, dynamic>;
                             final name = data['name'] ?? 'Unnamed Category';
-                            return DropdownMenuItem<String>(
-                              value: doc.id,
-                              child: Text(name),
+                            final isSelected =
+                                _selectedCategoryIds.contains(doc.id);
+                            return FilterChip(
+                              label: Text(name),
+                              selected: isSelected,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedCategoryIds.add(doc.id);
+                                  } else {
+                                    _selectedCategoryIds.remove(doc.id);
+                                  }
+                                });
+                              },
+                              selectedColor: Colors.blue.shade100,
+                              checkmarkColor: Colors.blue.shade700,
                             );
                           }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCategoryId = value;
-                            });
-                          },
-                          validator: (value) =>
-                              value == null ? 'Please select a category' : null,
                         );
                       },
                     ),

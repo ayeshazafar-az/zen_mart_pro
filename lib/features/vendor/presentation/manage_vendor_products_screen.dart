@@ -18,7 +18,8 @@ class ManageVendorProductsScreen extends StatefulWidget {
 
 class _ManageVendorProductsScreenState
     extends State<ManageVendorProductsScreen> {
-  void _showProductDialog(String shopId, {DocumentSnapshot? productDoc}) {
+  void _showProductDialog(String shopId, List<dynamic> globalCategoryIds,
+      {DocumentSnapshot? productDoc}) {
     final isEditing = productDoc != null;
     final nameController =
         TextEditingController(text: isEditing ? productDoc['name'] : '');
@@ -110,10 +111,37 @@ class _ManageVendorProductsScreenState
                     ),
                   ),
                   const SizedBox(height: 16),
-                  FutureBuilder<QuerySnapshot>(
-                    future: FirebaseFirestore.instance
-                        .collection(AppConstants.categoriesCollection)
-                        .get(),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: () async {
+                      final List<Map<String, dynamic>> combined = [];
+                      // Fetch all global
+                      final globalSnap = await FirebaseFirestore.instance
+                          .collection(AppConstants.categoriesCollection)
+                          .get();
+                      for (var doc in globalSnap.docs) {
+                        if (globalCategoryIds.contains(doc.id)) {
+                          final data = doc.data();
+                          combined.add({
+                            'id': doc.id,
+                            'name': '${data['name']} (Global)',
+                          });
+                        }
+                      }
+                      // Fetch local
+                      final localSnap = await FirebaseFirestore.instance
+                          .collection('shops')
+                          .doc(shopId)
+                          .collection('categories')
+                          .get();
+                      for (var doc in localSnap.docs) {
+                        final data = doc.data();
+                        combined.add({
+                          'id': doc.id,
+                          'name': '${data['name']}',
+                        });
+                      }
+                      return combined;
+                    }(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Padding(
@@ -121,19 +149,18 @@ class _ManageVendorProductsScreenState
                           child: CircularProgressIndicator(),
                         );
                       }
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                              'No categories exist. Please add one first.',
+                          child: Text('No categories available for your shop.',
                               style: TextStyle(color: Colors.red)),
                         );
                       }
-                      final categories = snapshot.data!.docs;
+                      final categories = snapshot.data!;
                       // Ensure selectedCategoryId exists in the options
                       if (selectedCategoryId != null &&
                           !categories
-                              .any((doc) => doc.id == selectedCategoryId)) {
+                              .any((cat) => cat['id'] == selectedCategoryId)) {
                         selectedCategoryId = null;
                       }
 
@@ -147,11 +174,10 @@ class _ManageVendorProductsScreenState
                               labelText: 'Category',
                               border: OutlineInputBorder(),
                             ),
-                            items: categories.map((doc) {
-                              final data = doc.data() as Map<String, dynamic>;
+                            items: categories.map((cat) {
                               return DropdownMenuItem<String>(
-                                value: doc.id,
-                                child: Text(data['name'] ?? 'Unnamed Category'),
+                                value: cat['id'],
+                                child: Text(cat['name']),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -300,7 +326,11 @@ class _ManageVendorProductsScreenState
                 child: Text('No shop assigned to your account.'));
           }
 
-          final shopDocId = shopSnapshot.data!.docs.first.id;
+          final shopDoc = shopSnapshot.data!.docs.first;
+          final shopDocId = shopDoc.id;
+          final shopData = shopDoc.data() as Map<String, dynamic>;
+          final globalCategoryIds = shopData['categoryIds'] as List<dynamic>? ??
+              [if (shopData['categoryId'] != null) shopData['categoryId']];
 
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -323,7 +353,8 @@ class _ManageVendorProductsScreenState
                       const Text('No products found.'),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => _showProductDialog(shopDocId),
+                        onPressed: () =>
+                            _showProductDialog(shopDocId, globalCategoryIds),
                         child: const Text('Add First Product'),
                       ),
                     ],
@@ -437,7 +468,8 @@ class _ManageVendorProductsScreenState
                             child: IconButton(
                               icon: Icon(Icons.edit_outlined,
                                   color: Colors.blue.shade700, size: 20),
-                              onPressed: () => _showProductDialog(shopDocId,
+                              onPressed: () => _showProductDialog(
+                                  shopDocId, globalCategoryIds,
                                   productDoc: doc),
                             ),
                           ),
@@ -501,7 +533,20 @@ class _ManageVendorProductsScreenState
           }
           final shopDocId = snapshot.data!.docs.first.id;
           return FloatingActionButton.extended(
-            onPressed: () => _showProductDialog(shopDocId),
+            onPressed: () => _showProductDialog(
+                shopDocId,
+                snapshot.data!.docs.first.data() != null
+                    ? (snapshot.data!.docs.first.data()
+                                as Map<String, dynamic>)['categoryIds']
+                            as List<dynamic>? ??
+                        [
+                          if ((snapshot.data!.docs.first.data()
+                                  as Map<String, dynamic>)['categoryId'] !=
+                              null)
+                            (snapshot.data!.docs.first.data()
+                                as Map<String, dynamic>)['categoryId']
+                        ]
+                    : []),
             icon: const Icon(Icons.add),
             label: const Text('Add Product'),
             backgroundColor: Colors.blueAccent,
