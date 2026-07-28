@@ -12,6 +12,8 @@ import 'manage_vendor_shop_banner_screen.dart';
 import 'view_vendor_reviews_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 import '../../../shared_features/widgets/safe_image.dart';
+import '../../customer/presentation/help_support_screen.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
@@ -262,6 +264,43 @@ class _VendorSettingsTab extends StatelessWidget {
             'Upload a promotional image',
             Icons.image,
             const ManageVendorShopBannerScreen(),
+          ),
+          _buildSettingsTile(
+            context,
+            'Help & Support',
+            'Contact Admin for assistance',
+            Icons.help,
+            const HelpSupportScreen(),
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                child: SwitchListTile(
+                  secondary: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.dark_mode, color: Colors.orange),
+                  ),
+                  title: const Text('Dark Mode',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text('Toggle application theme',
+                      style:
+                          TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                  value: themeProvider.isDarkMode,
+                  onChanged: (bool value) {
+                    themeProvider.toggleTheme(value);
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),

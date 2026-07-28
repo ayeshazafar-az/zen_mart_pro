@@ -8,8 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../features/auth/data/user_model.dart';
 import '../../features/auth/presentation/auth_provider.dart';
-import '../../core/theme/theme_provider.dart';
-import '../../features/customer/presentation/help_support_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -318,34 +316,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       : const Text('Update Profile',
                           style: TextStyle(fontSize: 16)),
                 ),
-              ),
-              const SizedBox(height: 32),
-              const Divider(),
-              Consumer<ThemeProvider>(
-                builder: (context, themeProvider, child) {
-                  return SwitchListTile(
-                    secondary:
-                        const Icon(Icons.dark_mode, color: Colors.blueGrey),
-                    title: const Text('Dark Mode'),
-                    value: themeProvider.isDarkMode,
-                    onChanged: (bool value) {
-                      themeProvider.toggleTheme(value);
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.help, color: Colors.orange),
-                title: const Text('Help & Support'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const HelpSupportScreen()),
-                  );
-                },
               ),
             ],
           ),

@@ -6,7 +6,7 @@ import 'available_orders_screen.dart';
 import 'active_delivery_screen.dart';
 import 'delivery_history_screen.dart';
 import 'earnings_dashboard_screen.dart';
-import '../../../shared_features/profile/edit_profile_screen.dart';
+import 'rider_profile_menu_screen.dart';
 import '../../../shared_features/widgets/safe_image.dart';
 
 class RiderDashboardScreen extends StatefulWidget {
@@ -57,7 +57,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       const ActiveDeliveryScreen(),
       const DeliveryHistoryScreen(),
       const EarningsDashboardScreen(),
-      EditProfileScreen(user: user),
+      const RiderProfileMenuScreen(),
     ];
 
     return Scaffold(

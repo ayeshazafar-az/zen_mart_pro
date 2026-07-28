@@ -1,12 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:geolocator/geolocator.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../../shared_features/chat/chat_screen.dart';
 import '../../../core/services/notification_service.dart';
 
-class ActiveDeliveryScreen extends StatelessWidget {
+class ActiveDeliveryScreen extends StatefulWidget {
   const ActiveDeliveryScreen({super.key});
+
+  @override
+  State<ActiveDeliveryScreen> createState() => _ActiveDeliveryScreenState();
+}
+
+class _ActiveDeliveryScreenState extends State<ActiveDeliveryScreen> {
+  StreamSubscription<Position>? _positionStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLocationUpdates();
+  }
+
+  Future<void> _startLocationUpdates() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    if (permission == LocationPermission.deniedForever) return;
+
+    // Start streaming position
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Update every 10 meters changed
+      ),
+    ).listen((Position position) {
+      _updateActiveOrdersLocation(position.latitude, position.longitude);
+    });
+  }
+
+  Future<void> _updateActiveOrdersLocation(double lat, double lng) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final riderId = authProvider.currentUser?.uid ?? '';
+    if (riderId.isEmpty) return;
+
+    try {
+      final activeOrders = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('riderId', isEqualTo: riderId)
+          .where('status', isEqualTo: 'Out for Delivery')
+          .get();
+
+      for (var doc in activeOrders.docs) {
+        await doc.reference.update({
+          'currentLatitude': lat,
+          'currentLongitude': lng,
+        });
+      }
+    } catch (e) {
+      debugPrint('Error updating location: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _positionStream?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

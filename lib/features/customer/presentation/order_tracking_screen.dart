@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../shared_features/chat/chat_screen.dart';
+import 'order_tracking_map_screen.dart';
 import 'submit_review_screen.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
@@ -160,7 +161,27 @@ class OrderTrackingScreen extends StatelessWidget {
                   ),
                   if (status == 'Out for Delivery') ...[
                     const SizedBox(height: 16),
-                    const LiveRiderSimulation(),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.map, color: Colors.white),
+                        label: const Text('View Live on Map',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderTrackingMapScreen(orderId: orderId),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ],
                 const SizedBox(height: 16),
