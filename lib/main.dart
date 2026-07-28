@@ -77,7 +77,7 @@ class _ZenMartAppState extends State<ZenMartApp> {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp.router(
-            title: 'Zen Mart Pro',
+            title: 'All in One Mart',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.themeMode,
             theme: AppTheme.lightTheme,

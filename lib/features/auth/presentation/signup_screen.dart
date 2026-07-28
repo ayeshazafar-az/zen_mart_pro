@@ -125,7 +125,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           size: 60, color: Color(0xFFFF6F00)),
                       const SizedBox(height: 16),
                       Text(
-                        'Join Zen Mart Pro',
+                        'Join All in One Mart',
                         style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,

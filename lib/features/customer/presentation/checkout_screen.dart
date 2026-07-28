@@ -316,7 +316,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Text(
-                        'Send payment to:\n0300-1234567\nAccount Title: Zen Mart Pro',
+                        'Send payment to:\n0300-1234567\nAccount Title: All in One Mart',
                         textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     const TextField(

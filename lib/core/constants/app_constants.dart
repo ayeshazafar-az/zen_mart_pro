@@ -1,6 +1,6 @@
 class AppConstants {
   // App Branding & Meta
-  static const String appName = "Zen Mart Pro";
+  static const String appName = "All in One Mart";
   static const String appVersion = "1.0.0+1";
   static const String zenvyroLogoPath = "assets/images/zenvyro_logo.png";
   static const String poweredByText = "Powered by Zenvyro Labs";

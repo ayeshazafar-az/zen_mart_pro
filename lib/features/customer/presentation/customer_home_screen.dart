@@ -88,7 +88,7 @@ class CustomerHomeScreen extends StatelessWidget {
                     FirebaseFirestore.instance.collection('shops').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return _buildFallbackBanner('Welcome to Zenith Mart Pro');
+                    return _buildFallbackBanner('Welcome to All in One Mart');
                   }
 
                   final shops = snapshot.data!.docs.where((doc) {
