@@ -404,24 +404,34 @@ class _ManageVendorOrdersScreenState extends State<ManageVendorOrdersScreen> {
                                             ].contains(status)
                                                 ? status
                                                 : 'Accepted',
-                                            items: const [
-                                              DropdownMenuItem(
-                                                  value: 'Accepted',
-                                                  child: Text('Accepted')),
-                                              DropdownMenuItem(
-                                                  value: 'Preparing',
-                                                  child: Text('Preparing')),
-                                              DropdownMenuItem(
-                                                  value: 'Ready',
-                                                  child: Text('Ready')),
-                                              DropdownMenuItem(
-                                                  value: 'Out for Delivery',
-                                                  child:
-                                                      Text('Out for Delivery')),
-                                              DropdownMenuItem(
-                                                  value: 'Delivered',
-                                                  child: Text('Delivered')),
-                                            ],
+                                            items: [
+                                              'Accepted',
+                                              'Preparing',
+                                              'Ready',
+                                              'Out for Delivery',
+                                              'Delivered'
+                                            ]
+                                                .where((s) {
+                                                  final progression = [
+                                                    'Accepted',
+                                                    'Preparing',
+                                                    'Ready',
+                                                    'Out for Delivery',
+                                                    'Delivered'
+                                                  ];
+                                                  final currentIndex =
+                                                      progression
+                                                          .indexOf(status);
+                                                  final itemIndex =
+                                                      progression.indexOf(s);
+                                                  return itemIndex >=
+                                                      (currentIndex == -1
+                                                          ? 0
+                                                          : currentIndex);
+                                                })
+                                                .map((s) => DropdownMenuItem(
+                                                    value: s, child: Text(s)))
+                                                .toList(),
                                             onChanged: (newStatus) {
                                               if (newStatus != null) {
                                                 _updateOrderStatus(orderId,
