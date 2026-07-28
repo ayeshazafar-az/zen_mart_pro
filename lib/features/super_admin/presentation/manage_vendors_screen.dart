@@ -46,6 +46,60 @@ class ManageVendorsScreen extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('Email: $email\nPhone: $phone'),
                   isThreeLine: true,
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) {
+                        return Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage: imageUrl.isNotEmpty
+                                      ? NetworkImage(imageUrl)
+                                      : null,
+                                  child: imageUrl.isEmpty
+                                      ? const Icon(Icons.store, size: 40)
+                                      : null,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Center(
+                                child: Text(
+                                  name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildInfoRow(Icons.email, 'Email', email),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(Icons.phone, 'Phone', phone),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(Icons.verified_user, 'Role',
+                                  data['role'] ?? 'Vendor'),
+                              if (data.containsKey('createdAt')) ...[
+                                const SizedBox(height: 12),
+                                _buildInfoRow(Icons.calendar_today, 'Joined',
+                                    _formatDate(data['createdAt'])),
+                              ],
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () async {
@@ -83,5 +137,32 @@ class ManageVendorsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.grey, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(dynamic timestamp) {
+    if (timestamp is Timestamp) {
+      final date = timestamp.toDate();
+      return '${date.day}/${date.month}/${date.year}';
+    }
+    return 'Unknown';
   }
 }
