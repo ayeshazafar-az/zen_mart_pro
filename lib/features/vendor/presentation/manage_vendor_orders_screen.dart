@@ -118,7 +118,10 @@ class _ManageVendorOrdersScreenState extends State<ManageVendorOrdersScreen> {
                                   style: TextStyle(
                                       color: isSelected
                                           ? Colors.white
-                                          : Colors.black87,
+                                          : (Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.white70
+                                              : Colors.black87),
                                       fontWeight: isSelected
                                           ? FontWeight.bold
                                           : FontWeight.normal)),
