@@ -39,6 +39,8 @@ class BrowseShopsScreen extends StatelessWidget {
               final phone = data['phone'] ?? 'No phone';
               final imageUrl = data['imageUrl'] ?? '';
               final bannerTitle = data['bannerTitle'] ?? '';
+              final categoryIds = data['categoryIds'] as List<dynamic>? ??
+                  [if (data['categoryId'] != null) data['categoryId']];
 
               return Card(
                 elevation: 2,
@@ -62,14 +64,50 @@ class BrowseShopsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (imageUrl.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12)),
-                          child: SafeImage(
-                            imageUrl: imageUrl,
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                        GestureDetector(
+                          onTap: () {
+                            if (imageUrl.isEmpty) return;
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                backgroundColor: Colors.transparent,
+                                insetPadding: EdgeInsets.zero,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    InteractiveViewer(
+                                      child: SafeImage(
+                                        imageUrl: imageUrl,
+                                        fit: BoxFit.contain,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        height:
+                                            MediaQuery.of(context).size.height,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 40,
+                                      right: 20,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white, size: 30),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12)),
+                            child: SafeImage(
+                              imageUrl: imageUrl,
+                              height: 140,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       Padding(
@@ -92,6 +130,60 @@ class BrowseShopsScreen extends StatelessWidget {
                                     fontWeight: FontWeight.w600),
                               ),
                             const SizedBox(height: 8),
+                            if (categoryIds.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: categoryIds.take(3).map((catId) {
+                                    return FutureBuilder<DocumentSnapshot>(
+                                      future: FirebaseFirestore.instance
+                                          .collection('categories')
+                                          .doc(catId)
+                                          .get(),
+                                      builder: (context, catSnapshot) {
+                                        String catName = '...';
+                                        if (catSnapshot.hasData &&
+                                            catSnapshot.data!.exists) {
+                                          catName =
+                                              catSnapshot.data!.get('name') ??
+                                                  'Category';
+                                        }
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.blue
+                                                        .withValues(alpha: 0.2)
+                                                    : Colors.blue.shade50,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: Colors.blue.shade300,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            catName,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.blue.shade300
+                                                  : Colors.blue.shade700,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
                             Row(
                               children: [
                                 const Icon(Icons.location_on,

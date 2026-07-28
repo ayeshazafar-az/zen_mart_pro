@@ -129,6 +129,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         authProvider.clearError();
         await authProvider.reloadUserData();
 
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Profile updated successfully!'),
