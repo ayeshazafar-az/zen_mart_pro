@@ -28,11 +28,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _appliedCoupon = '';
   double _deliveryFee = 50.0;
   bool _fetchingFee = true;
+  List<String> _savedAddresses = [];
+  bool _fetchingAddresses = true;
 
   @override
   void initState() {
     super.initState();
     _fetchDeliveryFee();
+    _fetchSavedAddresses();
+  }
+
+  Future<void> _fetchSavedAddresses() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.currentUser?.uid;
+    if (userId != null) {
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('addresses')
+            .orderBy('createdAt', descending: true)
+            .get();
+
+        final addresses = snapshot.docs
+            .map((doc) => doc.data()['address'] as String)
+            .toList();
+
+        if (mounted) {
+          setState(() {
+            _savedAddresses = addresses;
+            if (addresses.isNotEmpty && _addressController.text.isEmpty) {
+              _addressController.text = addresses.first;
+            }
+            _fetchingAddresses = false;
+          });
+        }
+      } catch (e) {
+        debugPrint('Failed to get saved addresses: $e');
+        if (mounted) {
+          setState(() {
+            _fetchingAddresses = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _fetchingAddresses = false;
+        });
+      }
+    }
   }
 
   Future<void> _fetchDeliveryFee() async {
@@ -358,7 +403,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout & Payment')),
-      body: _fetchingFee
+      body: _fetchingFee || _fetchingAddresses
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -380,6 +425,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ? 'Enter delivery address'
                           : null,
                     ),
+                    if (_savedAddresses.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 40,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _savedAddresses.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 8),
+                          itemBuilder: (context, index) {
+                            final address = _savedAddresses[index];
+                            return ActionChip(
+                              label: Text(
+                                address,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _addressController.text = address;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _phoneController,
