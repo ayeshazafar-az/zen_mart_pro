@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_screen.dart';
@@ -99,7 +100,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
 }
 
 class _VendorHomeTab extends StatelessWidget {
-  final user;
+  final dynamic user;
   const _VendorHomeTab({required this.user});
 
   @override
@@ -189,9 +190,9 @@ class _VendorHomeTab extends StatelessWidget {
                             : Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Icon(Icons.star, color: Colors.orange, size: 30),
                           SizedBox(height: 10),
                           Text('Reviews',
@@ -219,9 +220,9 @@ class _VendorHomeTab extends StatelessWidget {
                             : Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Icon(Icons.analytics, color: Colors.blue, size: 30),
                           SizedBox(height: 10),
                           Text('Analytics',
@@ -234,10 +235,208 @@ class _VendorHomeTab extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 32),
+            _buildDashboardStats(context),
             const SizedBox(height: 40),
             const Center(child: ZenvyroBrandingWidget(compact: true)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardStats(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('shops')
+          .where('vendorId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, shopSnapshot) {
+        if (!shopSnapshot.hasData || shopSnapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final shopId = shopSnapshot.data!.docs.first.id;
+
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('orders')
+              .where('shopId', isEqualTo: shopId)
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, orderSnapshot) {
+            if (!orderSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            double totalRevenue = 0;
+            int totalOrders = 0;
+            final orders = orderSnapshot.data!.docs;
+
+            for (var doc in orders) {
+              final data = doc.data() as Map<String, dynamic>;
+              final status = data['status']?.toString();
+
+              // Exclude cancelled and rejected orders from stats
+              if (status != 'Cancelled' && status != 'Rejected') {
+                totalOrders++;
+                double subtotal =
+                    double.tryParse(data['subtotal']?.toString() ?? '0') ?? 0;
+                if (subtotal == 0) {
+                  subtotal =
+                      double.tryParse(data['totalAmount']?.toString() ?? '0') ??
+                          0;
+                }
+                totalRevenue += subtotal;
+              }
+            }
+
+            // Exclude rejected/cancelled from recent orders list to not clutter the view
+            final recentValidOrders = orders.where((doc) {
+              final status =
+                  (doc.data() as Map<String, dynamic>)['status']?.toString();
+              return status != 'Cancelled' && status != 'Rejected';
+            }).toList();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Store Overview',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        title: 'Total Revenue',
+                        value: 'Rs. ${totalRevenue.toStringAsFixed(2)}',
+                        icon: Icons.account_balance_wallet,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _StatCard(
+                        title: 'Total Orders',
+                        value: totalOrders.toString(),
+                        icon: Icons.receipt_long,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                if (recentValidOrders.isNotEmpty) ...[
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Orders',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: (recentValidOrders.length > 5)
+                        ? 5
+                        : recentValidOrders.length,
+                    itemBuilder: (context, index) {
+                      final doc = recentValidOrders[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      double amount = double.tryParse(
+                              data['subtotal']?.toString() ?? '0') ??
+                          0;
+                      if (amount == 0) {
+                        amount = double.tryParse(
+                                data['totalAmount']?.toString() ?? '0') ??
+                            0;
+                      }
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Colors.orangeAccent,
+                            child: Icon(Icons.receipt, color: Colors.white),
+                          ),
+                          title: Text(
+                              'Order #${doc.id.substring(0, 8).toUpperCase()}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                          subtitle: Text(data['status'] ?? 'Pending'),
+                          trailing: Text(
+                            'Rs. ${amount.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Colors.green),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ]
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 4,
+            spreadRadius: 2,
+          )
+        ],
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          ),
+        ],
       ),
     );
   }

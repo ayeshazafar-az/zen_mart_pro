@@ -5,8 +5,27 @@ import '../../auth/presentation/auth_provider.dart';
 import '../../../shared_features/chat/chat_screen.dart';
 import '../../../core/services/notification_service.dart';
 
-class ManageVendorOrdersScreen extends StatelessWidget {
+class ManageVendorOrdersScreen extends StatefulWidget {
   const ManageVendorOrdersScreen({super.key});
+
+  @override
+  State<ManageVendorOrdersScreen> createState() =>
+      _ManageVendorOrdersScreenState();
+}
+
+class _ManageVendorOrdersScreenState extends State<ManageVendorOrdersScreen> {
+  String _selectedCategory = 'All';
+
+  final List<String> _categories = [
+    'All',
+    'Pending',
+    'Accepted',
+    'Preparing',
+    'Ready',
+    'Out for Delivery',
+    'Delivered',
+    'Rejected/Cancelled',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +68,10 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                 return const Center(child: Text('No orders received yet.'));
               }
 
-              final orders = orderSnapshot.data!.docs.toList();
+              List<QueryDocumentSnapshot> orders =
+                  orderSnapshot.data!.docs.toList();
+
+              // Sort by date
               orders.sort((a, b) {
                 final aData = a.data() as Map<String, dynamic>;
                 final bData = b.data() as Map<String, dynamic>;
@@ -61,325 +83,429 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                 return bTime.compareTo(aTime);
               });
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  final orderDoc = orders[index];
-                  final data = orderDoc.data() as Map<String, dynamic>;
-                  final orderId = orderDoc.id;
-                  final totalAmount = data['totalAmount']?.toString() ?? '0.00';
-                  // Adding earnings representation
-                  final subtotal = data['subtotal']?.toString() ?? totalAmount;
-                  final status = data['status'] ?? 'Pending';
-                  final customerEmail = data['customerEmail'] ?? 'Customer';
-                  final customerId = data['customerId'] ?? '';
-                  final paymentMethod = data['paymentMethod'] ?? 'Unknown';
-                  final shippingAddress =
-                      data['shippingAddress'] ?? 'No address provided';
-                  final phone = data['phone'] ?? 'No phone provided';
+              // Filter by Selected Category
+              if (_selectedCategory != 'All') {
+                orders = orders.where((doc) {
+                  final status = (doc.data() as Map<String, dynamic>)['status']
+                          ?.toString() ??
+                      'Pending';
+                  if (_selectedCategory == 'Rejected/Cancelled') {
+                    return status == 'Rejected' || status == 'Cancelled';
+                  }
+                  return status == _selectedCategory;
+                }).toList();
+              }
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                orderId.length > 8
-                                    ? 'Order #${orderId.substring(0, 8)}'
-                                    : 'Order #$orderId',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              Chip(
-                                label: Text(status.toUpperCase(),
-                                    style: const TextStyle(fontSize: 12)),
-                                backgroundColor: _getStatusColor(status)
-                                    .withValues(alpha: 0.1),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          FutureBuilder<DocumentSnapshot>(
-                            future: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(customerId)
-                                .get(),
-                            builder: (context, userSnapshot) {
-                              String displayName = customerEmail;
-                              String imageUrl = '';
-                              if (userSnapshot.hasData &&
-                                  userSnapshot.data != null &&
-                                  userSnapshot.data!.exists) {
-                                final userData = userSnapshot.data!.data()
-                                    as Map<String, dynamic>?;
-                                if (userData != null) {
-                                  if (userData.containsKey('name')) {
-                                    displayName = userData['name'];
-                                  }
-                                  if (userData.containsKey('profileImageUrl')) {
-                                    imageUrl = userData['profileImageUrl'];
-                                  }
+              return Column(children: [
+                // Categories Row
+                SizedBox(
+                    height: 60,
+                    child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        itemCount: _categories.length,
+                        itemBuilder: (context, index) {
+                          final category = _categories[index];
+                          final isSelected = _selectedCategory == category;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ChoiceChip(
+                              label: Text(
+                                  category == 'Pending'
+                                      ? 'New Orders'
+                                      : category,
+                                  style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal)),
+                              selected: isSelected,
+                              selectedColor: Colors.orange,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _selectedCategory = category;
+                                  });
                                 }
-                              }
-                              return Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor:
-                                        Colors.orangeAccent.withOpacity(0.3),
-                                    backgroundImage: imageUrl.isNotEmpty
-                                        ? NetworkImage(imageUrl)
-                                        : null,
-                                    child: imageUrl.isEmpty
-                                        ? const Icon(Icons.person,
-                                            size: 20, color: Colors.orange)
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text('Customer: $displayName',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w500)),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.payment,
-                                  size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text('Method: $paymentMethod',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: Colors.green.withValues(alpha: 0.3)),
+                              },
                             ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.account_balance_wallet,
-                                    size: 20, color: Colors.green),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Shop Earnings: Rs. $subtotal',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                        fontSize: 15),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text('Delivery Details',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14)),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on,
-                                  size: 16, color: Colors.redAccent),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                  child: Text(shippingAddress,
-                                      style: const TextStyle(fontSize: 13))),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.phone,
-                                  size: 16, color: Colors.blueAccent),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                  child: Text(phone,
-                                      style: const TextStyle(fontSize: 13))),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          const Text('Order Items',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14)),
-                          const SizedBox(height: 8),
-                          if (data['items'] != null &&
-                              (data['items'] as List).isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.grey[850]
-                                    : Colors.grey[100],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[800]!
-                                        : Colors.grey[300]!),
-                              ),
-                              child: Column(
-                                children: ((data['items'] as List).map((item) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Row(
+                          );
+                        })),
+                // Orders List
+                Expanded(
+                  child: orders.isEmpty
+                      ? const Center(child: Text('No orders in this category.'))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: orders.length,
+                          itemBuilder: (context, index) {
+                            final orderDoc = orders[index];
+                            final data =
+                                orderDoc.data() as Map<String, dynamic>;
+                            final orderId = orderDoc.id;
+                            final totalAmount =
+                                data['totalAmount']?.toString() ?? '0.00';
+                            final subtotal =
+                                data['subtotal']?.toString() ?? totalAmount;
+                            final status = data['status'] ?? 'Pending';
+                            final customerEmail =
+                                data['customerEmail'] ?? 'Customer';
+                            final customerId = data['customerId'] ?? '';
+                            final paymentMethod =
+                                data['paymentMethod'] ?? 'Unknown';
+                            final shippingAddress = data['shippingAddress'] ??
+                                'No address provided';
+                            final phone = data['phone'] ?? 'No phone provided';
+
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            '${item["quantity"]}x ${item["name"]}',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ),
                                         Text(
-                                          'Rs. ${item["price"]}',
+                                          orderId.length > 8
+                                              ? 'Order #${orderId.substring(0, 8)}'
+                                              : 'Order #$orderId',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.green),
+                                              fontSize: 16),
+                                        ),
+                                        Chip(
+                                          label: Text(status.toUpperCase(),
+                                              style: const TextStyle(
+                                                  fontSize: 12)),
+                                          backgroundColor:
+                                              _getStatusColor(status)
+                                                  .withValues(alpha: 0.1),
                                         ),
                                       ],
                                     ),
-                                  );
-                                })).toList(),
-                              ),
-                            )
-                          else
-                            const Text('No items specified',
-                                style: TextStyle(
-                                    color: Colors.grey, fontSize: 12)),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (status == 'Pending') ...[
-                                OutlinedButton(
-                                  onPressed: () => _updateOrderStatus(
-                                      orderId, 'Rejected', customerId),
-                                  style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.red),
-                                  child: const Text('Reject'),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () => _updateOrderStatus(
-                                      orderId, 'Accepted', customerId),
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green),
-                                  child: const Text('Accept'),
-                                ),
-                              ] else ...[
-                                DropdownButton<String>(
-                                  value: [
-                                    'Accepted',
-                                    'Preparing',
-                                    'Ready',
-                                    'Out for Delivery',
-                                    'Delivered'
-                                  ].contains(status)
-                                      ? status
-                                      : 'Accepted',
-                                  items: const [
-                                    DropdownMenuItem(
-                                        value: 'Accepted',
-                                        child: Text('Accepted')),
-                                    DropdownMenuItem(
-                                        value: 'Preparing',
-                                        child: Text('Preparing')),
-                                    DropdownMenuItem(
-                                        value: 'Ready', child: Text('Ready')),
-                                    DropdownMenuItem(
-                                        value: 'Out for Delivery',
-                                        child: Text('Out for Delivery')),
-                                    DropdownMenuItem(
-                                        value: 'Delivered',
-                                        child: Text('Delivered')),
-                                  ],
-                                  onChanged: (newStatus) {
-                                    if (newStatus != null) {
-                                      _updateOrderStatus(
-                                          orderId, newStatus, customerId);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          if ([
-                            'Pending',
-                            'Accepted',
-                            'Preparing',
-                            'Ready',
-                            'Out for Delivery'
-                          ].contains(status))
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                icon: const Icon(Icons.chat),
-                                label: const Text('Chat & Call Customer'),
-                                onPressed: () async {
-                                  String realCustomerName =
-                                      customerEmail.split('@')[0];
-                                  try {
-                                    if (customerId.isNotEmpty) {
-                                      final doc = await FirebaseFirestore
-                                          .instance
+                                    const SizedBox(height: 8),
+                                    FutureBuilder<DocumentSnapshot>(
+                                      future: FirebaseFirestore.instance
                                           .collection('users')
                                           .doc(customerId)
-                                          .get();
-                                      if (doc.exists) {
-                                        realCustomerName =
-                                            doc.data()?['name'] ??
-                                                realCustomerName;
-                                      }
-                                    }
-                                  } catch (e) {}
+                                          .get(),
+                                      builder: (context, userSnapshot) {
+                                        String displayName = customerEmail;
+                                        String imageUrl = '';
+                                        if (userSnapshot.hasData &&
+                                            userSnapshot.data != null &&
+                                            userSnapshot.data!.exists) {
+                                          final userData = userSnapshot.data!
+                                              .data() as Map<String, dynamic>?;
+                                          if (userData != null) {
+                                            if (userData.containsKey('name')) {
+                                              displayName = userData['name'];
+                                            }
+                                            if (userData.containsKey(
+                                                'profileImageUrl')) {
+                                              imageUrl =
+                                                  userData['profileImageUrl'];
+                                            }
+                                          }
+                                        }
+                                        return Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Colors
+                                                  .orangeAccent
+                                                  .withValues(alpha: 0.3),
+                                              backgroundImage:
+                                                  imageUrl.isNotEmpty
+                                                      ? NetworkImage(imageUrl)
+                                                      : null,
+                                              child: imageUrl.isEmpty
+                                                  ? const Icon(Icons.person,
+                                                      size: 20,
+                                                      color: Colors.orange)
+                                                  : null,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                  'Customer: $displayName',
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w500)),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.payment,
+                                            size: 16, color: Colors.grey),
+                                        const SizedBox(width: 4),
+                                        Text('Method: $paymentMethod',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Colors.green.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: Colors.green
+                                                .withValues(alpha: 0.3)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                              Icons.account_balance_wallet,
+                                              size: 20,
+                                              color: Colors.green),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              'Shop Earnings: Rs. $subtotal',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.green,
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text('Delivery Details',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on,
+                                            size: 16, color: Colors.redAccent),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                            child: Text(shippingAddress,
+                                                style: const TextStyle(
+                                                    fontSize: 13))),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.phone,
+                                            size: 16, color: Colors.blueAccent),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                            child: Text(phone,
+                                                style: const TextStyle(
+                                                    fontSize: 13))),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text('Order Items',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                    const SizedBox(height: 8),
+                                    if (data['items'] != null &&
+                                        (data['items'] as List).isNotEmpty)
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.grey[850]
+                                              : Colors.grey[100],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.grey[800]!
+                                                  : Colors.grey[300]!),
+                                        ),
+                                        child: Column(
+                                          children: ((data['items'] as List)
+                                              .map((item) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 8.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      '${item["quantity"]}x ${item["name"]}',
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w500),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Rs. ${item["price"]}',
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.green),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          })).toList(),
+                                        ),
+                                      )
+                                    else
+                                      const Text('No items specified',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 12)),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        if (status == 'Pending') ...[
+                                          OutlinedButton(
+                                            onPressed: () => _updateOrderStatus(
+                                                orderId,
+                                                'Rejected',
+                                                customerId),
+                                            style: OutlinedButton.styleFrom(
+                                                foregroundColor: Colors.red),
+                                            child: const Text('Reject'),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          ElevatedButton(
+                                            onPressed: () => _updateOrderStatus(
+                                                orderId,
+                                                'Accepted',
+                                                customerId),
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green),
+                                            child: const Text('Accept'),
+                                          ),
+                                        ] else ...[
+                                          DropdownButton<String>(
+                                            value: [
+                                              'Accepted',
+                                              'Preparing',
+                                              'Ready',
+                                              'Out for Delivery',
+                                              'Delivered'
+                                            ].contains(status)
+                                                ? status
+                                                : 'Accepted',
+                                            items: const [
+                                              DropdownMenuItem(
+                                                  value: 'Accepted',
+                                                  child: Text('Accepted')),
+                                              DropdownMenuItem(
+                                                  value: 'Preparing',
+                                                  child: Text('Preparing')),
+                                              DropdownMenuItem(
+                                                  value: 'Ready',
+                                                  child: Text('Ready')),
+                                              DropdownMenuItem(
+                                                  value: 'Out for Delivery',
+                                                  child:
+                                                      Text('Out for Delivery')),
+                                              DropdownMenuItem(
+                                                  value: 'Delivered',
+                                                  child: Text('Delivered')),
+                                            ],
+                                            onChanged: (newStatus) {
+                                              if (newStatus != null) {
+                                                _updateOrderStatus(orderId,
+                                                    newStatus, customerId);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if ([
+                                      'Pending',
+                                      'Accepted',
+                                      'Preparing',
+                                      'Ready',
+                                      'Out for Delivery'
+                                    ].contains(status))
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: OutlinedButton.icon(
+                                          icon: const Icon(Icons.chat),
+                                          label: const Text(
+                                              'Chat & Call Customer'),
+                                          onPressed: () async {
+                                            String realCustomerName =
+                                                customerEmail.split('@')[0];
+                                            try {
+                                              if (customerId.isNotEmpty) {
+                                                final doc =
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection('users')
+                                                        .doc(customerId)
+                                                        .get();
+                                                if (doc.exists) {
+                                                  realCustomerName =
+                                                      doc.data()?['name'] ??
+                                                          realCustomerName;
+                                                }
+                                              }
+                                            } catch (e) {
+                                              debugPrint(
+                                                  'Error fetching customer name: $e');
+                                            }
 
-                                  if (context.mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                          orderId: orderId,
-                                          recipientName: realCustomerName,
-                                          chatChannel: 'vendor_messages',
-                                          recipientPhone: data['phone'],
-                                          recipientId: customerId,
-                                          shopLogoUrl: shopLogoUrl.isNotEmpty
-                                              ? shopLogoUrl
-                                              : null,
+                                            if (context.mounted) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ChatScreen(
+                                                    orderId: orderId,
+                                                    recipientName:
+                                                        realCustomerName,
+                                                    chatChannel:
+                                                        'vendor_messages',
+                                                    recipientPhone:
+                                                        data['phone'],
+                                                    recipientId: customerId,
+                                                    shopLogoUrl:
+                                                        shopLogoUrl.isNotEmpty
+                                                            ? shopLogoUrl
+                                                            : null,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
                                         ),
                                       ),
-                                    );
-                                  }
-                                },
+                                  ],
+                                ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
+                            );
+                          },
+                        ),
+                ),
+              ]);
             },
           );
         },
@@ -429,7 +555,7 @@ class ManageVendorOrdersScreen extends StatelessWidget {
         body,
       );
     } catch (e) {
-      debugPrint('Failed to send vendor update notification: \$e');
+      debugPrint('Failed to send vendor update notification: $e');
     }
   }
 }

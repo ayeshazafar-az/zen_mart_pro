@@ -78,7 +78,15 @@ class VendorAnalyticsScreen extends StatelessWidget {
       builder: (context, snapshot) {
         String count = '...';
         if (snapshot.hasData) {
-          count = snapshot.data!.docs.length.toString();
+          int validCount = 0;
+          for (var doc in snapshot.data!.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final status = data['status']?.toString();
+            if (status != 'Rejected' && status != 'Cancelled') {
+              validCount++;
+            }
+          }
+          count = validCount.toString();
         }
 
         return Card(
