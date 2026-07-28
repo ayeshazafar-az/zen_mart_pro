@@ -1,81 +1,96 @@
-# Zen Mart Pro - Multi-Vendor E-Commerce Ecosystem
+# All In One Mart - Multi-Vendor E-Commerce Ecosystem
 
-## Project Overview
-Zen Mart Pro is a cutting-edge, complete Multi-Vendor E-Commerce Ecosystem that mirrors modern platforms like Foodpanda, Daraz, Amazon, and Shopify Marketplace. It features four distinct user roles—Super Admin, Vendor, Customer, and Rider—all operating smoothly within a single Flutter application seamlessly integrated with Firebase backend services.
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white) ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase) ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
 
-The platform relies on real-time data synchronization utilizing Firebase Cloud Firestore and Firebase Cloud Messaging (FCM), ensuring that state changes (like inventory updates, order tracking, and rider availability) instantly propagate across all relevant users' devices.
+**All In One Mart** is a cutting-edge, complete Multi-Vendor E-Commerce Ecosystem mirroring modern platforms like Foodpanda, Amazon, and Daraz. It features four distinct user roles—**Super Admin**, **Vendor**, **Customer**, and **Rider**—all operating smoothly within a single Flutter application seamlessly integrated with Firebase backend services.
 
-## Key Features & Roles
+The platform relies on real-time data synchronization utilizing Firebase Cloud Firestore and Firebase Cloud Storage, ensuring that state changes (like inventory updates, order tracking, chat messages, and rider availability) instantly propagate across all relevant users' devices.
 
-👑 **Super Admin**
-- Full system oversight and control.
+---
+
+## 📸 Application Gallery
+
+### Multi-Role Dashboards
+<p align="center">
+  <img src="assets/screenshots/customer_home.jpeg" width="300" alt="Customer Home Screen" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/admin_dashboard.jpeg" width="300" alt="Super Admin Dashboard" />
+</p>
+
+### Order Tracking & Logistics
+<p align="center">
+  <img src="assets/screenshots/customer_order_tracking.jpeg" width="300" alt="Customer Active Order Tracking" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/rider_active_delivery.jpeg" width="300" alt="Rider Delivery Panel" />
+</p>
+
+### Analytics & Real-Time Chat
+<p align="center">
+  <img src="assets/screenshots/vendor_analytics.jpeg" width="300" alt="Vendor Analytics" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/live_chat_system.jpeg" width="300" alt="Real-Time Chat Interface" />
+</p>
+
+---
+
+## 🔥 Key Features & Roles
+
+### 👑 Super Admin
+- Full system oversight and control through a beautiful Glassmorphism dashboard.
 - Create Vendor accounts, provision Shops, and assign them to Vendors.
 - Manage Customers, Riders, Categories, and Platform Banners.
-- Access System-wide reports and metrics.
+- Approve or reject Vendor creation requests.
 
-🏪 **Vendor**
+### 🏪 Vendor
 - Assigned to a predefined Shop by the Super Admin.
-- Dedicated Dashboard to monitor Shop performance and manage Sales.
-- Dynamic control over Inventory (Categories and Products), handling pricing and stock limitations via a custom UI.
+- Dedicated Dashboard to monitor Shop performance and manage Sales using dynamic Revenue Charts.
+- Dynamic control over Inventory (Categories and Products), handling pricing and stock limitations.
 - Process Customer Orders by accepting, preparing, and marking them as "Ready for Pickup".
-- Real-time modification of **Delivery Fees** associated with their shop operations.
 
-🛒 **Customer**
+### 🛒 Customer
 - Elegant interface to browse various Vendors and their Products.
 - Add items to a smart Shopping Cart.
-- Checkout flow offering multiple payment methods (including Cash on Delivery & QR Code wallet simulation).
-- Use integrated static coupons (e.g., ZENVYRO20, WELCOME10).
-- Fully functional order history and Real-time Tracking from "Order Pending" to "Delivered".
+- Checkout flow offering multiple payment methods (including Cash on Delivery & Online QR Code Wallet).
+- Fully functional order history and Real-time Tracking (Pending ➔ Accepted ➔ Preparing ➔ Out for Delivery ➔ Delivered).
+- Interactive Live Map tracking for their active deliveries.
 
-🏍 **Rider**
+### 🏍 Rider
 - Efficient interface for browsing available orders marked as "Ready for Pickup".
 - Accept delivery assignments, view route/address details, and monitor their delivery history/earnings.
-- Earnings dynamically updated based on the delivery criteria defined by Vendor fees.
+- Dynamic "Swipe to Deliver" mechanisms and distinctly color-coded payment warnings (COD vs Online Paid).
+- WhatsApp-style Live Chat system for real-time contact with Customers.
 
-✨ **Bonus & Core Integrations**
-- **Dark Mode Support**
-- **QR Code Payments**
-- **Coupons & Discounts** 
-- **Offline Data Sync (Firestore)**
-- **Cloud Storage** for dynamic banner and avatar hosting.
-- **Firebase Push Notifications (FCM)** setup for order event triggers.
+---
 
-## Packages Used
+## 🛠 Tech Stack & Packages
 
-### Core Framework
-- `flutter`: The SDK for multi-platform UI construction.
+- **Frontend:** Flutter (Dart) using Riverpod for State Management.
+- **Backend:** Firebase Authentication, Cloud Firestore (Real-time NoSQL), Firebase Storage (Media).
+- **Design System:** Custom Dark/Light theme switching, Google Fonts, and Glassmorphism effects.
+- **Key Integrations:** 
+  - `fl_chart` for dynamic business analytics.
+  - `google_maps_flutter` for real-time location mapping.
+  - `cached_network_image` for optimized media loading.
+  - `image_picker` for in-app media sharing in live chats and product uploads.
 
-### Firebase Backend Services
-- `firebase_core`: Fundamental plugin for Firebase initialization.
-- `firebase_auth`: Role-based authentication using email and secure sessions.
-- `cloud_firestore`: Synchronized Non-SQL document storage enabling real-time app capabilities.
-- `firebase_storage`: Cloud media management and hosting for avatars/banners.
-- `firebase_messaging`: FCM handling for cross-device notifications.
+---
 
-### State Management & Navigation
-- `provider`: Used for global AuthState and real-time dependency injection.
-
-### UI Enhancements & Extensions
-- `google_fonts`: Simplified access to premium typography without manually importing fonts.
-- `cached_network_image`: Network optimization cache to minimize backend queries for media.
-- `qr_flutter`: Real-time creation of custom QR codes during check-out flow.
-- `intl`: Streamlining proper Number/Currency format translations logic globally.
-- `image_picker` & `flutter_image_compress`: Allowing admins and vendors to manipulate graphics gracefully within standard mobile constraints.
-
-## Setup Instructions
+## 🚀 Setup Instructions
 
 ### 1. Prerequisites
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (latest stable release compatible with Kotlin/Gradle).
-- A valid Google Account for Firebase set-up.
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (latest stable release).
+- A valid Google Account to create a Firebase Project.
 
 ### 2. Implementation Steps
-1. **Clone the Source Code**: Pull the repository into a local working directory.
+1. **Clone the Repository**: Pull the repository into a local working directory.
 2. **Retrieve Dependencies**: Open your terminal locally at the project root and enter `flutter pub get`.
 3. **Connect to Firebase**:
-   - Run `flutterfire configure` to generate `firebase_options.dart`.
+   - Run `flutterfire configure` to connect your own Firebase project.
    - Ensure the associated Firebase Console Project has **Authentication (Email/Password)**, **Firestore**, and **Storage** fully activated.
-4. **Deploy Security Rules**: Apply standard open debug rules or standard auth-protection configurations for the Firestore database inside the active Firebase Project.
-5. **Compile & Run**: Launch an iOS simulator or Android emulator and run `flutter run`.
+4. **Compile & Run**: Launch an iOS simulator or Android emulator and run `flutter run`.
 
 --- 
-*Note: The **ZenvyroLabs** branding logo is displayed appropriately within the main Customer Dashboard Headers demonstrating adherence to the evaluation requirements.*
+*Note: The **Zenvyro Labs** branding logo has been integrated properly within the main Dashboard Footers reflecting corporate adherence.*
+
+## 🔒 Evaluation & Testing
+> **Reviewers:** To securely evaluate the Multi-Vendor ecosystem, the Super Admin and Vendor test credentials have been omitted from this public repository. Please refer directly to the **Submission Notes** in your evaluation portal for the secure login credentials.
