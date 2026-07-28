@@ -2,7 +2,7 @@ class AppConstants {
   // App Branding & Meta
   static const String appName = "All in One Mart";
   static const String appVersion = "1.0.0+1";
-  static const String zenvyroLogoPath = "assets/images/zenvyro_logo.png";
+  static const String zenvyroLogoPath = "assets/images/zenvyro_logo.jpeg";
   static const String poweredByText = "Powered by Zenvyro Labs";
 
   // User Roles for Multi-Vendor Ecosystem
