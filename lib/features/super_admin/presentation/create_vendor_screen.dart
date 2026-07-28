@@ -81,7 +81,7 @@ class _CreateVendorScreenState extends State<CreateVendorScreen> {
           await NotificationService().sendMockNotificationToUser(
             adminDoc.id,
             "New Vendor Registered \u{1F464}",
-            "Vendor \${_nameController.text.trim()} account created.",
+            "Vendor ${_nameController.text.trim()} account created.",
           );
         }
       } catch (e) {

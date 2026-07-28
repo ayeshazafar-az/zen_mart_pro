@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +14,8 @@ class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  StreamSubscription<QuerySnapshot>? _notificationSubscription;
 
   Future<void> initialize() async {
     // Request permission (Apple & Web)
@@ -102,7 +105,8 @@ class NotificationService {
   // Fallback simulator if no real Firebase Functions exist
   // We can write to a specific user's notification node and listen to it
   void listenToDatabaseNotifications(String userId) {
-    FirebaseFirestore.instance
+    _notificationSubscription?.cancel();
+    _notificationSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('notifications')
