@@ -9,6 +9,7 @@ import 'manage_vendor_categories_screen.dart';
 import 'manage_vendor_products_screen.dart';
 import 'manage_vendor_orders_screen.dart';
 import 'manage_vendor_shop_banner_screen.dart';
+import 'vendor_analytics_screen.dart';
 import 'view_vendor_reviews_screen.dart';
 import '../../../shared_features/profile/edit_profile_screen.dart';
 import '../../../shared_features/widgets/safe_image.dart';
@@ -203,23 +204,31 @@ class _VendorHomeTab extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.blue.withValues(alpha: 0.2)
-                          : Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Icon(Icons.analytics, color: Colors.blue, size: 30),
-                        SizedBox(height: 10),
-                        Text('Analytics',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
-                      ],
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const VendorAnalyticsScreen()));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.blue.withValues(alpha: 0.2)
+                            : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Icon(Icons.analytics, color: Colors.blue, size: 30),
+                          SizedBox(height: 10),
+                          Text('Analytics',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                        ],
+                      ),
                     ),
                   ),
                 ),

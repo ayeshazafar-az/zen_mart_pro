@@ -69,9 +69,15 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                   final data = orderDoc.data() as Map<String, dynamic>;
                   final orderId = orderDoc.id;
                   final totalAmount = data['totalAmount']?.toString() ?? '0.00';
+                  // Adding earnings representation
+                  final subtotal = data['subtotal']?.toString() ?? totalAmount;
                   final status = data['status'] ?? 'Pending';
                   final customerEmail = data['customerEmail'] ?? 'Customer';
                   final customerId = data['customerId'] ?? '';
+                  final paymentMethod = data['paymentMethod'] ?? 'Unknown';
+                  final shippingAddress =
+                      data['shippingAddress'] ?? 'No address provided';
+                  final phone = data['phone'] ?? 'No phone provided';
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -145,7 +151,69 @@ class ManageVendorOrdersScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          Text('Total Amount: Rs. $totalAmount'),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.payment,
+                                  size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text('Method: $paymentMethod',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: Colors.green.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.account_balance_wallet,
+                                    size: 20, color: Colors.green),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Shop Earnings: Rs. $subtotal',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                        fontSize: 15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text('Delivery Details',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on,
+                                  size: 16, color: Colors.redAccent),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                  child: Text(shippingAddress,
+                                      style: const TextStyle(fontSize: 13))),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.phone,
+                                  size: 16, color: Colors.blueAccent),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                  child: Text(phone,
+                                      style: const TextStyle(fontSize: 13))),
+                            ],
+                          ),
                           const SizedBox(height: 12),
                           const Text('Order Items',
                               style: TextStyle(
