@@ -168,6 +168,10 @@ class _ActiveDeliveryScreenState extends State<ActiveDeliveryScreen> {
                     final address = data['shippingAddress'] ?? 'No address';
                     final customerEmail = data['customerEmail'] ?? 'Customer';
                     final phone = data['phone'] ?? 'N/A';
+                    final paymentMethod =
+                        data['paymentMethod']?.toString() ?? 'COD';
+                    final isCOD = paymentMethod.toUpperCase() == 'COD' ||
+                        paymentMethod.toLowerCase() == 'cash on delivery';
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -247,10 +251,29 @@ class _ActiveDeliveryScreenState extends State<ActiveDeliveryScreen> {
                             const SizedBox(height: 8),
                             Text('Phone: $phone'),
                             Text('Address: $address'),
-                            Text('Payout: Rs. $totalAmount',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green)),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: isCOD
+                                      ? Colors.orange.withValues(alpha: 0.1)
+                                      : Colors.green.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: isCOD
+                                          ? Colors.orange.shade300
+                                          : Colors.green.shade300)),
+                              child: Text(
+                                  isCOD
+                                      ? 'Collect Cash: Rs. $totalAmount'
+                                      : 'Paid Online: Rs. $totalAmount',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isCOD
+                                          ? Colors.orange.shade800
+                                          : Colors.green.shade800)),
+                            ),
                             const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
