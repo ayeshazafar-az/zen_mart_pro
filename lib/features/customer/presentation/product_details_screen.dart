@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../shared_features/widgets/safe_image.dart';
-import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 

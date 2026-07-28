@@ -10,13 +10,15 @@ class ViewAllProductsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('All Platform Products')),
       body: StreamBuilder<QuerySnapshot>(
         // Using collectionGroup to fetch products across all shops or a global products collection
-        stream: FirebaseFirestore.instance.collectionGroup('products').snapshots(),
+        stream:
+            FirebaseFirestore.instance.collectionGroup('products').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No products found on the platform.'));
+            return const Center(
+                child: Text('No products found on the platform.'));
           }
 
           final products = snapshot.data!.docs;
@@ -29,22 +31,22 @@ class ViewAllProductsScreen extends StatelessWidget {
               final name = data['name'] ?? 'Unnamed Product';
               final price = data['price']?.toString() ?? '0.00';
               final imageUrl = data['imageUrl'] ?? '';
-              final docId = products[index].id;
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: imageUrl.isNotEmpty
                       ? Image.network(
-                    imageUrl,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.shopping_bag),
-                  )
+                          imageUrl,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.shopping_bag),
+                        )
                       : const Icon(Icons.shopping_bag, size: 40),
-                  title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('Price: Rs. $price'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
@@ -53,7 +55,8 @@ class ViewAllProductsScreen extends StatelessWidget {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Delete Product'),
-                          content: Text('Are you sure you want to delete $name?'),
+                          content:
+                              Text('Are you sure you want to delete $name?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -61,7 +64,8 @@ class ViewAllProductsScreen extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),
